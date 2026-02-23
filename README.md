@@ -138,7 +138,7 @@ mclaude --provider anthropic --installation work -p "review this PR"
 
 ### Claude Code Skill
 
-A bundled skill at `.claude/skills/mclaude-headless/` teaches AI agents how to use mclaude in headless mode. It includes:
+A bundled skill at [`.claude/skills/mclaude-headless/`](.claude/skills/mclaude-headless/) teaches AI agents how to use mclaude in headless mode. It includes:
 
 - Usage guide with discovery (`--list`), syntax, and examples
 - Complete Claude Code CLI reference (`references/claude-code-cli.md`) with all flags for non-interactive use
