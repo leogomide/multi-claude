@@ -1,5 +1,3 @@
-# Community
-
 > *Gerar código é fácil. Transformar ideias em software real é o desafio.*
 
 Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade que elimina a tentativa e erro e te dá controle total do projeto? Conheça a comunidade Ai Coders Academy:
