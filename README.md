@@ -21,12 +21,6 @@ Run `mclaude` to open a terminal UI where you can select a provider and model, m
 bun install -g @leogomide/multi-claude
 ```
 
-or via npm:
-
-```bash
-npm install -g @leogomide/multi-claude
-```
-
 ## Update
 
 ```bash
