@@ -1,7 +1,6 @@
-import { spawnSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ensureAccountDir, isAccountAuthenticated, loadConfig, migrateInstallations, removeAccountDir, saveConfig, CONFIG_DIR } from "./config.ts";
+import { loadConfig, migrateInstallations, saveConfig, CONFIG_DIR } from "./config.ts";
 import { debugLog } from "./debug.ts";
 import { initLocale } from "./i18n/index.ts";
 
@@ -59,31 +58,15 @@ debugLog("tui-process: runApp() returned, result=" + (result ? `type=${result.ty
 if (result) {
 	if (result.type === "oauth-login") {
 		debugLog("tui-process: handling OAuth login for provider=" + result.providerName);
-		const accountDir = await ensureAccountDir(result.providerId);
-
-		const loginResult = spawnSync("claude", ["login"], {
-			stdio: "inherit",
-			env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
-		});
-
-		if (loginResult.status === 0 && isAccountAuthenticated(result.providerId)) {
-			debugLog("tui-process: OAuth login successful");
-			console.log(`\n✓ Conta "${result.providerName}" autenticada com sucesso!\n`);
-			process.exit(2); // signal cli.ts to restart TUI
-		} else {
-			debugLog("tui-process: OAuth login failed");
-			if (result.isNew) {
-				// Only remove provider if it was just created (not re-auth)
-				const cfg = await loadConfig();
-				cfg.providers = cfg.providers.filter((p) => p.id !== result.providerId);
-				await saveConfig(cfg);
-				await removeAccountDir(result.providerId);
-				console.error("\n✗ Autenticação falhou. Provedor não foi adicionado.\n");
-			} else {
-				console.error("\n✗ Re-autenticação falhou.\n");
-			}
-			process.exit(2); // restart TUI so user can try again
-		}
+		const oauthData = {
+			type: "oauth-login" as const,
+			providerId: result.providerId,
+			providerName: result.providerName,
+			isNew: result.isNew,
+		};
+		await writeFile(SELECTION_FILE, JSON.stringify(oauthData), "utf-8");
+		debugLog("tui-process: oauth selection written to " + SELECTION_FILE);
+		process.exit(3); // signal cli.ts to handle OAuth login
 	}
 
 	if (result.type === "start-claude") {

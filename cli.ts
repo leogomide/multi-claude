@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { spawnSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -18,7 +18,25 @@ interface TuiSelection {
 	installationId?: string;
 }
 
+interface OAuthSelection {
+	type: "oauth-login";
+	providerId: string;
+	providerName: string;
+	isNew: boolean;
+}
+
 const SELECTION_FILE = join(homedir(), ".multi-claude", "last-selection.json");
+
+function resolveClaudePath(): string {
+	try {
+		if (process.platform === "win32") {
+			return execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
+		}
+		return execSync("which claude", { encoding: "utf-8" }).trim();
+	} catch {
+		return "claude";
+	}
+}
 
 function resetTerminal(): void {
 	if (process.stdin.isTTY && process.stdin.setRawMode) {
@@ -124,15 +142,53 @@ do {
 	tuiExitCode = tuiResult.status;
 
 	if (tuiExitCode === 2) {
-		debugLog("cli.ts: TUI exited with code 2 (OAuth login), restarting TUI");
+		debugLog("cli.ts: TUI exited with code 2, restarting TUI");
 		continue;
+	}
+
+	if (tuiExitCode === 3) {
+		// OAuth login requested — handle in clean process context (no Ink residue)
+		try {
+			const raw = await readFile(SELECTION_FILE, "utf-8");
+			const oauthData = JSON.parse(raw) as OAuthSelection;
+			await unlink(SELECTION_FILE);
+
+			const { ensureAccountDir, isAccountAuthenticated, removeAccountDir, loadConfig, saveConfig } = await import("./src/config.ts");
+			const accountDir = await ensureAccountDir(oauthData.providerId);
+			const claudePath = resolveClaudePath();
+
+			debugLog("cli.ts: running claude login for OAuth provider=" + oauthData.providerName);
+			const loginResult = spawnSync(claudePath, ["login"], {
+				stdio: "inherit",
+				env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
+			});
+
+			if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
+				debugLog("cli.ts: OAuth login successful");
+				console.log(`\n✓ Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
+			} else {
+				debugLog("cli.ts: OAuth login failed");
+				if (oauthData.isNew) {
+					const cfg = await loadConfig();
+					cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
+					await saveConfig(cfg);
+					await removeAccountDir(oauthData.providerId);
+					console.error("\n✗ Autenticação falhou. Provedor não foi adicionado.\n");
+				} else {
+					console.error("\n✗ Re-autenticação falhou.\n");
+				}
+			}
+		} catch (err) {
+			debugLog("cli.ts: OAuth handling error: " + String(err));
+		}
+		continue; // restart TUI
 	}
 
 	if (tuiExitCode !== 0) {
 		debugLog("cli.ts: TUI exited with status=" + tuiExitCode);
 		process.exit(tuiExitCode ?? 1);
 	}
-} while (tuiExitCode === 2);
+} while (tuiExitCode === 2 || tuiExitCode === 3);
 
 // Read selection from JSON file
 let selection: TuiSelection;
