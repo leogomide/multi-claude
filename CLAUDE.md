@@ -95,6 +95,29 @@ Configuracoes sao salvas em `~/.multi-claude/config.json`.
 
 - `TODO.md` - Developer's personal notes and task tracking file
 
+## Releases e Tags Git
+
+Ao lançar uma nova versão:
+
+1. Atualizar a versão no `package.json`
+2. Criar a tag da versão e mover a tag `latest`:
+
+```bash
+# Criar tag da versão
+git tag -a v1.x.x -m "Release v1.x.x"
+git push origin v1.x.x
+
+# Mover a tag latest para o commit atual
+git tag -d latest
+git push origin --delete latest
+git tag -a latest -m "Latest release"
+git push origin latest
+```
+
+Os usuários instalam via:
+- `bun install -g github:leogomide/multi-claude#latest` (última versão)
+- `bun install -g github:leogomide/multi-claude#v1.x.x` (versão específica)
+
 ## Descricao automática para commits
 
 Após cada modificação ou plano criado, gere no console uma descrição para usar no commit das modificações realizadas.

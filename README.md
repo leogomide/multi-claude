@@ -18,13 +18,13 @@ Run `mclaude` to open a terminal UI where you can select a provider and model, m
 ## Installation
 
 ```bash
-bun install -g github:leogomide/multi-claude
+bun install -g github:leogomide/multi-claude#latest
 ```
 
 ## Update
 
 ```bash
-bun install -g github:leogomide/multi-claude
+bun install -g github:leogomide/multi-claude#latest
 ```
 
 ## Uninstall
