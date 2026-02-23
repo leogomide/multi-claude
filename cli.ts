@@ -157,8 +157,8 @@ do {
 			const accountDir = await ensureAccountDir(oauthData.providerId);
 			const claudePath = resolveClaudePath();
 
-			debugLog("cli.ts: running claude login for OAuth provider=" + oauthData.providerName);
-			const loginResult = spawnSync(claudePath, ["login"], {
+			debugLog("cli.ts: running claude for OAuth login, provider=" + oauthData.providerName);
+			const loginResult = spawnSync(claudePath, [], {
 				stdio: "inherit",
 				env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
 			});
