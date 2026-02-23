@@ -1,6 +1,6 @@
 {
 	"name": "@leogomide/multi-claude",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "CLI tool to manage multiple API providers and launch Claude Code with the correct environment variables",
 	"license": "MIT",
 	"author": "Leonardo Gomide",
