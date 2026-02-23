@@ -24,38 +24,49 @@ export async function runApp(): Promise<AppResult | null> {
 
 	return new Promise((resolve) => {
 		let resolved = false;
+		let unmount: (() => void) | null = null;
 
 		const doResolve = (result: AppResult | null) => {
 			if (resolved) return;
 			resolved = true;
 			process.off("SIGINT", handleSigint);
 			try {
-				unmount();
+				unmount?.();
 			} catch (err) {
-				debugLog("app.tsx: unmount() THREW: " + String(err));
+				debugLog("app.tsx: unmount() THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
 			}
 			exitAlternateScreen();
 			resolve(result);
 		};
 
-		const { waitUntilExit, unmount } = render(
-			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={(result) => {
-						debugLog("app.tsx: onStartClaude fired, provider=" + result.provider.name);
-						doResolve({ type: "start-claude", provider: result.provider, model: result.model, installationId: result.installationId });
-					}}
-					onOAuthLogin={(result) => {
-						debugLog("app.tsx: onOAuthLogin fired, provider=" + result.providerName);
-						doResolve({ type: "oauth-login", providerId: result.providerId, providerName: result.providerName, isNew: result.isNew });
-					}}
-				/>
-			</I18nProvider>,
-		);
+		try {
+			const renderResult = render(
+				<I18nProvider>
+					<UnifiedApp
+						onStartClaude={(result) => {
+							debugLog("app.tsx: onStartClaude fired, provider=" + result.provider.name);
+							doResolve({ type: "start-claude", provider: result.provider, model: result.model, installationId: result.installationId });
+						}}
+						onOAuthLogin={(result) => {
+							debugLog("app.tsx: onOAuthLogin fired, provider=" + result.providerName);
+							doResolve({ type: "oauth-login", providerId: result.providerId, providerName: result.providerName, isNew: result.isNew });
+						}}
+					/>
+				</I18nProvider>,
+			);
+			unmount = renderResult.unmount;
 
-		// Fallback: user exits via Ctrl+C or useApp().exit()
-		waitUntilExit().then(() => {
-			doResolve(null);
-		});
+			// Fallback: user exits via Ctrl+C or useApp().exit()
+			renderResult.waitUntilExit().then(() => {
+				doResolve(null);
+			}).catch((err) => {
+				debugLog("app.tsx: waitUntilExit THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+				doResolve(null);
+			});
+		} catch (err) {
+			debugLog("app.tsx: render THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+			exitAlternateScreen();
+			resolve(null);
+		}
 	});
 }

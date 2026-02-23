@@ -8,12 +8,19 @@ import { initLocale } from "./i18n/index.ts";
 export const SELECTION_FILE = join(CONFIG_DIR, "last-selection.json");
 
 process.on("uncaughtException", (err) => {
-	debugLog("tui-process: UNCAUGHT EXCEPTION: " + (err instanceof Error ? (err.stack ?? err.message) : JSON.stringify(err)));
+	const detail = err instanceof Error ? (err.stack ?? err.message) : JSON.stringify(err);
+	debugLog("tui-process: UNCAUGHT EXCEPTION: " + detail);
+	console.error("mclaude crash:", detail);
 	process.exit(1);
 });
 process.on("unhandledRejection", (reason) => {
-	debugLog("tui-process: UNHANDLED REJECTION: " + String(reason));
+	const detail = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
+	debugLog("tui-process: UNHANDLED REJECTION: " + detail);
+	console.error("mclaude crash (unhandled rejection):", detail);
 	process.exit(1);
+});
+process.on("exit", (code) => {
+	debugLog("tui-process: process exit with code=" + code);
 });
 
 debugLog("tui-process: started");
@@ -21,18 +28,30 @@ debugLog("tui-process: started");
 const config = await loadConfig();
 
 if (!config.language) {
-	const { selectLanguage } = await import("./language-selector.tsx");
-	const locale = await selectLanguage();
-	config.language = locale;
-	await saveConfig(config);
+	try {
+		const { selectLanguage } = await import("./language-selector.tsx");
+		const locale = await selectLanguage();
+		config.language = locale;
+		await saveConfig(config);
+	} catch (err) {
+		debugLog("tui-process: language selection FAILED: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+		config.language = "en";
+	}
 }
 
 initLocale(config.language);
 
-debugLog("tui-process: config loaded, starting runApp()");
+debugLog("tui-process: config loaded (lang=" + config.language + "), starting runApp()");
 
-const { runApp } = await import("./app.tsx");
-const result = await runApp();
+let result: Awaited<ReturnType<typeof import("./app.tsx")["runApp"]>>;
+try {
+	const { runApp } = await import("./app.tsx");
+	result = await runApp();
+} catch (err) {
+	debugLog("tui-process: runApp() THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+	console.error("mclaude crash:", err instanceof Error ? err.message : String(err));
+	process.exit(1);
+}
 
 debugLog("tui-process: runApp() returned, result=" + (result ? `type=${result.type}` : "null"));
 

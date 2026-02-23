@@ -30,10 +30,17 @@ function resetTerminal(): void {
 }
 
 process.on("uncaughtException", (err) => {
-	debugLog("cli.ts: UNCAUGHT EXCEPTION: " + (err instanceof Error ? (err.stack ?? err.message) : JSON.stringify(err)));
+	const detail = err instanceof Error ? (err.stack ?? err.message) : JSON.stringify(err);
+	debugLog("cli.ts: UNCAUGHT EXCEPTION: " + detail);
+	console.error("mclaude crash:", detail);
 });
 process.on("unhandledRejection", (reason) => {
-	debugLog("cli.ts: UNHANDLED REJECTION: " + String(reason));
+	const detail = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
+	debugLog("cli.ts: UNHANDLED REJECTION: " + detail);
+	console.error("mclaude crash (unhandled rejection):", detail);
+});
+process.on("exit", (code) => {
+	debugLog("cli.ts: process exit with code=" + code);
 });
 
 debugLog("cli.ts: started, argv=" + JSON.stringify(process.argv));
