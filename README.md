@@ -1,3 +1,11 @@
+# Community
+
+> *Gerar código é fácil. Transformar ideias em software real é o desafio.*
+
+Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade que elimina a tentativa e erro e te dá controle total do projeto? Conheça a comunidade de AI Coding:
+
+**[Entrar na comunidade](https://kiwify.app/kBV4r4X?afid=Xox2vMps)**
+
 # multi-claude
 
 CLI tool to manage multiple API providers and launch [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the correct environment variables.
