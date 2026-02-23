@@ -72,9 +72,8 @@ export async function resetAllConfig(): Promise<void> {
 	if (existsSync(INSTALLATIONS_DIR)) {
 		await rm(INSTALLATIONS_DIR, { recursive: true, force: true });
 	}
-	// Reset config to defaults (preserves language preference)
-	const current = await loadConfig();
-	await saveConfig({ providers: [], installations: [], language: current.language });
+	// Reset config to defaults (including language)
+	await saveConfig({ providers: [], installations: [] });
 }
 
 export function isAccountAuthenticated(providerId: string): boolean {

@@ -29,8 +29,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 	const handleResetConfirm = (confirmed: boolean) => {
 		if (confirmed) {
 			resetAllConfig().then(() => {
-				setMessage({ text: t("settings.resetAllSuccess"), variant: "success" });
-				setConfirming(false);
+				process.exit(1);
 			});
 		} else {
 			setConfirming(false);
