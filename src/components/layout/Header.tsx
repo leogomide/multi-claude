@@ -3,6 +3,7 @@ import { Box, Text } from "ink";
 import React, { useState } from "react";
 import { useBreadcrumb } from "../../hooks/useBreadcrumb.tsx";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
+import pkg from "../../../package.json";
 
 function detectClaudeVersion(): string | null {
 	try {
@@ -26,7 +27,7 @@ export function Header() {
 		<Box borderStyle="round" borderColor="gray" flexDirection="column" paddingX={1}>
 			<Box justifyContent="space-between">
 				<Text bold color="magenta">
-					{"✨ mclaude"}
+					{`✨ mclaude v${pkg.version}`}
 				</Text>
 				<Text color="gray" dimColor>
 					{claudeVersion ? `claude v${claudeVersion}` : "claude not found"}
