@@ -60,6 +60,91 @@ mclaude --allowedTools "Bash(git *)" -p "show recent commits"
 
 The `--model` / `-m` flag is intercepted and replaced by the model you select in the TUI.
 
+### Headless Mode (non-interactive)
+
+Skip the TUI entirely by specifying `--provider` on the command line. Useful for scripting, automation, and AI agents.
+
+```bash
+mclaude --provider deepseek --model deepseek-chat -p "explain this function"
+mclaude --provider ollama --model llama3 -c
+mclaude --provider anthropic --installation work -p "review this PR"
+```
+
+**mclaude flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--provider <name>` | Provider to use (template ID, name, or slug). **Required for headless mode.** |
+| `--model <model>` | Model to use. Auto-selects first available if omitted. |
+| `--installation <name>` | Installation to use. Defaults to `default`. |
+| `--list` | Print available providers, models, and installations as JSON. |
+
+All other flags are forwarded to Claude Code (`-p`, `-c`, `--resume`, `--max-turns`, `--output-format`, etc.).
+
+#### Discovery
+
+Use `--list` to see what's available:
+
+```bash
+mclaude --list
+```
+
+```json
+{
+  "providers": [
+    { "cliId": "deepseek", "name": "DeepSeek", "templateId": "deepseek", "type": "api", "models": ["deepseek-chat", "deepseek-reasoner"] }
+  ],
+  "installations": [
+    { "cliId": "default", "name": "Default" }
+  ],
+  "usage": "mclaude --provider <cliId> [--model <model>] [--installation <cliId>] [claude-flags...]"
+}
+```
+
+The `cliId` field is the identifier to use with `--provider` and `--installation`. It's also shown in the TUI sidebar as **CLI ID** when you highlight a provider.
+
+#### Provider matching
+
+The `--provider` value is matched in this order:
+
+1. **Provider name** (case-insensitive) — `--provider "My DeepSeek"`
+2. **Template ID** — `--provider deepseek`
+3. **Slug of the name** — `--provider my-deepseek`
+4. **Provider UUID** — for scripting with stable IDs
+
+If multiple providers match (e.g., two OpenRouter accounts), use the exact name to disambiguate.
+
+#### Examples
+
+```bash
+# Non-interactive query
+mclaude --provider deepseek --model deepseek-chat -p "explain this codebase"
+
+# Auto-select model (uses first available)
+mclaude --provider deepseek -p "hello"
+
+# Continue last conversation
+mclaude --provider ollama --model llama3 -c
+
+# Autonomous agent with limits
+mclaude --provider openrouter --model anthropic/claude-sonnet-4 -p --max-turns 5 "fix the failing tests"
+
+# JSON output for programmatic parsing
+mclaude --provider deepseek --model deepseek-chat -p --output-format json "list all TODOs"
+
+# With specific installation
+mclaude --provider anthropic --installation work -p "review this PR"
+```
+
+### Claude Code Skill
+
+A bundled skill at `.claude/skills/mclaude-headless/` teaches AI agents how to use mclaude in headless mode. It includes:
+
+- Usage guide with discovery (`--list`), syntax, and examples
+- Complete Claude Code CLI reference (`references/claude-code-cli.md`) with all flags for non-interactive use
+
+The skill triggers automatically when an agent needs to launch Claude Code via mclaude.
+
 ### Other flags
 
 ```bash
