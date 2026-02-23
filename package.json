@@ -28,7 +28,8 @@
 		"lint": "biome check --fix .",
 		"link": "bun link",
 		"prepare": "bun link",
-		"test": "bun test src/smoke.test.tsx"
+		"test": "bun test src/smoke.test.tsx",
+		"publish": "npm publish"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
