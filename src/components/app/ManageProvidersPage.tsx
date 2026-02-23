@@ -2,7 +2,7 @@ import { Text } from "ink";
 import React, { useEffect, useMemo, useState } from "react";
 import { isAccountAuthenticated, loadConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
-import { getEffectiveModels, getTemplate } from "../../providers.ts";
+import { getEffectiveModels, getProviderBaseUrl, getTemplate } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
 import { hasApiModelFetching } from "../../services/api-models.ts";
 import type { GroupedSelectItem } from "../common/GroupedSelect.tsx";
@@ -103,8 +103,9 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 				{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
 				{ label: t("sidebar.models"), value: modelsValue },
 			];
-			if (template?.baseUrl) {
-				items.push({ label: t("sidebar.baseUrl"), value: template.baseUrl.replace("https://", "") });
+			const effectiveUrl = getProviderBaseUrl(provider);
+			if (effectiveUrl) {
+				items.push({ label: t("sidebar.baseUrl"), value: effectiveUrl.replace(/^https?:\/\//, "") });
 			}
 			return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
 		}

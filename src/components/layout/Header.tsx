@@ -27,10 +27,10 @@ export function Header() {
 		<Box borderStyle="round" borderColor="gray" flexDirection="column" paddingX={1}>
 			<Box justifyContent="space-between">
 				<Text bold color="magenta">
-					{`✨ mclaude v${pkg.version}`}
+					{`✨ multi-claude v${pkg.version}`}
 				</Text>
 				<Text color="gray" dimColor>
-					{claudeVersion ? `claude v${claudeVersion}` : "claude not found"}
+					{claudeVersion ? `claude code v${claudeVersion}` : "claude not found"}
 				</Text>
 			</Box>
 			{hasCrumbs && (

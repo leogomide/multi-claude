@@ -13,7 +13,7 @@ import { TextPrompt } from "../common/TextPrompt.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
 
-type Step = "loading" | "menu" | "edit-name" | "edit-key" | "validating-key" | "confirm-remove";
+type Step = "loading" | "menu" | "edit-name" | "edit-key" | "edit-url" | "validating-key" | "confirm-remove";
 
 interface EditProviderFlowProps {
 	providerId: string;
@@ -35,7 +35,7 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 		if (key.escape) {
 			if (step === "menu") {
 				onCancel();
-			} else if (step === "edit-name" || step === "edit-key" || step === "confirm-remove") {
+			} else if (step === "edit-name" || step === "edit-key" || step === "edit-url" || step === "confirm-remove") {
 				setStep("menu");
 			} else if (step === "validating-key") {
 				setStep("edit-key");
@@ -126,6 +126,7 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 			]
 			: [
 				{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
+				...(hasDefaultApiKey ? [{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" }] : []),
 				...(!hasDefaultApiKey ? [{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" }] : []),
 				{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
 				{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
@@ -148,6 +149,8 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 							setMessage(null);
 							if (item.value === "edit-name") {
 								setStep("edit-name");
+							} else if (item.value === "edit-url") {
+								setStep("edit-url");
 							} else if (item.value === "edit-key") {
 								setStep("edit-key");
 							} else if (item.value === "manage-models") {
@@ -185,6 +188,48 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 							saveConfig(config).then(() => {
 								refreshProvider().then(() => {
 									setMessage({ text: t("editProvider.nameUpdated", { name: val.trim() }), variant: "success" });
+									setStep("menu");
+								});
+							});
+						});
+					}}
+				/>
+			</AppShell>
+		);
+	}
+
+	if (step === "edit-url" && provider) {
+		const template = getTemplate(provider.templateId);
+		const currentUrl = provider.baseUrl || template?.baseUrl || "";
+		return (
+			<AppShell footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+				<TextPrompt
+					label={t("editFlow.urlLabel")}
+					initialValue={currentUrl}
+					validate={(val) => {
+						const trimmed = val.trim();
+						if (!trimmed) return t("validation.urlInvalid");
+						if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+							return t("validation.urlMustBeHttp");
+						}
+						try {
+							new URL(trimmed);
+						} catch {
+							return t("validation.urlInvalid");
+						}
+						return undefined;
+					}}
+					onSubmit={(url) => {
+						const trimmedUrl = url.trim().replace(/\/+$/, "");
+						loadConfig().then((config) => {
+							const prov = config.providers.find((p) => p.id === providerId);
+							if (prov) {
+								const templateUrl = getTemplate(prov.templateId)?.baseUrl;
+								prov.baseUrl = trimmedUrl !== templateUrl ? trimmedUrl : undefined;
+							}
+							saveConfig(config).then(() => {
+								refreshProvider().then(() => {
+									setMessage({ text: t("editProvider.urlUpdated", { url: trimmedUrl }), variant: "success" });
 									setStep("menu");
 								});
 							});

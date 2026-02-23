@@ -176,6 +176,10 @@ export function getTemplate(id: string): ProviderTemplate | undefined {
 	return PROVIDER_TEMPLATES.find((t) => t.id === id);
 }
 
+export function getProviderBaseUrl(provider: ConfiguredProvider): string | undefined {
+	return provider.baseUrl || getTemplate(provider.templateId)?.baseUrl;
+}
+
 function defaultEnvConfigurator(this: ProviderTemplate, env: Record<string, string>, apiKey: string, _model: string): void {
 	env["ANTHROPIC_BASE_URL"] = this.baseUrl;
 	env["ANTHROPIC_AUTH_TOKEN"] = apiKey;
@@ -261,8 +265,10 @@ export function buildClaudeEnv(provider: ConfiguredProvider, model: string, inst
 	}
 
 	// Apply provider-specific or default env configuration
+	const effectiveBaseUrl = provider.baseUrl || template.baseUrl;
+	const templateWithUrl = { ...template, baseUrl: effectiveBaseUrl };
 	const configurator: EnvConfigurator = template.configureEnv ?? defaultEnvConfigurator;
-	configurator.call(template, env, provider.apiKey, model);
+	configurator.call(templateWithUrl, env, provider.apiKey, model);
 
 	// Common: cleanup CLAUDE_CODE vars and re-apply template env
 	cleanupAndApplyTemplateEnv(env, template);

@@ -60,7 +60,7 @@ function mapOpenRouterModel(m: OpenRouterModelMeta): ApiModelMeta {
 	};
 }
 
-export async function fetchApiModels(templateId: string, apiKey: string): Promise<ApiFetchResult> {
+export async function fetchApiModels(templateId: string, apiKey: string, customBaseUrl?: string): Promise<ApiFetchResult> {
 	switch (templateId) {
 		case "openrouter": {
 			const result = await fetchOpenRouterModels(apiKey);
@@ -72,7 +72,7 @@ export async function fetchApiModels(templateId: string, apiKey: string): Promis
 		case "ollama":
 		case "lmstudio":
 		case "llamacpp": {
-			const baseUrl = getTemplate(templateId)?.baseUrl;
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { ok: false, error: "unknown" };
 			if (templateId === "ollama") return fetchOllamaModels(baseUrl);
 			if (templateId === "lmstudio") return fetchLMStudioModels(baseUrl);

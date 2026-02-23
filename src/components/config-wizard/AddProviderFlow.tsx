@@ -27,8 +27,9 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const [step, setStep] = useState<Step>("template");
 	const [templateId, setTemplateId] = useState("");
 	const [name, setName] = useState("");
-	const [activeField, setActiveField] = useState<"name" | "key">("name");
+	const [activeField, setActiveField] = useState<"name" | "url" | "key">("name");
 	const [highlightedTemplateId, setHighlightedTemplateId] = useState<string | null>(PROVIDER_TEMPLATES[0]?.id ?? null);
+	const [baseUrl, setBaseUrl] = useState("");
 	const [apiKey, setApiKey] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -283,20 +284,8 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 					setName(val);
 					const defaultKey = template?.defaultApiKey;
 					if (defaultKey) {
-						loadConfig().then((config) => {
-							const provider: ConfiguredProvider = {
-								id: crypto.randomUUID(),
-								name: val,
-								templateId,
-								type: "api",
-								apiKey: defaultKey,
-								models: [...(template?.defaultModels ?? [])],
-							};
-							config.providers.push(provider);
-							saveConfig(config).then(() => {
-								onDone({ text: t("addFlow.success", { name: val }), variant: "success" });
-							});
-						});
+						setBaseUrl(template?.baseUrl ?? "");
+						setActiveField("url");
 					} else {
 						setActiveField("key");
 					}
@@ -305,6 +294,51 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 					setStep("template");
 				}}
 			/>
+			{template?.defaultApiKey && activeField === "url" && (
+				<Box marginTop={1}>
+					<TextPrompt
+						label={t("addFlow.urlLabel")}
+						initialValue={baseUrl}
+						placeholder={template?.baseUrl}
+						focus={activeField === "url"}
+						validate={(val) => {
+							const trimmed = val.trim();
+							if (!trimmed) return t("validation.urlInvalid");
+							if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+								return t("validation.urlMustBeHttp");
+							}
+							try {
+								new URL(trimmed);
+							} catch {
+								return t("validation.urlInvalid");
+							}
+							return undefined;
+						}}
+						onSubmit={(url) => {
+							const trimmedUrl = url.trim().replace(/\/+$/, "");
+							const defaultKey = template?.defaultApiKey!;
+							loadConfig().then((config) => {
+								const provider: ConfiguredProvider = {
+									id: crypto.randomUUID(),
+									name,
+									templateId,
+									type: "api",
+									apiKey: defaultKey,
+									models: [...(template?.defaultModels ?? [])],
+									baseUrl: trimmedUrl !== template?.baseUrl ? trimmedUrl : undefined,
+								};
+								config.providers.push(provider);
+								saveConfig(config).then(() => {
+									onDone({ text: t("addFlow.success", { name }), variant: "success" });
+								});
+							});
+						}}
+						onCancel={() => {
+							setActiveField("name");
+						}}
+					/>
+				</Box>
+			)}
 			{!template?.defaultApiKey && (
 				<Box marginTop={1}>
 					<TextPrompt

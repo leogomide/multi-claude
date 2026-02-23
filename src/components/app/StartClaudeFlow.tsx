@@ -4,7 +4,7 @@ import TextInput from "ink-text-input";
 import React, { useEffect, useMemo, useState } from "react";
 import { getInstallationPath, isAccountAuthenticated, isOAuthTokenValid, loadConfig, readOAuthCredentials } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
-import { getEffectiveModelsWithSource, getTemplate } from "../../providers.ts";
+import { getEffectiveModelsWithSource, getProviderBaseUrl, getTemplate } from "../../providers.ts";
 import type { ModelWithSource } from "../../providers.ts";
 import { DEFAULT_INSTALLATION_ID } from "../../schema.ts";
 import type { ConfiguredProvider, Installation } from "../../schema.ts";
@@ -101,7 +101,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 	const loadModelsForProvider = async (provider: ConfiguredProvider) => {
 		if (hasApiModelFetching(provider.templateId)) {
 			setStep("loading-models");
-			const result = await fetchApiModels(provider.templateId, provider.apiKey);
+			const result = await fetchApiModels(provider.templateId, provider.apiKey, getProviderBaseUrl(provider));
 
 			if (!result.ok) {
 				setFetchError(result.error);

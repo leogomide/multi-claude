@@ -12,6 +12,8 @@ export interface TranslationDictionary {
 		nameRequired: string;
 		apiKeyRequired: string;
 		modelNameRequired: string;
+		urlInvalid: string;
+		urlMustBeHttp: string;
 	};
 	selector: {
 		selectProvider: string;
@@ -35,6 +37,7 @@ export interface TranslationDictionary {
 		selectTemplate: string;
 		nameLabel: string;
 		apiKeyLabel: string;
+		urlLabel: string;
 		success: string;
 		defaultModels: string;
 	};
@@ -42,6 +45,7 @@ export interface TranslationDictionary {
 		selectProvider: string;
 		nameLabel: string;
 		apiKeyLabel: string;
+		urlLabel: string;
 		noProviders: string;
 		success: string;
 	};
@@ -82,11 +86,13 @@ export interface TranslationDictionary {
 		title: string;
 		editName: string;
 		editApiKey: string;
+		editUrl: string;
 		manageModels: string;
 		removeProvider: string;
 		back: string;
 		nameUpdated: string;
 		apiKeyUpdated: string;
+		urlUpdated: string;
 	};
 	settings: {
 		title: string;
