@@ -1,0 +1,50 @@
+{
+	"name": "multi-claude",
+	"version": "1.0.0",
+	"description": "CLI tool to manage multiple API providers and launch Claude Code with the correct environment variables",
+	"license": "MIT",
+	"author": "Leonardo Gomide",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/leogomide/multi-claude"
+	},
+	"keywords": [
+		"claude",
+		"claude-code",
+		"cli",
+		"anthropic",
+		"multi-provider",
+		"tui"
+	],
+	"module": "index.ts",
+	"type": "module",
+	"bin": {
+		"mclaude": "./cli.ts"
+	},
+	"scripts": {
+		"dev": "bun run cli.ts",
+		"check-types": "bunx tsc --noEmit",
+		"lint": "biome check --fix .",
+		"link": "bun link",
+		"prepare": "bun link",
+		"test": "bun test src/smoke.test.tsx"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.2",
+		"@types/bun": "latest",
+		"@types/react": "19.2.14",
+		"ink-testing-library": "4.0.0"
+	},
+	"dependencies": {
+		"@inkjs/ui": "2.0.0",
+		"ink": "6.8.0",
+		"ink-select-input": "6.2.0",
+		"ink-text-input": "6.0.0",
+		"react": "19.2.4",
+		"rosetta": "1.1.0",
+		"zod": "4.3.6"
+	}
+}
