@@ -25,6 +25,7 @@ export const configuredProviderSchema = z.object({
 export const installationSchema = z.object({
 	id: z.string(),
 	name: z.string(),
+	dirName: z.string().default(""),
 });
 
 export type Installation = z.infer<typeof installationSchema>;

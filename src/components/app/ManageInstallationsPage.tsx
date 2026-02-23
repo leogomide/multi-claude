@@ -82,7 +82,7 @@ export function ManageInstallationsPage({ onSelect, onEscape, lastMessage }: Man
 			if (!installation) return null;
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: installation.name },
-				{ label: t("sidebar.installationPath"), value: getInstallationPath(installation.id) },
+				{ label: t("sidebar.installationPath"), value: getInstallationPath(installation.dirName) },
 			];
 			return <Sidebar title={t("sidebar.installationInfo")} items={items} />;
 		}

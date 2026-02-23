@@ -84,7 +84,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 				setSelectedModel("");
 				if (config.installations.length === 1) {
 					// Single custom installation: auto-select
-					onComplete({ provider, model: "", installationId: config.installations[0]!.id });
+					onComplete({ provider, model: "", installationId: config.installations[0]!.dirName });
 				} else if (config.installations.length === 0) {
 					// No installations — shouldn't happen if onboarding worked, but handle gracefully
 					onComplete({ provider, model: "", installationId: DEFAULT_INSTALLATION_ID });
@@ -177,7 +177,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 			items.push({ id: DEFAULT_INSTALLATION_ID, name: t("installations.defaultName"), path: "~/.claude/" });
 		}
 		for (const inst of installations) {
-			items.push({ id: inst.id, name: inst.name, path: getInstallationPath(inst.id) });
+			items.push({ id: inst.dirName, name: inst.name, path: getInstallationPath(inst.dirName) });
 		}
 		return items;
 	}, [selectedProvider, installations, t]);

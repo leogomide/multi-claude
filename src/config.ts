@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { Config } from "./schema.ts";
@@ -61,6 +61,62 @@ export async function removeInstallationDir(id: string): Promise<void> {
 	if (existsSync(dir)) {
 		await rm(dir, { recursive: true, force: true });
 	}
+}
+
+export function generateShortId(): string {
+	return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+}
+
+export function slugify(name: string): string {
+	return name
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.slice(0, 40);
+}
+
+export function computeDirName(id: string, name: string): string {
+	const slug = slugify(name);
+	return slug ? `${id}-${slug}` : id;
+}
+
+export async function renameInstallationDir(oldDirName: string, newDirName: string): Promise<void> {
+	if (oldDirName === newDirName) return;
+	const oldPath = join(INSTALLATIONS_DIR, oldDirName);
+	const newPath = join(INSTALLATIONS_DIR, newDirName);
+	if (existsSync(oldPath) && !existsSync(newPath)) {
+		await rename(oldPath, newPath);
+	}
+}
+
+export async function migrateInstallations(config: Config): Promise<void> {
+	const needsMigration = config.installations.some((inst) => !inst.dirName);
+	if (!needsMigration) return;
+
+	for (const inst of config.installations) {
+		if (inst.dirName) continue;
+
+		const oldId = inst.id;
+		const shortId = oldId.replace(/-/g, "").slice(0, 8);
+		const dirName = computeDirName(shortId, inst.name);
+
+		const oldPath = join(INSTALLATIONS_DIR, oldId);
+		const newPath = join(INSTALLATIONS_DIR, dirName);
+		if (existsSync(oldPath) && !existsSync(newPath)) {
+			try {
+				await rename(oldPath, newPath);
+			} catch {
+				// If rename fails, continue — directory will be recreated on next use
+			}
+		}
+
+		inst.id = shortId;
+		inst.dirName = dirName;
+	}
+
+	await saveConfig(config);
 }
 
 export async function resetAllConfig(): Promise<void> {

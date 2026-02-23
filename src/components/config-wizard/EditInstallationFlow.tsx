@@ -1,7 +1,7 @@
 import { Box, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useEffect, useState } from "react";
-import { loadConfig, removeInstallationDir, saveConfig } from "../../config.ts";
+import { computeDirName, loadConfig, removeInstallationDir, renameInstallationDir, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import type { Installation } from "../../schema.ts";
 import { ConfirmPrompt } from "../common/ConfirmPrompt.tsx";
@@ -112,17 +112,18 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 						return undefined;
 					}}
 					onSubmit={(val) => {
-						loadConfig().then((config) => {
+						loadConfig().then(async (config) => {
 							const inst = config.installations.find((i) => i.id === installationId);
 							if (inst) {
+								const oldDirName = inst.dirName;
 								inst.name = val.trim();
+								inst.dirName = computeDirName(inst.id, inst.name);
+								await renameInstallationDir(oldDirName, inst.dirName);
 							}
-							saveConfig(config).then(() => {
-								refreshInstallation().then(() => {
-									setMessage({ text: t("installations.renamed", { name: val.trim() }), variant: "success" });
-									setStep("menu");
-								});
-							});
+							await saveConfig(config);
+							await refreshInstallation();
+							setMessage({ text: t("installations.renamed", { name: val.trim() }), variant: "success" });
+							setStep("menu");
 						});
 					}}
 				/>
@@ -141,9 +142,11 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 							return;
 						}
 						loadConfig().then((config) => {
+							const inst = config.installations.find((i) => i.id === installationId);
+							const dirNameToRemove = inst?.dirName || installationId;
 							config.installations = config.installations.filter((i) => i.id !== installationId);
 							saveConfig(config).then(async () => {
-								await removeInstallationDir(installationId);
+								await removeInstallationDir(dirNameToRemove);
 								onDone({
 									text: t("installations.removed", { name: installation.name }),
 									variant: "success",

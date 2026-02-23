@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ensureAccountDir, isAccountAuthenticated, loadConfig, removeAccountDir, saveConfig, CONFIG_DIR } from "./config.ts";
+import { ensureAccountDir, isAccountAuthenticated, loadConfig, migrateInstallations, removeAccountDir, saveConfig, CONFIG_DIR } from "./config.ts";
 import { debugLog } from "./debug.ts";
 import { initLocale } from "./i18n/index.ts";
 
@@ -26,6 +26,7 @@ process.on("exit", (code) => {
 debugLog("tui-process: started");
 
 const config = await loadConfig();
+await migrateInstallations(config);
 
 if (!config.language) {
 	try {

@@ -2,7 +2,7 @@ import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useEffect, useMemo, useState } from "react";
-import { ensureInstallationDir, loadConfig, saveConfig } from "../../config.ts";
+import { computeDirName, ensureInstallationDir, generateShortId, loadConfig, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { PROVIDER_TEMPLATES } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
@@ -199,11 +199,12 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 						}}
 						onSubmit={(val) => {
 							const installationName = val.trim();
-							const installationId = crypto.randomUUID();
+							const id = generateShortId();
+							const dirName = computeDirName(id, installationName);
 							loadConfig().then((config) => {
-								config.installations.push({ id: installationId, name: installationName });
+								config.installations.push({ id, name: installationName, dirName });
 								saveConfig(config).then(() => {
-									ensureInstallationDir(installationId).then(() => {
+									ensureInstallationDir(dirName).then(() => {
 										setActiveField("name");
 										setStep("oauth-name");
 									});

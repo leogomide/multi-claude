@@ -1,5 +1,5 @@
 import React from "react";
-import { ensureInstallationDir, loadConfig, saveConfig } from "../../config.ts";
+import { computeDirName, ensureInstallationDir, generateShortId, loadConfig, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { TextPrompt } from "../common/TextPrompt.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
@@ -29,11 +29,12 @@ export function AddInstallationFlow({ onDone, onCancel }: AddInstallationFlowPro
 				}}
 				onSubmit={(val) => {
 					const installationName = val.trim();
-					const installationId = crypto.randomUUID();
+					const id = generateShortId();
+					const dirName = computeDirName(id, installationName);
 					loadConfig().then((config) => {
-						config.installations.push({ id: installationId, name: installationName });
+						config.installations.push({ id, name: installationName, dirName });
 						saveConfig(config).then(() => {
-							ensureInstallationDir(installationId).then(() => {
+							ensureInstallationDir(dirName).then(() => {
 								onDone({ text: t("installations.added", { name: installationName }), variant: "success" });
 							});
 						});
