@@ -1,12 +1,5 @@
 # templates
 
-atualmente no projeto, substituimos algumas variaveis de ambiente para serem os defualt_opus_model e etc
-
-porem, seguindo a documentacao em https://code.claude.com/docs/en/settings
-vejo que tem a variavel `availableModels`, que muda essa lista de modelos dinamicamente
-
-analise se podemos aplcar os modelos disponiveis nos provedores atraves dessa varaivel, para termos uma flexibilidade ainda maior
-no uso da ferramenta
 
 pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
 
