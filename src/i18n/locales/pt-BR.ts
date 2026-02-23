@@ -178,6 +178,7 @@ export const ptBR: TranslationDictionary = {
 		installationPath: "Caminho",
 		manageInstallationsDesc: "Adicionar, editar e remover instalações",
 		name: "Nome",
+		cliId: "ID CLI",
 		template: "Template",
 		models: "Modelos",
 		baseUrl: "URL Base",

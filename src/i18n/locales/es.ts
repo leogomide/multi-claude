@@ -178,6 +178,7 @@ export const es: TranslationDictionary = {
 		installationPath: "Ruta",
 		manageInstallationsDesc: "Agregar, editar y eliminar instalaciones",
 		name: "Nombre",
+		cliId: "ID CLI",
 		template: "Plantilla",
 		models: "Modelos",
 		baseUrl: "URL Base",

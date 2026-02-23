@@ -54,8 +54,21 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 	console.log("");
 	console.log("Usage: mclaude [options] [claude-code-flags...]");
 	console.log("");
-	console.log("All arguments are forwarded to Claude Code.");
-	console.log("The --model/-m flag is replaced by the model selected in the UI.");
+	console.log("Without --provider, opens the interactive TUI.");
+	console.log("With --provider, runs in headless mode (no TUI).");
+	console.log("");
+	console.log("Headless mode (skip TUI):");
+	console.log("  --provider <name>       Provider name, template ID, or slug");
+	console.log("  --model <model>         Model to use (auto-selects first if omitted)");
+	console.log("  --installation <name>   Installation to use (default if omitted)");
+	console.log("  --list                  List providers, models and installations (JSON)");
+	console.log("");
+	console.log("Examples:");
+	console.log('  mclaude --provider deepseek --model deepseek-chat -p "explain this"');
+	console.log("  mclaude --provider ollama --model llama3 -c");
+	console.log("  mclaude --list");
+	console.log("");
+	console.log("All other arguments are forwarded to Claude Code.");
 	console.log("");
 	console.log("Common Claude Code flags:");
 	console.log("  -c, --continue     Continue most recent conversation");
@@ -74,6 +87,23 @@ if (cliArgs.includes("--version") || cliArgs.includes("-v")) {
 	const { version } = await import("./package.json");
 	console.log(version);
 	process.exit(0);
+}
+
+// Interceptar --list
+if (cliArgs.includes("--list")) {
+	const { printHeadlessInfo } = await import("./src/headless.ts");
+	await printHeadlessInfo();
+	process.exit(0);
+}
+
+// Headless mode (--provider flag)
+const { extractHeadlessArgs, runHeadless } = await import("./src/headless.ts");
+const headlessArgs = extractHeadlessArgs(cliArgs);
+
+if (headlessArgs) {
+	const exitCode = await runHeadless(headlessArgs);
+	resetTerminal();
+	process.exit(exitCode);
 }
 
 // Spawn TUI in a separate process — never import Ink/React here

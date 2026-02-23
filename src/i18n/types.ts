@@ -175,6 +175,7 @@ export interface TranslationDictionary {
 		installationPath: string;
 		manageInstallationsDesc: string;
 		name: string;
+		cliId: string;
 		template: string;
 		models: string;
 		baseUrl: string;

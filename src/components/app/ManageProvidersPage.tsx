@@ -1,6 +1,7 @@
 import { Text } from "ink";
 import React, { useEffect, useMemo, useState } from "react";
 import { isAccountAuthenticated, loadConfig } from "../../config.ts";
+import { getCliId } from "../../headless.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { getEffectiveModels, getProviderBaseUrl, getTemplate } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
@@ -88,6 +89,7 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 				const authenticated = isAccountAuthenticated(provider.id);
 				const items: SidebarItem[] = [
 					{ label: t("sidebar.name"), value: provider.name },
+					{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
 					{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
 					{ label: t("sidebar.authStatus"), value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"), color: authenticated ? "green" : "red" },
 				];
@@ -100,6 +102,7 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 				: String(modelCount);
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: provider.name },
+				{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
 				{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
 				{ label: t("sidebar.models"), value: modelsValue },
 			];
