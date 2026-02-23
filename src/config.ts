@@ -9,6 +9,7 @@ export const CONFIG_DIR = join(homedir(), ".multi-claude");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 export const ACCOUNTS_DIR = join(CONFIG_DIR, "accounts");
 export const INSTALLATIONS_DIR = join(CONFIG_DIR, "installations");
+export const LOGS_DIR = join(CONFIG_DIR, "logs");
 
 function defaultConfig(): Config {
 	return { providers: [], installations: [] };
@@ -127,6 +128,10 @@ export async function resetAllConfig(): Promise<void> {
 	// Remove custom installations
 	if (existsSync(INSTALLATIONS_DIR)) {
 		await rm(INSTALLATIONS_DIR, { recursive: true, force: true });
+	}
+	// Remove debug logs
+	if (existsSync(LOGS_DIR)) {
+		await rm(LOGS_DIR, { recursive: true, force: true });
 	}
 	// Reset config to defaults (including language)
 	await saveConfig({ providers: [], installations: [] });
