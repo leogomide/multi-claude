@@ -217,4 +217,12 @@ export interface TranslationDictionary {
 		anyKey: string;
 		search: string;
 	};
+	update: {
+		groupLabel: string;
+		menuItem: string;
+		updating: string;
+		success: string;
+		failed: string;
+		sidebarDesc: string;
+	};
 }

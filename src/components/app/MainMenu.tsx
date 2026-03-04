@@ -1,12 +1,14 @@
 import { Text } from "ink";
 import React, { useEffect, useMemo, useState } from "react";
+import pkg from "../../../package.json";
 import { isAccountAuthenticated, loadConfig } from "../../config.ts";
 import { getCliId } from "../../headless.ts";
+import { useUpdateCheck } from "../../hooks/useUpdateCheck.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { getEffectiveModels, getTemplate } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
 import { hasApiModelFetching } from "../../services/api-models.ts";
-import type { GroupedSelectItem } from "../common/GroupedSelect.tsx";
+import type { GroupedSelectGroup, GroupedSelectItem } from "../common/GroupedSelect.tsx";
 import { GroupedSelect } from "../common/GroupedSelect.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
@@ -19,6 +21,7 @@ export type MainMenuResult =
 	| { type: "manage-providers" }
 	| { type: "manage-installations" }
 	| { type: "settings" }
+	| { type: "update" }
 	| { type: "exit" };
 
 interface MainMenuProps {
@@ -31,6 +34,7 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 	const { t } = useTranslation();
 	const [providers, setProviders] = useState<ConfiguredProvider[]>([]);
 	const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
+	const { latestVersion } = useUpdateCheck(pkg.version);
 
 	useEffect(() => {
 		loadConfig().then((config) => {
@@ -60,12 +64,28 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			],
 		};
 
-		return [launchGroup, actionsGroup];
-	}, [providers, t]);
+		const result: GroupedSelectGroup[] = [];
+		if (latestVersion) {
+			result.push({
+				label: t("update.groupLabel"),
+				labelColor: "yellow",
+				items: [{
+					label: t("update.menuItem", { version: latestVersion }),
+					value: "update",
+					icon: "⬆️",
+					color: "yellow",
+				}],
+			});
+		}
+		result.push(launchGroup, actionsGroup);
+		return result;
+	}, [providers, t, latestVersion]);
 
 	const handleSelect = (item: GroupedSelectItem) => {
 		if (item.value === "__no-providers__") return;
-		if (item.value.startsWith("provider:")) {
+		if (item.value === "update") {
+			onSelect({ type: "update" });
+		} else if (item.value.startsWith("provider:")) {
 			const providerId = item.value.replace("provider:", "");
 			const provider = providers.find((p) => p.id === providerId);
 			onSelect({ type: "launch-provider", providerId, providerName: provider?.name ?? "" });
@@ -121,7 +141,8 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 		}
 
 		let description = "";
-		if (highlightedValue === "manage-providers") description = t("sidebar.manageProvidersDesc");
+		if (highlightedValue === "update") description = t("update.sidebarDesc");
+		else if (highlightedValue === "manage-providers") description = t("sidebar.manageProvidersDesc");
 		else if (highlightedValue === "manage-installations") description = t("sidebar.manageInstallationsDesc");
 		else if (highlightedValue === "settings") description = t("sidebar.settingsDesc");
 		else if (highlightedValue === "exit") description = t("sidebar.exitDesc");

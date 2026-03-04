@@ -220,4 +220,12 @@ export const es: TranslationDictionary = {
 		anyKey: "cualquier tecla",
 		search: "buscar",
 	},
+	update: {
+		groupLabel: "ACTUALIZACIÓN DISPONIBLE",
+		menuItem: "Actualizar a v{{version}}",
+		updating: "Actualizando mclaude...",
+		success: "¡Actualizado exitosamente! Ejecute 'mclaude' para usar la v{{version}}.",
+		failed: "Error en la actualización. Intente: bun install -g @leogomide/multi-claude@latest",
+		sidebarDesc: "Una nueva versión de mclaude está disponible. Seleccione para actualizar ahora.",
+	},
 };

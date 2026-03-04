@@ -29,7 +29,7 @@ export function Header() {
 				<Text bold color="magenta">
 					{`✨ multi-claude v${pkg.version}`}
 				</Text>
-				<Text color="gray" dimColor>
+				<Text color="cyan">
 					{claudeVersion ? `claude code v${claudeVersion}` : "claude not found"}
 				</Text>
 			</Box>

@@ -184,6 +184,21 @@ do {
 		continue; // restart TUI
 	}
 
+	if (tuiExitCode === 4) {
+		resetTerminal();
+		console.log("\n⬆️  Updating mclaude...\n");
+		const updateResult = spawnSync(process.execPath, ["install", "-g", "@leogomide/multi-claude@latest"], {
+			stdio: "inherit",
+		});
+		if (updateResult.status === 0) {
+			console.log("\n✓ mclaude updated successfully! Run 'mclaude' to use the new version.\n");
+			process.exit(0);
+		} else {
+			console.error("\n✗ Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n");
+			process.exit(1);
+		}
+	}
+
 	if (tuiExitCode !== 0) {
 		debugLog("cli.ts: TUI exited with status=" + tuiExitCode);
 		process.exit(tuiExitCode ?? 1);

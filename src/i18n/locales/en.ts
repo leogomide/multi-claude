@@ -219,4 +219,12 @@ export const en: TranslationDictionary = {
 		anyKey: "any key",
 		search: "search",
 	},
+	update: {
+		groupLabel: "UPDATE AVAILABLE",
+		menuItem: "Update to v{{version}}",
+		updating: "Updating mclaude...",
+		success: "Updated successfully! Run 'mclaude' to use v{{version}}.",
+		failed: "Update failed. Try: bun install -g @leogomide/multi-claude@latest",
+		sidebarDesc: "A new version of mclaude is available. Select to update now.",
+	},
 };

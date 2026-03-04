@@ -5,10 +5,12 @@ export interface GroupedSelectItem {
 	label: string;
 	value: string;
 	icon?: string;
+	color?: string;
 }
 
 export interface GroupedSelectGroup {
 	label?: string;
+	labelColor?: string;
 	items: GroupedSelectItem[];
 }
 
@@ -66,7 +68,7 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 				<Box key={group.label ?? `group-${gi}`} flexDirection="column">
 					{group.label && (
 						<Box marginTop={gi > 0 ? 1 : 0}>
-							<Text bold dimColor>
+							<Text bold dimColor={!group.labelColor} color={group.labelColor}>
 								{"── "}
 								{group.label}
 								{" ──"}
@@ -78,7 +80,7 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 						const isActive = idx === activeIndex;
 						return (
 							<Box key={item.value}>
-								<Text bold color={isActive ? "cyan" : undefined}>
+								<Text bold color={isActive ? "cyan" : item.color}>
 									{isActive ? "❯ " : "  "}
 									{item.icon ? `${item.icon}  ` : ""}
 									{item.label}

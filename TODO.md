@@ -1,5 +1,8 @@
 # templates
 
+vamos adicionar um mecanismo de auto update ao mclaude. 
+
+ele deve checar se a versao instalada é diferente da versao latest no npm e ter um botao de atualizar no menu principal se for necessario
 
 pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
 
@@ -7,13 +10,3 @@ pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correçõe
 
 # correções
 
-testar com minimax, zai e openrouter
-
-- adicionar check balance no provedor moonshot
-  - https://platform.moonshot.ai/docs/api/balance#example-request
-
-- adicionar limites no provedor zai 
-  - https://api.z.ai/api/monitor/usage/quota/limit
-
-- possibilidade de mapeamento dos modelos padrao para modelos do provedor
-  - poder mapear as variaveis ANTHROPIC_DEFAULT_OPUS_MODEL e etc para modelos por provedor

@@ -86,7 +86,7 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} />
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
 			</I18nProvider>,
 		);
 
@@ -105,7 +105,7 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} />
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
 			</I18nProvider>,
 		);
 
@@ -128,7 +128,7 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} />
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
 			</I18nProvider>,
 		);
 
@@ -154,7 +154,7 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} />
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
 			</I18nProvider>,
 		);
 
@@ -174,7 +174,7 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} />
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
 			</I18nProvider>,
 		);
 
@@ -198,7 +198,7 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} />
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
 			</I18nProvider>,
 		);
 

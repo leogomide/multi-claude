@@ -39,17 +39,18 @@ type AppView =
 interface UnifiedAppProps {
 	onStartClaude: (result: { provider: ConfiguredProvider; model: string; installationId: string }) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
+	onRunUpdate: () => void;
 }
 
-export function UnifiedApp({ onStartClaude, onOAuthLogin }: UnifiedAppProps) {
+export function UnifiedApp({ onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
 	return (
 		<BreadcrumbProvider>
-			<UnifiedAppInner onStartClaude={onStartClaude} onOAuthLogin={onOAuthLogin} />
+			<UnifiedAppInner onStartClaude={onStartClaude} onOAuthLogin={onOAuthLogin} onRunUpdate={onRunUpdate} />
 		</BreadcrumbProvider>
 	);
 }
 
-function UnifiedAppInner({ onStartClaude, onOAuthLogin }: UnifiedAppProps) {
+function UnifiedAppInner({ onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
 	const { exit } = useApp();
 	const { t } = useTranslation();
 	const { setCrumbs } = useBreadcrumb();
@@ -116,12 +117,15 @@ function UnifiedAppInner({ onStartClaude, onOAuthLogin }: UnifiedAppProps) {
 				case "settings":
 					goTo("settings", [t("settings.title")]);
 					break;
+				case "update":
+					onRunUpdate();
+					break;
 				case "exit":
 					exit();
 					break;
 			}
 		},
-		[exit, goTo, t],
+		[exit, goTo, t, onRunUpdate],
 	);
 
 	const handleManageProvidersSelect = useCallback(

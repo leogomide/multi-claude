@@ -7,7 +7,8 @@ import type { ConfiguredProvider } from "./schema.ts";
 
 export type AppResult =
 	| { type: "start-claude"; provider: ConfiguredProvider; model: string; installationId: string }
-	| { type: "oauth-login"; providerId: string; providerName: string; isNew: boolean };
+	| { type: "oauth-login"; providerId: string; providerName: string; isNew: boolean }
+	| { type: "run-update" };
 
 export async function runApp(): Promise<AppResult | null> {
 	process.stdout.write("\x1b[?1049h");
@@ -50,6 +51,10 @@ export async function runApp(): Promise<AppResult | null> {
 						onOAuthLogin={(result) => {
 							debugLog("app.tsx: onOAuthLogin fired, provider=" + result.providerName);
 							doResolve({ type: "oauth-login", providerId: result.providerId, providerName: result.providerName, isNew: result.isNew });
+						}}
+						onRunUpdate={() => {
+							debugLog("app.tsx: onRunUpdate fired");
+							doResolve({ type: "run-update" });
 						}}
 					/>
 				</I18nProvider>,

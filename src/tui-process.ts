@@ -56,6 +56,11 @@ try {
 debugLog("tui-process: runApp() returned, result=" + (result ? `type=${result.type}` : "null"));
 
 if (result) {
+	if (result.type === "run-update") {
+		debugLog("tui-process: update requested");
+		process.exit(4);
+	}
+
 	if (result.type === "oauth-login") {
 		debugLog("tui-process: handling OAuth login for provider=" + result.providerName);
 		const oauthData = {
