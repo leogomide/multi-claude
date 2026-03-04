@@ -138,9 +138,14 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 	const searchable = modelItems.length > 10;
 
 	const filteredItems = useMemo(() => {
-		if (!query.trim()) return modelItems;
+		const sorted = [...modelItems].sort((a, b) => {
+			const nameA = (a.meta?.name ?? a.name).toLowerCase();
+			const nameB = (b.meta?.name ?? b.name).toLowerCase();
+			return nameA.localeCompare(nameB);
+		});
+		if (!query.trim()) return sorted;
 		const lower = query.toLowerCase();
-		return modelItems.filter((item) => item.name.toLowerCase().includes(lower) || (item.meta?.name ?? "").toLowerCase().includes(lower));
+		return sorted.filter((item) => item.name.toLowerCase().includes(lower) || (item.meta?.name ?? "").toLowerCase().includes(lower));
 	}, [modelItems, query]);
 
 	// header(5) + footer(3) + status(1) + title(1) + scroll indicators(2) + search(1 if searchable)
