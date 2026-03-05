@@ -6,11 +6,11 @@ import { I18nProvider } from "./i18n/context.tsx";
 import type { ConfiguredProvider } from "./schema.ts";
 
 export type AppResult =
-	| { type: "start-claude"; provider: ConfiguredProvider; model: string; installationId: string }
+	| { type: "start-claude"; provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }
 	| { type: "oauth-login"; providerId: string; providerName: string; isNew: boolean }
 	| { type: "run-update" };
 
-export async function runApp(): Promise<AppResult | null> {
+export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> {
 	process.stdout.write("\x1b[?1049h");
 
 	const exitAlternateScreen = () => {
@@ -44,9 +44,10 @@ export async function runApp(): Promise<AppResult | null> {
 			const renderResult = render(
 				<I18nProvider>
 					<UnifiedApp
+						cliArgs={cliArgs}
 						onStartClaude={(result) => {
 							debugLog("app.tsx: onStartClaude fired, provider=" + result.provider.name);
-							doResolve({ type: "start-claude", provider: result.provider, model: result.model, installationId: result.installationId });
+							doResolve({ type: "start-claude", provider: result.provider, model: result.model, installationId: result.installationId, selectedFlags: result.selectedFlags });
 						}}
 						onOAuthLogin={(result) => {
 							debugLog("app.tsx: onOAuthLogin fired, provider=" + result.providerName);

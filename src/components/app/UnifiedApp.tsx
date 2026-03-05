@@ -37,20 +37,21 @@ type AppView =
 	| "change-language";
 
 interface UnifiedAppProps {
-	onStartClaude: (result: { provider: ConfiguredProvider; model: string; installationId: string }) => void;
+	cliArgs?: string[];
+	onStartClaude: (result: { provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onRunUpdate: () => void;
 }
 
-export function UnifiedApp({ onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
+export function UnifiedApp({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
 	return (
 		<BreadcrumbProvider>
-			<UnifiedAppInner onStartClaude={onStartClaude} onOAuthLogin={onOAuthLogin} onRunUpdate={onRunUpdate} />
+			<UnifiedAppInner cliArgs={cliArgs} onStartClaude={onStartClaude} onOAuthLogin={onOAuthLogin} onRunUpdate={onRunUpdate} />
 		</BreadcrumbProvider>
 	);
 }
 
-function UnifiedAppInner({ onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
+function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
 	const { exit } = useApp();
 	const { t } = useTranslation();
 	const { setCrumbs } = useBreadcrumb();
@@ -228,6 +229,7 @@ function UnifiedAppInner({ onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAp
 				<StartClaudeFlow
 					key={flowKey}
 					providerId={selectedProviderId}
+					cliArgs={cliArgs}
 					onComplete={onStartClaude}
 					onOAuthLogin={onOAuthLogin}
 					onCancel={() => backToMenu()}

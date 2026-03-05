@@ -24,6 +24,10 @@ process.on("exit", (code) => {
 
 debugLog("tui-process: started");
 
+// CLI args passed from parent process
+const cliArgs = process.argv.slice(2);
+debugLog("tui-process: cliArgs=" + JSON.stringify(cliArgs));
+
 const config = await loadConfig();
 await migrateInstallations(config);
 
@@ -46,7 +50,7 @@ debugLog("tui-process: config loaded (lang=" + config.language + "), starting ru
 let result: Awaited<ReturnType<typeof import("./app.tsx")["runApp"]>>;
 try {
 	const { runApp } = await import("./app.tsx");
-	result = await runApp();
+	result = await runApp(cliArgs);
 } catch (err) {
 	debugLog("tui-process: runApp() THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
 	console.error("mclaude crash:", err instanceof Error ? err.message : String(err));
@@ -89,6 +93,7 @@ if (result) {
 			models: result.provider.models,
 			model: result.model,
 			installationId: result.installationId,
+			selectedFlags: result.selectedFlags,
 		};
 		await writeFile(SELECTION_FILE, JSON.stringify(selection), "utf-8");
 		debugLog("tui-process: selection written to " + SELECTION_FILE);

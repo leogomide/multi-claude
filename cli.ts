@@ -16,6 +16,7 @@ interface TuiSelection {
 	models: string[];
 	model: string;
 	installationId?: string;
+	selectedFlags?: string[];
 }
 
 interface OAuthSelection {
@@ -26,6 +27,41 @@ interface OAuthSelection {
 }
 
 const SELECTION_FILE = join(homedir(), ".multi-claude", "last-selection.json");
+
+const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
+	"--resume", "-r",
+	"--dangerously-skip-permissions",
+	"--verbose",
+	"--worktree", "-w",
+	"--chrome",
+]);
+
+function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[] {
+	// Remove strategic flags from original args (user may have toggled them off in TUI)
+	// Also skip values that follow --worktree/-w
+	const nonStrategic: string[] = [];
+	let skipNext = false;
+	for (let i = 0; i < originalCliArgs.length; i++) {
+		if (skipNext) {
+			skipNext = false;
+			continue;
+		}
+		const arg = originalCliArgs[i]!;
+		if (STRATEGIC_FLAGS_WITH_ALIASES.has(arg)) {
+			// For --worktree/-w, also skip the next arg if it doesn't start with --
+			if ((arg === "--worktree" || arg === "-w") && i + 1 < originalCliArgs.length) {
+				const next = originalCliArgs[i + 1]!;
+				if (!next.startsWith("-")) {
+					skipNext = true;
+				}
+			}
+			continue;
+		}
+		nonStrategic.push(arg);
+	}
+	// Add TUI-selected flags + remaining non-strategic args
+	return [...selectedFlags, ...nonStrategic];
+}
 
 function resolveClaudePath(): string {
 	try {
@@ -131,7 +167,7 @@ const tuiPath = join(import.meta.dir, "src", "tui-process.ts");
 let tuiExitCode: number | null = null;
 do {
 	debugLog("cli.ts: spawning TUI process: " + tuiPath);
-	const tuiResult = spawnSync(process.execPath, [tuiPath], { stdio: "inherit" });
+	const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], { stdio: "inherit" });
 
 	if (tuiResult.error) {
 		debugLog("cli.ts: TUI spawn error: " + String(tuiResult.error));
@@ -165,7 +201,7 @@ do {
 
 			if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
 				debugLog("cli.ts: OAuth login successful");
-				console.log(`\n✓ Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
+				console.log(`\n\u2713 Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
 			} else {
 				debugLog("cli.ts: OAuth login failed");
 				if (oauthData.isNew) {
@@ -173,9 +209,9 @@ do {
 					cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
 					await saveConfig(cfg);
 					await removeAccountDir(oauthData.providerId);
-					console.error("\n✗ Autenticação falhou. Provedor não foi adicionado.\n");
+					console.error("\n\u2717 Autentica\u00e7\u00e3o falhou. Provedor n\u00e3o foi adicionado.\n");
 				} else {
-					console.error("\n✗ Re-autenticação falhou.\n");
+					console.error("\n\u2717 Re-autentica\u00e7\u00e3o falhou.\n");
 				}
 			}
 		} catch (err) {
@@ -186,15 +222,15 @@ do {
 
 	if (tuiExitCode === 4) {
 		resetTerminal();
-		console.log("\n⬆️  Updating mclaude...\n");
+		console.log("\n\u2B06\uFE0F  Updating mclaude...\n");
 		const updateResult = spawnSync(process.execPath, ["install", "-g", "@leogomide/multi-claude@latest"], {
 			stdio: "inherit",
 		});
 		if (updateResult.status === 0) {
-			console.log("\n✓ mclaude updated successfully! Run 'mclaude' to use the new version.\n");
+			console.log("\n\u2713 mclaude updated successfully! Run 'mclaude' to use the new version.\n");
 			process.exit(0);
 		} else {
-			console.error("\n✗ Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n");
+			console.error("\n\u2717 Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n");
 			process.exit(1);
 		}
 	}
@@ -241,9 +277,12 @@ const provider: ConfiguredProvider = {
 	models: selection.models,
 };
 
+// Merge TUI-selected flags with original CLI args
+const mergedArgs = mergeFlags(cliArgs, selection.selectedFlags ?? []);
+
 const { runClaude } = await import("./src/runner.ts");
 debugLog("cli.ts: calling runClaude()");
-const exitCode = await runClaude(provider, selection.model ?? "", cliArgs, selection.installationId);
+const exitCode = await runClaude(provider, selection.model ?? "", mergedArgs, selection.installationId);
 debugLog("cli.ts: runClaude() returned exitCode=" + exitCode);
 
 resetTerminal();
@@ -253,9 +292,9 @@ const providerInfo = isOAuth
 	: `${selection.providerName} (${selection.model})`;
 
 if (exitCode !== 0) {
-	console.log(`\n[mclaude] ${providerInfo} — exited with code ${exitCode}`);
+	console.log(`\n[mclaude] ${providerInfo} \u2014 exited with code ${exitCode}`);
 } else {
-	console.log(`\n[mclaude] ${providerInfo} — session ended`);
+	console.log(`\n[mclaude] ${providerInfo} \u2014 session ended`);
 }
 
 process.exit(exitCode);

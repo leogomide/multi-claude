@@ -216,6 +216,8 @@ export interface TranslationDictionary {
 		back: string;
 		anyKey: string;
 		search: string;
+		toggle: string;
+		launch: string;
 	};
 	update: {
 		groupLabel: string;
@@ -224,5 +226,23 @@ export interface TranslationDictionary {
 		success: string;
 		failed: string;
 		sidebarDesc: string;
+	};
+	cliFlags: {
+		title: string;
+		groupSession: string;
+		groupPermissions: string;
+		groupDevelopment: string;
+		groupIntegration: string;
+		resume: string;
+		skipPermissions: string;
+		verbose: string;
+		worktree: string;
+		chrome: string;
+		descResume: string;
+		descSkipPermissions: string;
+		descVerbose: string;
+		descWorktree: string;
+		descChrome: string;
+		worktreePlaceholder: string;
 	};
 }

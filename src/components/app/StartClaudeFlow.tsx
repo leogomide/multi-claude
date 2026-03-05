@@ -11,16 +11,37 @@ import type { ConfiguredProvider, Installation } from "../../schema.ts";
 import { fetchApiModels, hasApiModelFetching } from "../../services/api-models.ts";
 import type { ApiModelError } from "../../services/api-models.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
+import type { ChecklistItem, ChecklistResult } from "../common/ChecklistSelect.tsx";
+import { ChecklistSelect } from "../common/ChecklistSelect.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
 import type { SidebarItem } from "../layout/Sidebar.tsx";
 import { Sidebar } from "../layout/Sidebar.tsx";
 
-type Step = "loading-models" | "select-model" | "select-installation" | "no-models" | "error" | "auth-expired";
+const STRATEGIC_FLAGS = new Set([
+	"--resume", "-r",
+	"--dangerously-skip-permissions",
+	"--verbose",
+	"--worktree", "-w",
+	"--chrome",
+]);
+
+function parsePreCheckedFlags(args: string[]): Set<string> {
+	const checked = new Set<string>();
+	for (const arg of args) {
+		if (arg === "-r") checked.add("--resume");
+		else if (arg === "-w") checked.add("--worktree");
+		else if (STRATEGIC_FLAGS.has(arg)) checked.add(arg);
+	}
+	return checked;
+}
+
+type Step = "loading-models" | "select-model" | "select-installation" | "select-flags" | "no-models" | "error" | "auth-expired";
 
 interface StartClaudeFlowProps {
 	providerId: string;
-	onComplete: (result: { provider: ConfiguredProvider; model: string; installationId: string }) => void;
+	cliArgs?: string[];
+	onComplete: (result: { provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onCancel: () => void;
 }
@@ -36,7 +57,7 @@ function formatContextLength(tokens: number): string {
 
 function formatPricePerMillion(pricePerToken: string): string {
 	const perM = parseFloat(pricePerToken) * 1_000_000;
-	return Number.isNaN(perM) ? "—" : `$${perM.toFixed(2)}`;
+	return Number.isNaN(perM) ? "\u2014" : `$${perM.toFixed(2)}`;
 }
 
 function formatFileSize(bytes: number): string {
@@ -46,7 +67,7 @@ function formatFileSize(bytes: number): string {
 	return `${bytes} B`;
 }
 
-export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel }: StartClaudeFlowProps) {
+export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthLogin, onCancel }: StartClaudeFlowProps) {
 	const { t } = useTranslation();
 	const [step, setStep] = useState<Step>("loading-models");
 	const [selectedProvider, setSelectedProvider] = useState<ConfiguredProvider | null>(null);
@@ -57,6 +78,16 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 	const [installations, setInstallations] = useState<Installation[]>([]);
 	const [selectedModel, setSelectedModel] = useState<string>("");
 	const [installationActiveIndex, setInstallationActiveIndex] = useState(0);
+	const [selectedInstallationIdForFlags, setSelectedInstallationIdForFlags] = useState<string>("");
+	const [highlightedFlag, setHighlightedFlag] = useState<ChecklistItem | null>(null);
+	const preCheckedFlags = useMemo(() => parsePreCheckedFlags(cliArgs), [cliArgs]);
+
+	const goToFlagsStep = (provider: ConfiguredProvider, model: string, installationId: string) => {
+		setSelectedProvider(provider);
+		setSelectedModel(model);
+		setSelectedInstallationIdForFlags(installationId);
+		setStep("select-flags");
+	};
 
 	useEffect(() => {
 		loadConfig().then((config) => {
@@ -75,19 +106,19 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 				}
 				const creds = readOAuthCredentials(provider.id);
 				if (!creds || !isOAuthTokenValid(creds)) {
-					// Token expired or unreadable — trigger re-authentication
+					// Token expired or unreadable \u2014 trigger re-authentication
 					setStep("auth-expired");
 					return;
 				}
-				// OAuth: skip model selection, go to installation selection
+				// OAuth: skip model selection, go to flags step
 				// Anthropic must use a custom installation (not Default)
 				setSelectedModel("");
 				if (config.installations.length === 1) {
-					// Single custom installation: auto-select
-					onComplete({ provider, model: "", installationId: config.installations[0]!.dirName });
+					// Single custom installation: auto-select, go to flags
+					goToFlagsStep(provider, "", config.installations[0]!.dirName);
 				} else if (config.installations.length === 0) {
-					// No installations — shouldn't happen if onboarding worked, but handle gracefully
-					onComplete({ provider, model: "", installationId: DEFAULT_INSTALLATION_ID });
+					// No installations \u2014 go to flags with default
+					goToFlagsStep(provider, "", DEFAULT_INSTALLATION_ID);
 				} else {
 					setStep("select-installation");
 				}
@@ -165,8 +196,8 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 	const goToInstallationOrComplete = (provider: ConfiguredProvider, model: string) => {
 		const isOAuth = provider.type === "oauth";
 		if (!isOAuth && installations.length === 0) {
-			// Non-Anthropic, no custom installations: auto-select Default
-			onComplete({ provider, model, installationId: DEFAULT_INSTALLATION_ID });
+			// Non-Anthropic, no custom installations: auto-select Default, go to flags
+			goToFlagsStep(provider, model, DEFAULT_INSTALLATION_ID);
 		} else {
 			setSelectedModel(model);
 			setInstallationActiveIndex(0);
@@ -187,7 +218,83 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 		return items;
 	}, [selectedProvider, installations, t]);
 
+	const flagGroups = useMemo(() => {
+		return [
+			{
+				label: t("cliFlags.groupSession"),
+				items: [
+					{
+						label: t("cliFlags.resume"),
+						value: "--resume",
+						description: t("cliFlags.descResume"),
+						checked: preCheckedFlags.has("--resume"),
+					},
+				],
+			},
+			{
+				label: t("cliFlags.groupPermissions"),
+				items: [
+					{
+						label: t("cliFlags.skipPermissions"),
+						value: "--dangerously-skip-permissions",
+						description: t("cliFlags.descSkipPermissions"),
+						checked: preCheckedFlags.has("--dangerously-skip-permissions"),
+					},
+				],
+			},
+			{
+				label: t("cliFlags.groupDevelopment"),
+				items: [
+					{
+						label: t("cliFlags.verbose"),
+						value: "--verbose",
+						description: t("cliFlags.descVerbose"),
+						checked: preCheckedFlags.has("--verbose"),
+					},
+					{
+						label: t("cliFlags.worktree"),
+						value: "--worktree",
+						description: t("cliFlags.descWorktree"),
+						checked: preCheckedFlags.has("--worktree"),
+						acceptsValue: true,
+						valuePlaceholder: t("cliFlags.worktreePlaceholder"),
+					},
+				],
+			},
+			{
+				label: t("cliFlags.groupIntegration"),
+				items: [
+					{
+						label: t("cliFlags.chrome"),
+						value: "--chrome",
+						description: t("cliFlags.descChrome"),
+						checked: preCheckedFlags.has("--chrome"),
+					},
+				],
+			},
+		];
+	}, [t, preCheckedFlags]);
+
+	const handleFlagsConfirm = (selected: ChecklistResult[]) => {
+		if (!selectedProvider) return;
+		const flags: string[] = [];
+		for (const s of selected) {
+			flags.push(s.flag);
+			if (s.value) {
+				flags.push(s.value);
+			}
+		}
+		onComplete({
+			provider: selectedProvider,
+			model: selectedModel,
+			installationId: selectedInstallationIdForFlags,
+			selectedFlags: flags,
+		});
+	};
+
 	useInput((input, key) => {
+		if (step === "select-flags") return; // ChecklistSelect handles its own input
+
 		if (key.escape) {
 			if (step === "select-installation") {
 				// Go back: for OAuth cancel, for API go back to model selection
@@ -213,7 +320,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 			} else if (key.return && selectedProvider) {
 				const item = installationListItems[installationActiveIndex];
 				if (item) {
-					onComplete({ provider: selectedProvider, model: selectedModel, installationId: item.id });
+					goToFlagsStep(selectedProvider, selectedModel, item.id);
 				}
 			}
 			return;
@@ -304,9 +411,18 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 		return <Sidebar title={t("sidebar.modelInfo")} items={items} />;
 	}, [highlightedItem, t]);
 
+	const flagSidebar = useMemo(() => {
+		if (!highlightedFlag) return null;
+		const items: SidebarItem[] = [
+			{ label: "Flag", value: highlightedFlag.value },
+			{ label: t("sidebar.name"), value: highlightedFlag.description },
+		];
+		return <Sidebar title="Flag Info" items={items} />;
+	}, [highlightedFlag, t]);
+
 	const footerItems = [
-		{ key: "↑↓", label: t("footer.navigate") },
-		{ key: "⏎", label: t("footer.select") },
+		{ key: "\u2191\u2193", label: t("footer.navigate") },
+		{ key: "\u23CE", label: t("footer.select") },
 		{ key: "esc", label: t("footer.back") },
 		...(searchable ? [{ key: "/", label: t("footer.search") }] : []),
 	];
@@ -349,8 +465,45 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 
 	if (step === "auth-expired" && selectedProvider) {
 		return (
-			<AppShell footerItems={[{ key: "⏎", label: t("anthropic.reAuthenticate") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell footerItems={[{ key: "\u23CE", label: t("anthropic.reAuthenticate") }, { key: "esc", label: t("footer.back") }]}>
 				<StatusMessage variant="warning">{t("anthropic.authExpired")}</StatusMessage>
+			</AppShell>
+		);
+	}
+
+	if (step === "select-flags" && selectedProvider) {
+		const flagsFooter = [
+			{ key: "\u2191\u2193", label: t("footer.navigate") },
+			{ key: "space", label: t("footer.toggle") },
+			{ key: "\u23CE", label: t("footer.launch") },
+			{ key: "esc", label: t("footer.back") },
+		];
+
+		return (
+			<AppShell sidebar={flagSidebar} footerItems={flagsFooter}>
+				<StatusMessage variant="info">
+					{t("selector.providerLabel")}: {selectedProvider.name}
+					{selectedModel ? ` | ${selectedModel}` : ""}
+				</StatusMessage>
+				<Text bold color="cyan">
+					{t("cliFlags.title")}
+				</Text>
+				<ChecklistSelect
+					groups={flagGroups}
+					onConfirm={handleFlagsConfirm}
+					onHighlight={setHighlightedFlag}
+					onEscape={() => {
+						// Go back to installation selection if there are installations to choose from,
+						// otherwise go back to model selection (or cancel for OAuth)
+						if (installationListItems.length > 1) {
+							setStep("select-installation");
+						} else if (selectedProvider.type === "oauth") {
+							onCancel();
+						} else {
+							setStep("select-model");
+						}
+					}}
+				/>
 			</AppShell>
 		);
 	}
@@ -365,8 +518,8 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 			: null;
 
 		const installationFooter = [
-			{ key: "↑↓", label: t("footer.navigate") },
-			{ key: "⏎", label: t("footer.select") },
+			{ key: "\u2191\u2193", label: t("footer.navigate") },
+			{ key: "\u23CE", label: t("footer.select") },
 			{ key: "esc", label: t("footer.back") },
 		];
 
@@ -384,7 +537,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 						return (
 							<Box key={item.id} flexDirection="row">
 								<Text bold={isActive} color={isActive ? "cyan" : undefined}>
-									{isActive ? "❯ " : "  "}
+									{isActive ? "\u276F " : "  "}
 									{item.name}
 								</Text>
 							</Box>
@@ -420,7 +573,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 				)}
 				<Box flexDirection="column">
 					{scrollOffset > 0 && (
-						<Text dimColor>  ↑ ...</Text>
+						<Text dimColor>  \u2191 ...</Text>
 					)}
 					{visibleItems.map((item) => {
 						const globalIdx = filteredItems.indexOf(item);
@@ -428,7 +581,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 						return (
 							<Box key={item.name} flexDirection="row">
 								<Text bold={isActive} color={isActive ? "cyan" : undefined}>
-									{isActive ? "❯ " : "  "}
+									{isActive ? "\u276F " : "  "}
 									{item.meta?.name ?? item.name}
 								</Text>
 								{item.meta?.context_length !== undefined && (
@@ -444,7 +597,7 @@ export function StartClaudeFlow({ providerId, onComplete, onOAuthLogin, onCancel
 						);
 					})}
 					{scrollOffset + visibleLimit < filteredItems.length && (
-						<Text dimColor>  ↓ ...</Text>
+						<Text dimColor>  \u2193 ...</Text>
 					)}
 				</Box>
 			</AppShell>
