@@ -4,11 +4,21 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 **[Entrar na comunidade](https://kiwify.app/kBV4r4X?afid=Xox2vMps)**
 
+<h1 align="center">multi-claude</h1>
+
 <div align="center">
-  <img src="cover.jpg" alt="multi-claude cover" width="600"/>
+
+[![Version](https://img.shields.io/badge/version-1.0.10-blue)](https://github.com/leogomide/multi-claude/releases)
+[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
+[![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
+[![Claude Code](https://img.shields.io/badge/Claude-Code-orange)](https://docs.anthropic.com/en/docs/claude-code)
+
 </div>
 
-# multi-claude
+<div align="center">
+  <img src="cover.png" alt="multi-claude cover" width="600"/>
+</div>
 
 CLI tool to manage multiple API providers and launch [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the correct environment variables.
 
