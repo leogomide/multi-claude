@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
-const SCRIPT_VERSION = "7";
+const SCRIPT_VERSION = "10";
 
 export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
@@ -71,7 +71,7 @@ const MODEL_HINT = process.env.MCLAUDE_MODEL || '';
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || 'full';
 const LANG = process.env.MCLAUDE_LANG || 'en';
 
-const C = { cyan: '\\x1b[36m', green: '\\x1b[32m', yellow: '\\x1b[33m', red: '\\x1b[31m', dim: '\\x1b[2m', bold: '\\x1b[1m', reset: '\\x1b[0m', white: '\\x1b[37m', magenta: '\\x1b[35m', blue: '\\x1b[34m', brightBlue: '\\x1b[94m' };
+const C = { cyan: '\\x1b[36m', green: '\\x1b[32m', yellow: '\\x1b[33m', red: '\\x1b[91m', dim: '\\x1b[2m', bold: '\\x1b[1m', reset: '\\x1b[0m', white: '\\x1b[37m', magenta: '\\x1b[35m', blue: '\\x1b[34m', brightBlue: '\\x1b[94m' };
 
 const L = ({
     en:      { left: 'left',  hit: 'hit', session: 'Session', api: 'API', cost: 'Cost', time: 'time' },
@@ -134,7 +134,7 @@ process.stdin.on('end', () => {
         const linesPart = (linesAdd || linesRem) ? SEP + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset : '';
 
         // Shared parts
-        const provModel = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + model : model;
+        const provModel = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + C.white + model + C.reset : C.white + model + C.reset;
         const ctxBar = cc + mkBar(pct, 30) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
         const ctxBarWide = cc + mkBar(pct, 50) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + ' ' + L.left + C.reset;
 
@@ -157,8 +157,8 @@ process.stdin.on('end', () => {
                     (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
                 );
 
-                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
-                    C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
+                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
+                    C.cyan + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
                     C.cyan + fmtCost(cpm) + '/min' + C.reset;
                 if (gitPart) l4 += SEP + gitPart;
                 l4 += linesPart;

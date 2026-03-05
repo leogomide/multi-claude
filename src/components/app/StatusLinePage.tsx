@@ -51,8 +51,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 				</Text>
 				<Text>
 					<Text color="white">Session:3h31m</Text><Sep />
-					<Text color="cyan">API:1h38m</Text><Sep />
-					<Text bold color="green">Cost:$11.15</Text><Sep />
+					<Text color="white">API:1h38m</Text><Sep />
+					<Text color="cyan">Cost:$11.15</Text><Sep />
 					<Text color="cyan">$0.19/min</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
