@@ -105,16 +105,13 @@ export async function runClaudeDefault(
 	extraArgs: string[] = [],
 	installationId?: string,
 ): Promise<number> {
-	const env: Record<string, string> = {};
-	for (const [key, value] of Object.entries(process.env)) {
-		if (value !== undefined) {
-			env[key] = value;
-		}
-	}
+	// Track env vars we set so we can clean them up after spawn
+	const addedEnvKeys: string[] = [];
 
 	// Set installation dir for custom installations
 	if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
-		env["CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
+		process.env["CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
+		addedEnvKeys.push("CLAUDE_CONFIG_DIR");
 	}
 
 	// Build args (no --model flag)
@@ -149,10 +146,11 @@ export async function runClaudeDefault(
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
-		env["MCLAUDE_PROVIDER_NAME"] = "";
-		env["MCLAUDE_MODEL"] = "";
-		env["MCLAUDE_STATUSLINE_TEMPLATE"] = slTemplate;
-		env["MCLAUDE_LANG"] = language;
+		process.env["MCLAUDE_PROVIDER_NAME"] = "";
+		process.env["MCLAUDE_MODEL"] = "";
+		process.env["MCLAUDE_STATUSLINE_TEMPLATE"] = slTemplate;
+		process.env["MCLAUDE_LANG"] = language;
+		addedEnvKeys.push("MCLAUDE_PROVIDER_NAME", "MCLAUDE_MODEL", "MCLAUDE_STATUSLINE_TEMPLATE", "MCLAUDE_LANG");
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
 		debugLog("runner.ts: statusline template=" + slTemplate + " (default launch)");
 	}
@@ -160,12 +158,19 @@ export async function runClaudeDefault(
 	debugLog("runner.ts: spawning claude (default), args=" + JSON.stringify(args));
 
 	return new Promise<number>((resolve, reject) => {
+		// No explicit env — inherit process.env natively
 		const child = spawn(claudePath, args, {
 			stdio: "inherit",
-			env,
 		});
 
+		const cleanup = () => {
+			for (const key of addedEnvKeys) {
+				delete process.env[key];
+			}
+		};
+
 		child.on("error", (err) => {
+			cleanup();
 			debugLog("runner.ts: spawn error: " + (err.stack ?? err.message));
 			const msg = err.message;
 			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
@@ -181,6 +186,7 @@ export async function runClaudeDefault(
 		});
 
 		child.on("close", (code, signal) => {
+			cleanup();
 			debugLog("runner.ts: child closed (default), code=" + code + ", signal=" + signal);
 			resolve(code ?? 1);
 		});
