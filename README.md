@@ -60,6 +60,18 @@ mclaude --allowedTools "Bash(git *)" -p "show recent commits"
 
 The `--model` / `-m` flag is intercepted and replaced by the model you select in the TUI.
 
+### TUI Flag Selection
+
+Before launching Claude Code, the TUI presents a flag selection step where you can toggle common flags on or off. Flags passed via the command line are pre-checked, and your selection is persisted between sessions.
+
+| Group | Flag | Description |
+|-------|------|-------------|
+| Session | `--resume` | Resume a previous session (interactive picker) |
+| Permissions | `--dangerously-skip-permissions` | Skip all permission prompts (use with caution) |
+| Development | `--verbose` | Enable verbose logging, shows full turn-by-turn output |
+| Development | `--worktree [name]` | Run in an isolated git worktree |
+| Integration | `--chrome` | Enable Chrome browser integration for web automation |
+
 ### Headless Mode (non-interactive)
 
 Skip the TUI entirely by specifying `--provider` on the command line. Useful for scripting, automation, and AI agents.
@@ -295,6 +307,47 @@ If a session expires, you can re-authenticate from **Edit provider → Re-authen
 - **OAuth accounts:** `~/.multi-claude/accounts/`
 - **Installations:** `~/.multi-claude/installations/`
 - **Supported languages:** English, Portugues (BR), Espanol — change in **Settings → Change language**
+
+## Status Line
+
+mclaude injects a customizable status line into Claude Code that shows real-time session information. Configure it from **Settings > Status line** in the TUI.
+
+### Templates
+
+| Template | Lines | Focus |
+|----------|-------|-------|
+| **none** | — | Disabled |
+| **full** (default) | 4 | Model, context bar, tokens + I/O ratio + cache + burn rate, session + API time + git |
+| **slim** | 3 | Model, context bar, tokens + cost + session + git |
+| **mini** | 1 | Model, context %, cost, duration, git branch, lines changed |
+| **cost** | 3 | Total cost highlighted, cost/min, hourly projection, in/out cost breakdown |
+| **dev** | 3 | Branch, worktree, agent, lines changed. Context + cost compact |
+| **perf** | 3 | Cache hit rate, I/O ratio, API time %, output token throughput |
+| **context** | 3 | Wider context bar, detailed token breakdown by type, total vs window limit |
+
+### Preview
+
+**full:**
+```
+Provider/Opus
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░ 153.9k/77% | 46.1k/23% left
+In:84.2k | Out:62.8k | I/O 1.3:1 | Cache:20.6M (71% hit) | $0.19/min | Cost:$11.15
+Session:3h31m | API:1h38m | master | (+45,-7)
+```
+
+**slim:**
+```
+Provider/Opus
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░ 153.9k/77% | 46.1k/23% left
+In:84.2k Out:62.8k | $11.15 | 3h31m | master | (+45,-7)
+```
+
+**mini:**
+```
+Provider/Opus | Ctx 77% | $11.15 | 3h31m | master | (+45,-7)
+```
+
+Color-coded indicators change from green to yellow to red based on context usage, cost, and cache hit rates.
 
 ## Development
 
