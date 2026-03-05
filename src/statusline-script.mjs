@@ -192,11 +192,12 @@ process.stdin.on('end', () => {
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines, tailPerLine);
 
-                // Bar line: bar(2 cols) | used/pct + remaining/pct left(1 col)
+                // Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
                 const barW = 2 * W + SEP_W;
                 const bar = cc + mkBar(pct, barW) + C.reset;
-                const ctxInfo = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
-                const barLine = bar + SEP + ctxInfo;
+                const ctxUsed = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset;
+                const ctxLeft = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+                const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
 
                 console.log(provModelLine);
                 lines.forEach(l => console.log(l));

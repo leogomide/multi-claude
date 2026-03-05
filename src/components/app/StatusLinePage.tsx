@@ -56,7 +56,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 				</Text>
 				<Text>
 					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
-					<Text color="yellow">153.9k/77%</Text><Sep /><Text color="yellow">46.1k/23% left</Text>
+					<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 				</Text>
 			</Box>
 		);
