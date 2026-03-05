@@ -34,7 +34,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "slim",
 		nameKey: "statusLine.slim",
 		descKey: "statusLine.slimDesc",
-		preview: "Provider/Opus\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c | 46.1k/23% left\nInput:84.2k Output:62.8k | $11.15             | 3h31m              | master | +45 -7",
+		preview: "Provider/Opus (master +45 -7)\nInput:84.2k    | Output:62.8k   | Cost:$11.15    | Session:3h31m\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
 	},
 	{
 		id: "mini",

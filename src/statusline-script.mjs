@@ -239,24 +239,33 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'slim': {
-                // Grid: 3 columns
-                const COLS = 3;
-                const cCol = costC(cost);
+                // Grid: 3 columns — compact version of default
+
+                // Line 1: Provider/Model + git info + lines changed
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
 
                 const coreLines = [
                     [
-                        C.cyan + 'Input:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Output:' + fmtK(totalOut) + C.reset,
-                        C.bold + cCol + fmtCost(cost) + C.reset,
-                        C.white + fmtDur(durMs) + C.reset,
+                        C.cyan + 'Input:' + fmtK(totalIn) + C.reset,
+                        C.yellow + 'Output:' + fmtK(totalOut) + C.reset,
+                        C.green + L.cost + ':' + fmtCost(cost) + C.reset,
+                        C.cyan + L.session + ':' + fmtDur(durMs) + C.reset,
                     ],
                 ];
-                const tailPerLine = [[gitPart, linesPart]];
                 const W = calcW(coreLines);
-                const lines = fmtGrid(W, coreLines, tailPerLine);
+                const lines = fmtGrid(W, coreLines);
 
-                console.log(provModel);
-                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                // Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
+                const barW = 2 * W + SEP_W;
+                const bar = cc + mkBar(pct, barW) + C.reset;
+                const ctxUsed = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset;
+                const ctxLeft = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+                const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+
+                console.log(provModelLine);
                 lines.forEach(l => console.log(l));
+                console.log(barLine);
                 break;
             }
             case 'mini': {

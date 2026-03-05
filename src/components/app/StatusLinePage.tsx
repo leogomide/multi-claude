@@ -89,18 +89,21 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	}
 
 	if (id === "slim") {
-		// Grid: 3 columns
-		const bW = 2 * W3 + 1 * 3;
+		// Grid: 4 columns — compact version of default
+		const W = W4;
 		return (
 			<Box flexDirection="column">
-				{provLine}
-				{gridBar(bW, W3)}
+				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text><Text color="cyan">Input:84.2k</Text>{" "}<Text color="yellow">{P("Output:62.8k", W3 - 12)}</Text></Text><Sep />
-					<Text bold color="green">{P("$11.15", W3)}</Text><Sep />
-					<Text color="white">{P("3h31m", W3)}</Text><Sep />
-					<Text color="magenta">master</Text><Sep />
-					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
+					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
+					<Text color="green">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="cyan">{P("Session:3h31m", W)}</Text>
+				</Text>
+				<Text>
+					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
+					<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 				</Text>
 			</Box>
 		);
