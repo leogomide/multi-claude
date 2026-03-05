@@ -151,16 +151,15 @@ process.stdin.on('end', () => {
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
                 const cCol = costC(cost);
                 console.log(
-                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + SEP +
-                    C.yellow + 'Out:' + fmtK(totalOut) + C.reset + SEP +
-                    C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + SEP +
+                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + '/' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset +
+                    ' ' + C.dim + '(' + C.reset + C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + C.dim + ')' + C.reset + SEP +
                     C.green + 'Cache:' + fmtK(cachedTokens) + C.reset +
-                    (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '') + SEP +
-                    C.cyan + fmtCost(cpm) + '/min' + C.reset + SEP +
-                    C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset
+                    (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
                 );
 
-                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset;
+                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
+                    C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
+                    C.cyan + fmtCost(cpm) + '/min' + C.reset;
                 if (gitPart) l4 += SEP + gitPart;
                 l4 += linesPart;
                 console.log(l4);
