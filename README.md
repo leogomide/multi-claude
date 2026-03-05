@@ -4,6 +4,10 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 **[Entrar na comunidade](https://kiwify.app/kBV4r4X?afid=Xox2vMps)**
 
+<div align="center">
+  <img src="cover.jpg" alt="multi-claude cover" width="600"/>
+</div>
+
 # multi-claude
 
 CLI tool to manage multiple API providers and launch [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the correct environment variables.
