@@ -71,19 +71,6 @@ export async function runClaude(
 	debugLog("runner.ts: spawning claude, args=" + JSON.stringify(args));
 	debugLog("runner.ts: env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
 
-	// Keep terminal window title as mclaude(model) throughout the session.
-	// Subprocesses (npx, etc.) can overwrite the title, so we reapply it periodically.
-	const title = `mclaude(${provider.name}/${model})`;
-	const setTitle = () => {
-		if (process.platform === "win32") {
-			process.title = title;
-		} else if (process.stdout.isTTY) {
-			process.stdout.write(`\x1b]0;${title}\x07`);
-		}
-	};
-	setTitle();
-	const titleInterval = setInterval(setTitle, 2000);
-
 	return new Promise<number>((resolve, reject) => {
 		const child = spawn(claudePath, args, {
 			stdio: "inherit",
@@ -91,7 +78,6 @@ export async function runClaude(
 		});
 
 		child.on("error", (err) => {
-			clearInterval(titleInterval);
 			debugLog("runner.ts: spawn error: " + (err.stack ?? err.message));
 			const msg = err.message;
 			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
@@ -107,7 +93,6 @@ export async function runClaude(
 		});
 
 		child.on("close", (code, signal) => {
-			clearInterval(titleInterval);
 			debugLog("runner.ts: child closed, code=" + code + ", signal=" + signal);
 			resolve(code ?? 1);
 		});
