@@ -34,7 +34,7 @@ export const DEFAULT_INSTALLATION_ID = "default";
 export const DEFAULT_LAUNCH_TEMPLATE_ID = "__default__";
 
 export const statusLineConfigSchema = z.object({
-	template: z.string().default("none"),
+	template: z.string().default("full"),
 });
 
 export const configSchema = z.object({

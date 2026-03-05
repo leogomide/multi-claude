@@ -59,7 +59,7 @@ export async function runClaude(
 
 	// Status line injection
 	const config = await loadConfig();
-	let slTemplate = config.statusLine?.template ?? "none";
+	let slTemplate = config.statusLine?.template ?? "full";
 	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
 		log.warn("unknown template '" + slTemplate + "', falling back to 'full'");
 		slTemplate = "full";
@@ -141,7 +141,7 @@ export async function runClaudeDefault(
 
 	// Status line injection
 	const config = await loadConfig();
-	let slTemplate = config.statusLine?.template ?? "none";
+	let slTemplate = config.statusLine?.template ?? "full";
 	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
 		slTemplate = "full";
 	}

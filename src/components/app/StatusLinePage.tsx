@@ -102,7 +102,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 
 	useEffect(() => {
 		loadConfig().then((config) => {
-			const tmpl = (config.statusLine?.template ?? "none") as StatusLineTemplateId;
+			const tmpl = (config.statusLine?.template ?? "full") as StatusLineTemplateId;
 			setCurrentTemplate(tmpl);
 			setHighlightedId(tmpl);
 		});
