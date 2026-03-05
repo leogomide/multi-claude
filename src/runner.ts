@@ -55,6 +55,10 @@ export async function runClaude(
 	debugLog("runner.ts: spawning claude, args=" + JSON.stringify(args));
 	debugLog("runner.ts: env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
 
+	if (process.stdout.isTTY) {
+		process.stdout.write(`\x1b]0;mclaude(${model})\x07`);
+	}
+
 	return new Promise<number>((resolve, reject) => {
 		const child = spawn(claudePath, args, {
 			stdio: "inherit",
