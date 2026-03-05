@@ -1,7 +1,7 @@
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "./CyanSelectInput.tsx";
 import React from "react";
 import { useTranslation } from "../../i18n/context.tsx";
+import CyanSelectInput from "./CyanSelectInput.tsx";
 
 interface ConfirmPromptProps {
 	message: string;

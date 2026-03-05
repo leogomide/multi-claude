@@ -1,9 +1,9 @@
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "./CyanSelectInput.tsx";
 import TextInput from "ink-text-input";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "../../i18n/context.tsx";
 import { i18n } from "../../i18n/index.ts";
+import CyanSelectInput from "./CyanSelectInput.tsx";
 
 interface SearchableSelectItem {
 	label: string;

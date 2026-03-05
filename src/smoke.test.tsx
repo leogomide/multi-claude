@@ -28,8 +28,10 @@ mock.module("./config.ts", () => ({
 }));
 
 mock.module("./services/api-models.ts", () => ({
-	hasApiModelFetching: (templateId: string) => templateId === "openrouter" || templateId === "requesty",
-	hasApiKeyValidation: (templateId: string) => templateId === "openrouter" || templateId === "requesty",
+	hasApiModelFetching: (templateId: string) =>
+		templateId === "openrouter" || templateId === "requesty",
+	hasApiKeyValidation: (templateId: string) =>
+		templateId === "openrouter" || templateId === "requesty",
 	fetchApiModels: async () => ({
 		ok: true as const,
 		models: [
@@ -86,7 +88,11 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
 			</I18nProvider>,
 		);
 
@@ -105,7 +111,11 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
 			</I18nProvider>,
 		);
 
@@ -128,7 +138,11 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
 			</I18nProvider>,
 		);
 
@@ -154,7 +168,11 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
 			</I18nProvider>,
 		);
 
@@ -174,7 +192,11 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
 			</I18nProvider>,
 		);
 
@@ -189,7 +211,9 @@ describe("Smoke Test — TUI Flows", () => {
 		await delay(50);
 
 		expect(onStartClaude).toHaveBeenCalledTimes(1);
-		const call = (onStartClaude.mock.calls[0] as unknown as [{ provider: { id: string }; model: string }])[0];
+		const call = (
+			onStartClaude.mock.calls[0] as unknown as [{ provider: { id: string }; model: string }]
+		)[0];
 		expect(call.provider.id).toBe("test-minimax");
 		expect(call.model).toBe("minimax-01");
 	});
@@ -198,7 +222,11 @@ describe("Smoke Test — TUI Flows", () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={mock(() => {})} onRunUpdate={mock(() => {})} />
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
 			</I18nProvider>,
 		);
 

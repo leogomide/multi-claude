@@ -77,7 +77,13 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 		const entries: FlatEntry[] = [];
 		groups.forEach((group, gi) => {
 			if (group.label) {
-				entries.push({ type: "label", groupIndex: gi, label: group.label, labelColor: group.labelColor, hasMarginTop: gi > 0 });
+				entries.push({
+					type: "label",
+					groupIndex: gi,
+					label: group.label,
+					labelColor: group.labelColor,
+					hasMarginTop: gi > 0,
+				});
 			}
 			group.items.forEach((item, ii) => {
 				entries.push({ type: "item", groupIndex: gi, itemIndex: ii, item });
@@ -121,7 +127,9 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 	}, [flatEntries, activeIndex, maxVisibleRows, needsScrolling]);
 
 	const showUpIndicator = needsScrolling && visibleEntries[0] !== flatEntries[0];
-	const showDownIndicator = needsScrolling && visibleEntries[visibleEntries.length - 1] !== flatEntries[flatEntries.length - 1];
+	const showDownIndicator =
+		needsScrolling &&
+		visibleEntries[visibleEntries.length - 1] !== flatEntries[flatEntries.length - 1];
 
 	// Track which items are visible to map to global flatIndex
 	let itemCounter = 0;
@@ -135,11 +143,14 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 
 	return (
 		<Box flexDirection="column">
-			{showUpIndicator && <Text dimColor>  {"↑ ..."}</Text>}
+			{showUpIndicator && <Text dimColor> {"↑ ..."}</Text>}
 			{visibleEntries.map((entry, vi) => {
 				if (entry.type === "label") {
 					return (
-						<Box key={`label-${entry.groupIndex}`} marginTop={entry.hasMarginTop && !showUpIndicator ? 1 : 0}>
+						<Box
+							key={`label-${entry.groupIndex}`}
+							marginTop={entry.hasMarginTop && !showUpIndicator ? 1 : 0}
+						>
 							<Text bold dimColor={!entry.labelColor} color={entry.labelColor}>
 								{"── "}
 								{entry.label}
@@ -160,7 +171,7 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 					</Box>
 				);
 			})}
-			{showDownIndicator && <Text dimColor>  {"↓ ..."}</Text>}
+			{showDownIndicator && <Text dimColor> {"↓ ..."}</Text>}
 		</Box>
 	);
 }

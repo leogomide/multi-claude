@@ -1,10 +1,4 @@
-import {
-	appendFileSync,
-	mkdirSync,
-	readdirSync,
-	unlinkSync,
-	writeFileSync,
-} from "node:fs";
+import { appendFileSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { LOGS_DIR } from "./config.ts";
 
@@ -110,7 +104,12 @@ export function initLogger(role: "cli" | "tui" | "headless", sessionId?: string)
 
 // --- Core Write ---
 
-function writeLog(level: Exclude<LogLevel, "off">, source: string, msg: string, err?: unknown): void {
+function writeLog(
+	level: Exclude<LogLevel, "off">,
+	source: string,
+	msg: string,
+	err?: unknown,
+): void {
 	ensureInit();
 	if (!logFile) return;
 	if (LOG_LEVELS[level] > LOG_LEVELS[configuredLevel]) return;

@@ -32,9 +32,7 @@ export type OpenRouterFetchResult =
 	| { ok: true; models: OpenRouterModelMeta[] }
 	| { ok: false; error: OpenRouterError };
 
-export type OpenRouterKeyValidation =
-	| { valid: true }
-	| { valid: false; error: OpenRouterError };
+export type OpenRouterKeyValidation = { valid: true } | { valid: false; error: OpenRouterError };
 
 export async function fetchOpenRouterModels(apiKey: string): Promise<OpenRouterFetchResult> {
 	try {

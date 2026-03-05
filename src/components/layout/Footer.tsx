@@ -27,7 +27,7 @@ export function Footer({ items }: FooterProps) {
 						</Text>
 					))
 				) : (
-					<Text>{" "}</Text>
+					<Text> </Text>
 				)}
 			</Box>
 		</Box>

@@ -1,12 +1,18 @@
-import { spawn, execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { getInstallationPath, loadConfig } from "./config.ts";
 import { createLogger } from "./debug.ts";
 
 const log = createLogger("runner");
+
 import { buildClaudeEnv } from "./providers.ts";
-import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import type { ConfiguredProvider } from "./schema.ts";
-import { STATUSLINE_TEMPLATE_IDS, buildStatusLineSettingsJson, ensureStatusLineScript, getStatusLineEnvVars } from "./statusline.ts";
+import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
+import {
+	buildStatusLineSettingsJson,
+	ensureStatusLineScript,
+	getStatusLineEnvVars,
+	STATUSLINE_TEMPLATE_IDS,
+} from "./statusline.ts";
 
 export async function runClaude(
 	provider: ConfiguredProvider,
@@ -48,7 +54,8 @@ export async function runClaude(
 	let claudePath = "claude";
 	try {
 		if (process.platform === "win32") {
-			claudePath = execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
+			claudePath =
+				execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
 		} else {
 			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
 		}
@@ -60,7 +67,10 @@ export async function runClaude(
 	// Status line injection
 	const config = await loadConfig();
 	let slTemplate = config.statusLine?.template ?? "full";
-	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
+	if (
+		slTemplate !== "none" &&
+		!(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)
+	) {
 		log.warn("unknown template '" + slTemplate + "', falling back to 'full'");
 		slTemplate = "full";
 	}
@@ -73,7 +83,12 @@ export async function runClaude(
 	}
 
 	log.info("spawning claude, args=" + JSON.stringify(args));
-	log.debug("env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
+	log.debug(
+		"env keys=" +
+			JSON.stringify(
+				Object.keys(env).filter((k) => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE")),
+			),
+	);
 
 	return new Promise<number>((resolve, reject) => {
 		const child = spawn(claudePath, args, {
@@ -120,10 +135,18 @@ export async function runClaudeDefault(
 	const args: string[] = [];
 	let skipNext = false;
 	for (let i = 0; i < extraArgs.length; i++) {
-		if (skipNext) { skipNext = false; continue; }
+		if (skipNext) {
+			skipNext = false;
+			continue;
+		}
 		const arg = extraArgs[i]!;
-		if (arg === "--model" || arg === "-m") { skipNext = true; continue; }
-		if (arg.startsWith("--model=")) { continue; }
+		if (arg === "--model" || arg === "-m") {
+			skipNext = true;
+			continue;
+		}
+		if (arg.startsWith("--model=")) {
+			continue;
+		}
 		args.push(arg);
 	}
 
@@ -131,7 +154,8 @@ export async function runClaudeDefault(
 	let claudePath = "claude";
 	try {
 		if (process.platform === "win32") {
-			claudePath = execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
+			claudePath =
+				execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
 		} else {
 			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
 		}
@@ -142,7 +166,10 @@ export async function runClaudeDefault(
 	// Status line injection
 	const config = await loadConfig();
 	let slTemplate = config.statusLine?.template ?? "full";
-	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
+	if (
+		slTemplate !== "none" &&
+		!(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)
+	) {
 		slTemplate = "full";
 	}
 	if (slTemplate !== "none") {
@@ -152,7 +179,12 @@ export async function runClaudeDefault(
 		process.env["MCLAUDE_MODEL"] = "";
 		process.env["MCLAUDE_STATUSLINE_TEMPLATE"] = slTemplate;
 		process.env["MCLAUDE_LANG"] = language;
-		addedEnvKeys.push("MCLAUDE_PROVIDER_NAME", "MCLAUDE_MODEL", "MCLAUDE_STATUSLINE_TEMPLATE", "MCLAUDE_LANG");
+		addedEnvKeys.push(
+			"MCLAUDE_PROVIDER_NAME",
+			"MCLAUDE_MODEL",
+			"MCLAUDE_STATUSLINE_TEMPLATE",
+			"MCLAUDE_LANG",
+		);
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
 		log.info("statusline template=" + slTemplate + " (default launch)");
 	}

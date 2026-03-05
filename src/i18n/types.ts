@@ -119,7 +119,7 @@ export interface TranslationDictionary {
 		miniDesc: string;
 		cost: string;
 		costDesc: string;
-perf: string;
+		perf: string;
 		perfDesc: string;
 		context: string;
 		contextDesc: string;

@@ -46,7 +46,12 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 		const providerGroup =
 			providerItems.length > 0
 				? { label: t("manageProviders.title"), items: providerItems }
-				: { label: t("manageProviders.title"), items: [{ label: t("manageProviders.noProviders"), value: "__no-providers__", icon: "💤" }] };
+				: {
+						label: t("manageProviders.title"),
+						items: [
+							{ label: t("manageProviders.noProviders"), value: "__no-providers__", icon: "💤" },
+						],
+					};
 
 		const actionsGroup = {
 			label: t("mainMenu.options"),
@@ -91,15 +96,20 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 					{ label: t("sidebar.name"), value: provider.name },
 					{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
 					{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
-					{ label: t("sidebar.authStatus"), value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"), color: authenticated ? "green" : "red" },
+					{
+						label: t("sidebar.authStatus"),
+						value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"),
+						color: authenticated ? "green" : "red",
+					},
 				];
 				return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
 			}
 
 			const modelCount = getEffectiveModels(provider).length;
-			const modelsValue = hasApiModelFetching(provider.templateId) && modelCount === 0
-				? t("sidebar.modelsViaApi")
-				: String(modelCount);
+			const modelsValue =
+				hasApiModelFetching(provider.templateId) && modelCount === 0
+					? t("sidebar.modelsViaApi")
+					: String(modelCount);
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: provider.name },
 				{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
@@ -108,7 +118,10 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 			];
 			const effectiveUrl = getProviderBaseUrl(provider);
 			if (effectiveUrl) {
-				items.push({ label: t("sidebar.baseUrl"), value: effectiveUrl.replace(/^https?:\/\//, "") });
+				items.push({
+					label: t("sidebar.baseUrl"),
+					value: effectiveUrl.replace(/^https?:\/\//, ""),
+				});
 			}
 			return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
 		}
@@ -135,7 +148,12 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 			{lastMessage && (
 				<StatusMessage variant={lastMessage.variant}>{lastMessage.text}</StatusMessage>
 			)}
-			<GroupedSelect groups={groups} onSelect={handleSelect} onHighlight={handleHighlight} onEscape={onEscape} />
+			<GroupedSelect
+				groups={groups}
+				onSelect={handleSelect}
+				onHighlight={handleHighlight}
+				onEscape={onEscape}
+			/>
 		</AppShell>
 	);
 }

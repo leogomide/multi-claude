@@ -74,7 +74,13 @@ export function TextPrompt({
 			</Text>
 			<Box>
 				<Text color="green">{"> "}</Text>
-				<TextInput value={value} onChange={handleChange} placeholder={placeholder} mask={mask} focus={focus} />
+				<TextInput
+					value={value}
+					onChange={handleChange}
+					placeholder={placeholder}
+					mask={mask}
+					focus={focus}
+				/>
 			</Box>
 			{error && <Text color="red">{error}</Text>}
 		</Box>

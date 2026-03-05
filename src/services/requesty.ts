@@ -1,4 +1,4 @@
-import type { ApiModelMeta, ApiFetchResult, ApiKeyValidation } from "./api-models.ts";
+import type { ApiFetchResult, ApiKeyValidation, ApiModelMeta } from "./api-models.ts";
 
 interface RequestyModelRaw {
 	id: string;

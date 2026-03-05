@@ -28,7 +28,12 @@ interface ChecklistSelectProps {
 	onEscape?: () => void;
 }
 
-export function ChecklistSelect({ groups, onConfirm, onHighlight, onEscape }: ChecklistSelectProps) {
+export function ChecklistSelect({
+	groups,
+	onConfirm,
+	onHighlight,
+	onEscape,
+}: ChecklistSelectProps) {
 	const allItems = groups.flatMap((g) => g.items);
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [checkedValues, setCheckedValues] = useState<Set<string>>(() => {
@@ -141,7 +146,9 @@ export function ChecklistSelect({ groups, onConfirm, onHighlight, onEscape }: Ch
 												<Text color="green">{"> "}</Text>
 												<TextInput
 													value={itemValues.get(item.value) ?? ""}
-													onChange={(val) => setItemValues((prev) => new Map(prev).set(item.value, val))}
+													onChange={(val) =>
+														setItemValues((prev) => new Map(prev).set(item.value, val))
+													}
 													placeholder={item.valuePlaceholder ?? ""}
 												/>
 											</Box>
@@ -150,7 +157,9 @@ export function ChecklistSelect({ groups, onConfirm, onHighlight, onEscape }: Ch
 												{"  "}
 												{itemValues.get(item.value)
 													? `= ${itemValues.get(item.value)}`
-													: item.valuePlaceholder ? `(${item.valuePlaceholder})` : ""}
+													: item.valuePlaceholder
+														? `(${item.valuePlaceholder})`
+														: ""}
 											</Text>
 										)}
 									</Box>

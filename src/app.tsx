@@ -4,11 +4,18 @@ import { UnifiedApp } from "./components/app/UnifiedApp.tsx";
 import { createLogger } from "./debug.ts";
 
 const log = createLogger("app");
+
 import { I18nProvider } from "./i18n/context.tsx";
 import type { ConfiguredProvider } from "./schema.ts";
 
 export type AppResult =
-	| { type: "start-claude"; provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }
+	| {
+			type: "start-claude";
+			provider: ConfiguredProvider;
+			model: string;
+			installationId: string;
+			selectedFlags: string[];
+	  }
 	| { type: "oauth-login"; providerId: string; providerName: string; isNew: boolean }
 	| { type: "run-update" };
 
@@ -49,11 +56,22 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 						cliArgs={cliArgs}
 						onStartClaude={(result) => {
 							log.info("onStartClaude fired, provider=" + result.provider.name);
-							doResolve({ type: "start-claude", provider: result.provider, model: result.model, installationId: result.installationId, selectedFlags: result.selectedFlags });
+							doResolve({
+								type: "start-claude",
+								provider: result.provider,
+								model: result.model,
+								installationId: result.installationId,
+								selectedFlags: result.selectedFlags,
+							});
 						}}
 						onOAuthLogin={(result) => {
 							log.info("onOAuthLogin fired, provider=" + result.providerName);
-							doResolve({ type: "oauth-login", providerId: result.providerId, providerName: result.providerName, isNew: result.isNew });
+							doResolve({
+								type: "oauth-login",
+								providerId: result.providerId,
+								providerName: result.providerName,
+								isNew: result.isNew,
+							});
 						}}
 						onRunUpdate={() => {
 							log.info("onRunUpdate fired");
@@ -65,12 +83,15 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 			unmount = renderResult.unmount;
 
 			// Fallback: user exits via Ctrl+C or useApp().exit()
-			renderResult.waitUntilExit().then(() => {
-				doResolve(null);
-			}).catch((err) => {
-				log.error("waitUntilExit threw", err);
-				doResolve(null);
-			});
+			renderResult
+				.waitUntilExit()
+				.then(() => {
+					doResolve(null);
+				})
+				.catch((err) => {
+					log.error("waitUntilExit threw", err);
+					doResolve(null);
+				});
 		} catch (err) {
 			log.error("render threw", err);
 			exitAlternateScreen();

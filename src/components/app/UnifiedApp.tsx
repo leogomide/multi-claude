@@ -13,10 +13,10 @@ import { EditInstallationFlow } from "../config-wizard/EditInstallationFlow.tsx"
 import { EditProviderFlow } from "../config-wizard/EditProviderFlow.tsx";
 import { ManageModelsFlow } from "../config-wizard/ManageModelsFlow.tsx";
 import type { FlowMessage } from "../types.ts";
-import type { ManageInstallationsResult } from "./ManageInstallationsPage.tsx";
-import { ManageInstallationsPage } from "./ManageInstallationsPage.tsx";
 import type { MainMenuResult } from "./MainMenu.tsx";
 import { MainMenu } from "./MainMenu.tsx";
+import type { ManageInstallationsResult } from "./ManageInstallationsPage.tsx";
+import { ManageInstallationsPage } from "./ManageInstallationsPage.tsx";
 import type { ManageProvidersResult } from "./ManageProvidersPage.tsx";
 import { ManageProvidersPage } from "./ManageProvidersPage.tsx";
 import type { SettingsAction } from "./SettingsPage.tsx";
@@ -40,7 +40,12 @@ type AppView =
 
 interface UnifiedAppProps {
 	cliArgs?: string[];
-	onStartClaude: (result: { provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }) => void;
+	onStartClaude: (result: {
+		provider: ConfiguredProvider;
+		model: string;
+		installationId: string;
+		selectedFlags: string[];
+	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onRunUpdate: () => void;
 }
@@ -48,7 +53,12 @@ interface UnifiedAppProps {
 export function UnifiedApp({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: UnifiedAppProps) {
 	return (
 		<BreadcrumbProvider>
-			<UnifiedAppInner cliArgs={cliArgs} onStartClaude={onStartClaude} onOAuthLogin={onOAuthLogin} onRunUpdate={onRunUpdate} />
+			<UnifiedAppInner
+				cliArgs={cliArgs}
+				onStartClaude={onStartClaude}
+				onOAuthLogin={onOAuthLogin}
+				onRunUpdate={onRunUpdate}
+			/>
 		</BreadcrumbProvider>
 	);
 }
@@ -186,11 +196,12 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 			switch (action) {
 				case "open-folder": {
 					try {
-						const cmd = process.platform === "win32"
-							? `explorer "${CONFIG_DIR}"`
-							: process.platform === "darwin"
-								? `open "${CONFIG_DIR}"`
-								: `xdg-open "${CONFIG_DIR}"`;
+						const cmd =
+							process.platform === "win32"
+								? `explorer "${CONFIG_DIR}"`
+								: process.platform === "darwin"
+									? `open "${CONFIG_DIR}"`
+									: `xdg-open "${CONFIG_DIR}"`;
 						execSync(cmd, { stdio: "ignore" });
 					} catch {
 						// ignore — explorer may return non-zero even on success
@@ -231,7 +242,12 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 	return (
 		<>
 			{view === "main-menu" && (
-				<MainMenu key={flowKey} onSelect={handleMainMenuSelect} onEscape={() => exit()} lastMessage={lastMessage} />
+				<MainMenu
+					key={flowKey}
+					onSelect={handleMainMenuSelect}
+					onEscape={() => exit()}
+					lastMessage={lastMessage}
+				/>
 			)}
 
 			{view === "select-model" && (
@@ -246,7 +262,12 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 			)}
 
 			{view === "manage-providers" && (
-				<ManageProvidersPage key={flowKey} onSelect={handleManageProvidersSelect} onEscape={() => backToMenu()} lastMessage={lastMessage} />
+				<ManageProvidersPage
+					key={flowKey}
+					onSelect={handleManageProvidersSelect}
+					onEscape={() => backToMenu()}
+					lastMessage={lastMessage}
+				/>
 			)}
 
 			{view === "settings" && (
@@ -254,15 +275,29 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 			)}
 
 			{view === "add-provider" && (
-				<AddProviderFlow key={flowKey} onDone={backToManageProviders} onOAuthLogin={onOAuthLogin} onCancel={() => backToManageProviders()} />
+				<AddProviderFlow
+					key={flowKey}
+					onDone={backToManageProviders}
+					onOAuthLogin={onOAuthLogin}
+					onCancel={() => backToManageProviders()}
+				/>
 			)}
 
 			{view === "manage-installations" && (
-				<ManageInstallationsPage key={flowKey} onSelect={handleManageInstallationsSelect} onEscape={() => backToMenu()} lastMessage={lastMessage} />
+				<ManageInstallationsPage
+					key={flowKey}
+					onSelect={handleManageInstallationsSelect}
+					onEscape={() => backToMenu()}
+					lastMessage={lastMessage}
+				/>
 			)}
 
 			{view === "add-installation" && (
-				<AddInstallationFlow key={flowKey} onDone={backToManageInstallations} onCancel={() => backToManageInstallations()} />
+				<AddInstallationFlow
+					key={flowKey}
+					onDone={backToManageInstallations}
+					onCancel={() => backToManageInstallations()}
+				/>
 			)}
 
 			{view === "edit-installation" && selectedInstallationId && (
@@ -280,7 +315,11 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 					providerId={selectedProviderForEdit}
 					onDone={backToManageProviders}
 					onManageModels={() => {
-						goTo("manage-models", [t("manageProviders.title"), t("editProvider.title"), t("editProvider.manageModels")]);
+						goTo("manage-models", [
+							t("manageProviders.title"),
+							t("editProvider.title"),
+							t("editProvider.manageModels"),
+						]);
 					}}
 					onOAuthLogin={onOAuthLogin}
 					onCancel={() => backToManageProviders()}
@@ -297,11 +336,19 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 			)}
 
 			{view === "statusline" && (
-				<StatusLinePage key={flowKey} onDone={(msg) => backToSettings(msg)} onCancel={() => backToSettings()} />
+				<StatusLinePage
+					key={flowKey}
+					onDone={(msg) => backToSettings(msg)}
+					onCancel={() => backToSettings()}
+				/>
 			)}
 
 			{view === "change-language" && (
-				<LanguageSelector key={flowKey} onSelect={handleLanguageSelect} onCancel={() => backToSettings()} />
+				<LanguageSelector
+					key={flowKey}
+					onSelect={handleLanguageSelect}
+					onCancel={() => backToSettings()}
+				/>
 			)}
 		</>
 	);

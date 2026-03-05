@@ -1,6 +1,5 @@
 import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { loadConfig, removeAccountDir, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
@@ -8,12 +7,20 @@ import { getTemplate } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
 import { hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
 import { ConfirmPrompt } from "../common/ConfirmPrompt.tsx";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { TextPrompt } from "../common/TextPrompt.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
 
-type Step = "loading" | "menu" | "edit-name" | "edit-key" | "edit-url" | "validating-key" | "confirm-remove";
+type Step =
+	| "loading"
+	| "menu"
+	| "edit-name"
+	| "edit-key"
+	| "edit-url"
+	| "validating-key"
+	| "confirm-remove";
 
 interface EditProviderFlowProps {
 	providerId: string;
@@ -23,7 +30,13 @@ interface EditProviderFlowProps {
 	onCancel: () => void;
 }
 
-export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLogin, onCancel }: EditProviderFlowProps) {
+export function EditProviderFlow({
+	providerId,
+	onDone,
+	onManageModels,
+	onOAuthLogin,
+	onCancel,
+}: EditProviderFlowProps) {
 	const { t } = useTranslation();
 	const [step, setStep] = useState<Step>("loading");
 	const [provider, setProvider] = useState<ConfiguredProvider | null>(null);
@@ -35,7 +48,12 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 		if (key.escape) {
 			if (step === "menu") {
 				onCancel();
-			} else if (step === "edit-name" || step === "edit-key" || step === "edit-url" || step === "confirm-remove") {
+			} else if (
+				step === "edit-name" ||
+				step === "edit-key" ||
+				step === "edit-url" ||
+				step === "confirm-remove"
+			) {
 				setStep("menu");
 			} else if (step === "validating-key") {
 				setStep("edit-key");
@@ -68,17 +86,20 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 			} else {
 				const template = getTemplate(provider?.templateId ?? "");
 				const providerLabel = template?.description ?? provider?.templateId ?? "";
-				const errorMsg = result.error === "auth"
-					? t("apiModels.keyInvalid")
-					: result.error === "network"
-						? t("apiModels.networkError", { provider: providerLabel })
-						: t("apiModels.fetchError", { provider: providerLabel });
+				const errorMsg =
+					result.error === "auth"
+						? t("apiModels.keyInvalid")
+						: result.error === "network"
+							? t("apiModels.networkError", { provider: providerLabel })
+							: t("apiModels.fetchError", { provider: providerLabel });
 				setValidationError(errorMsg);
 				setStep("edit-key");
 			}
 		});
 
-		return () => { cancelled = true; };
+		return () => {
+			cancelled = true;
+		};
 	}, [step]);
 
 	useEffect(() => {
@@ -119,19 +140,23 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 		const hasDefaultApiKey = template?.defaultApiKey != null;
 		const menuItems = isOAuth
 			? [
-				{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
-				{ label: `🔐 ${t("anthropic.reAuthenticate")}`, value: "re-auth" },
-				{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
-				{ label: `↩ ${t("editProvider.back")}`, value: "back" },
-			]
+					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
+					{ label: `🔐 ${t("anthropic.reAuthenticate")}`, value: "re-auth" },
+					{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
+					{ label: `↩ ${t("editProvider.back")}`, value: "back" },
+				]
 			: [
-				{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
-				...(hasDefaultApiKey ? [{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" }] : []),
-				...(!hasDefaultApiKey ? [{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" }] : []),
-				{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
-				{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
-				{ label: `↩ ${t("editProvider.back")}`, value: "back" },
-			];
+					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
+					...(hasDefaultApiKey
+						? [{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" }]
+						: []),
+					...(!hasDefaultApiKey
+						? [{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" }]
+						: []),
+					{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
+					{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
+					{ label: `↩ ${t("editProvider.back")}`, value: "back" },
+				];
 
 		return (
 			<AppShell footerItems={footerItems}>
@@ -171,7 +196,12 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 
 	if (step === "edit-name" && provider) {
 		return (
-			<AppShell footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<TextPrompt
 					label={t("editFlow.nameLabel")}
 					initialValue={provider.name}
@@ -187,7 +217,10 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 							}
 							saveConfig(config).then(() => {
 								refreshProvider().then(() => {
-									setMessage({ text: t("editProvider.nameUpdated", { name: val.trim() }), variant: "success" });
+									setMessage({
+										text: t("editProvider.nameUpdated", { name: val.trim() }),
+										variant: "success",
+									});
 									setStep("menu");
 								});
 							});
@@ -202,7 +235,12 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 		const template = getTemplate(provider.templateId);
 		const currentUrl = provider.baseUrl || template?.baseUrl || "";
 		return (
-			<AppShell footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<TextPrompt
 					label={t("editFlow.urlLabel")}
 					initialValue={currentUrl}
@@ -229,7 +267,10 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 							}
 							saveConfig(config).then(() => {
 								refreshProvider().then(() => {
-									setMessage({ text: t("editProvider.urlUpdated", { url: trimmedUrl }), variant: "success" });
+									setMessage({
+										text: t("editProvider.urlUpdated", { url: trimmedUrl }),
+										variant: "success",
+									});
 									setStep("menu");
 								});
 							});
@@ -250,7 +291,12 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 
 	if (step === "edit-key") {
 		return (
-			<AppShell footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<TextPrompt
 					label={t("editFlow.apiKeyLabel")}
 					mask="*"
@@ -290,7 +336,12 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 
 	if (step === "confirm-remove" && provider) {
 		return (
-			<AppShell footerItems={[{ key: "y/n", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "y/n", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<ConfirmPrompt
 					message={t("removeFlow.confirmRemove", { name: provider.name })}
 					onConfirm={(confirmed) => {

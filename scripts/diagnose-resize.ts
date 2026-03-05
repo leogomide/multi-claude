@@ -176,7 +176,10 @@ function cleanup() {
 }
 
 process.on("exit", cleanup);
-process.on("SIGINT", () => { cleanup(); process.exit(0); });
+process.on("SIGINT", () => {
+	cleanup();
+	process.exit(0);
+});
 
 const RESET = "\x1b[0m";
 const BOLD = "\x1b[1m";

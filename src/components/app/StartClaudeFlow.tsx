@@ -2,15 +2,21 @@ import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
 import TextInput from "ink-text-input";
 import React, { useEffect, useMemo, useState } from "react";
-import { getInstallationPath, isAccountAuthenticated, isOAuthTokenValid, loadConfig, readOAuthCredentials } from "../../config.ts";
-import { useTranslation } from "../../i18n/context.tsx";
-import { getEffectiveModelsWithSource, getProviderBaseUrl, getTemplate } from "../../providers.ts";
-import type { ModelWithSource } from "../../providers.ts";
-import { DEFAULT_INSTALLATION_ID, DEFAULT_LAUNCH_TEMPLATE_ID } from "../../schema.ts";
-import type { ConfiguredProvider, Installation } from "../../schema.ts";
-import { fetchApiModels, hasApiModelFetching } from "../../services/api-models.ts";
-import type { ApiModelError } from "../../services/api-models.ts";
+import {
+	getInstallationPath,
+	isAccountAuthenticated,
+	isOAuthTokenValid,
+	loadConfig,
+	readOAuthCredentials,
+} from "../../config.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
+import { useTranslation } from "../../i18n/context.tsx";
+import type { ModelWithSource } from "../../providers.ts";
+import { getEffectiveModelsWithSource, getProviderBaseUrl, getTemplate } from "../../providers.ts";
+import type { ConfiguredProvider, Installation } from "../../schema.ts";
+import { DEFAULT_INSTALLATION_ID, DEFAULT_LAUNCH_TEMPLATE_ID } from "../../schema.ts";
+import type { ApiModelError } from "../../services/api-models.ts";
+import { fetchApiModels, hasApiModelFetching } from "../../services/api-models.ts";
 import type { ChecklistItem, ChecklistResult } from "../common/ChecklistSelect.tsx";
 import { ChecklistSelect } from "../common/ChecklistSelect.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
@@ -19,10 +25,12 @@ import type { SidebarItem } from "../layout/Sidebar.tsx";
 import { Sidebar } from "../layout/Sidebar.tsx";
 
 const STRATEGIC_FLAGS = new Set([
-	"--resume", "-r",
+	"--resume",
+	"-r",
 	"--dangerously-skip-permissions",
 	"--verbose",
-	"--worktree", "-w",
+	"--worktree",
+	"-w",
 	"--chrome",
 ]);
 
@@ -36,12 +44,24 @@ function parsePreCheckedFlags(args: string[]): Set<string> {
 	return checked;
 }
 
-type Step = "loading-models" | "select-model" | "select-installation" | "select-flags" | "no-models" | "error" | "auth-expired";
+type Step =
+	| "loading-models"
+	| "select-model"
+	| "select-installation"
+	| "select-flags"
+	| "no-models"
+	| "error"
+	| "auth-expired";
 
 interface StartClaudeFlowProps {
 	providerId: string | null;
 	cliArgs?: string[];
-	onComplete: (result: { provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }) => void;
+	onComplete: (result: {
+		provider: ConfiguredProvider;
+		model: string;
+		installationId: string;
+		selectedFlags: string[];
+	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onCancel: () => void;
 }
@@ -67,7 +87,13 @@ function formatFileSize(bytes: number): string {
 	return `${bytes} B`;
 }
 
-export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthLogin, onCancel }: StartClaudeFlowProps) {
+export function StartClaudeFlow({
+	providerId,
+	cliArgs = [],
+	onComplete,
+	onOAuthLogin,
+	onCancel,
+}: StartClaudeFlowProps) {
 	const { t } = useTranslation();
 	const [step, setStep] = useState<Step>("loading-models");
 	const [selectedProvider, setSelectedProvider] = useState<ConfiguredProvider | null>(null);
@@ -163,7 +189,11 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 	const loadModelsForProvider = async (provider: ConfiguredProvider) => {
 		if (hasApiModelFetching(provider.templateId)) {
 			setStep("loading-models");
-			const result = await fetchApiModels(provider.templateId, provider.apiKey, getProviderBaseUrl(provider));
+			const result = await fetchApiModels(
+				provider.templateId,
+				provider.apiKey,
+				getProviderBaseUrl(provider),
+			);
 
 			if (!result.ok) {
 				setFetchError(result.error);
@@ -207,7 +237,11 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 		});
 		if (!query.trim()) return sorted;
 		const lower = query.toLowerCase();
-		return sorted.filter((item) => item.name.toLowerCase().includes(lower) || (item.meta?.name ?? "").toLowerCase().includes(lower));
+		return sorted.filter(
+			(item) =>
+				item.name.toLowerCase().includes(lower) ||
+				(item.meta?.name ?? "").toLowerCase().includes(lower),
+		);
 	}, [modelItems, query]);
 
 	// header(5) + footer(3) + status(1) + title(1) + scroll indicators(2) + search(1 if searchable)
@@ -217,12 +251,14 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 		if (filteredItems.length <= visibleLimit) return 0;
 		const half = Math.floor(visibleLimit / 2);
 		if (activeIndex <= half) return 0;
-		if (activeIndex >= filteredItems.length - half) return Math.max(0, filteredItems.length - visibleLimit);
+		if (activeIndex >= filteredItems.length - half)
+			return Math.max(0, filteredItems.length - visibleLimit);
 		return activeIndex - half;
 	}, [activeIndex, filteredItems.length]);
-	const visibleItems = filteredItems.length <= visibleLimit
-		? filteredItems
-		: filteredItems.slice(scrollOffset, scrollOffset + visibleLimit);
+	const visibleItems =
+		filteredItems.length <= visibleLimit
+			? filteredItems
+			: filteredItems.slice(scrollOffset, scrollOffset + visibleLimit);
 
 	const goToInstallationOrComplete = (provider: ConfiguredProvider, model: string) => {
 		const isOAuth = provider.type === "oauth";
@@ -241,7 +277,11 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 		const isOAuth = selectedProvider.type === "oauth";
 		const items: { id: string; name: string; path: string }[] = [];
 		if (!isOAuth) {
-			items.push({ id: DEFAULT_INSTALLATION_ID, name: t("installations.defaultName"), path: "~/.claude/" });
+			items.push({
+				id: DEFAULT_INSTALLATION_ID,
+				name: t("installations.defaultName"),
+				path: "~/.claude/",
+			});
 		}
 		for (const inst of installations) {
 			items.push({ id: inst.dirName, name: inst.name, path: getInstallationPath(inst.dirName) });
@@ -329,7 +369,10 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 		if (key.escape) {
 			if (step === "select-installation") {
 				// Go back: for OAuth/default cancel, for API go back to model selection
-				if (selectedProvider?.type === "oauth" || selectedProvider?.templateId === DEFAULT_LAUNCH_TEMPLATE_ID) {
+				if (
+					selectedProvider?.type === "oauth" ||
+					selectedProvider?.templateId === DEFAULT_LAUNCH_TEMPLATE_ID
+				) {
 					onCancel();
 				} else {
 					setStep("select-model");
@@ -340,7 +383,11 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 			return;
 		}
 		if (step === "auth-expired" && key.return && selectedProvider) {
-			onOAuthLogin({ providerId: selectedProvider.id, providerName: selectedProvider.name, isNew: false });
+			onOAuthLogin({
+				providerId: selectedProvider.id,
+				providerName: selectedProvider.name,
+				isNew: false,
+			});
 			return;
 		}
 		if (step === "select-installation") {
@@ -383,11 +430,12 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 
 	const sidebarContent = useMemo(() => {
 		if (!highlightedItem) return null;
-		const sourceLabel = highlightedItem.source === "default"
-			? t("sidebar.sourceDefault")
-			: highlightedItem.source === "api"
-				? "API"
-				: t("sidebar.sourceUser");
+		const sourceLabel =
+			highlightedItem.source === "default"
+				? t("sidebar.sourceDefault")
+				: highlightedItem.source === "api"
+					? "API"
+					: t("sidebar.sourceUser");
 
 		const meta = highlightedItem.meta;
 
@@ -395,25 +443,51 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: meta.name ?? highlightedItem.name },
 				...(meta.context_length !== undefined
-					? [{ label: t("sidebar.context"), value: `${formatContextLength(meta.context_length)} tokens` }]
+					? [
+							{
+								label: t("sidebar.context"),
+								value: `${formatContextLength(meta.context_length)} tokens`,
+							},
+						]
 					: []),
 				...(meta.max_output_tokens != null
-					? [{ label: t("sidebar.maxOutput"), value: `${meta.max_output_tokens.toLocaleString()} tokens` }]
+					? [
+							{
+								label: t("sidebar.maxOutput"),
+								value: `${meta.max_output_tokens.toLocaleString()} tokens`,
+							},
+						]
 					: []),
 				...(meta.pricing
 					? [
-						{ label: t("sidebar.inPrice"), value: `${formatPricePerMillion(meta.pricing.prompt)} /M tokens` },
-						{ label: t("sidebar.outPrice"), value: `${formatPricePerMillion(meta.pricing.completion)} /M tokens` },
-					]
+							{
+								label: t("sidebar.inPrice"),
+								value: `${formatPricePerMillion(meta.pricing.prompt)} /M tokens`,
+							},
+							{
+								label: t("sidebar.outPrice"),
+								value: `${formatPricePerMillion(meta.pricing.completion)} /M tokens`,
+							},
+						]
 					: []),
 				...(meta.input_modalities && meta.input_modalities.length > 0
 					? [{ label: t("sidebar.modalities"), value: meta.input_modalities.join(", ") }]
 					: []),
 				...(meta.supported_parameters
 					? [
-						{ label: t("sidebar.tools"), value: meta.supported_parameters.includes("tools") ? t("common.yes") : t("common.no") },
-						{ label: t("sidebar.reasoning"), value: meta.supported_parameters.includes("reasoning") ? t("common.yes") : t("common.no") },
-					]
+							{
+								label: t("sidebar.tools"),
+								value: meta.supported_parameters.includes("tools")
+									? t("common.yes")
+									: t("common.no"),
+							},
+							{
+								label: t("sidebar.reasoning"),
+								value: meta.supported_parameters.includes("reasoning")
+									? t("common.yes")
+									: t("common.no"),
+							},
+						]
 					: []),
 				...(meta.is_moderated === true
 					? [{ label: t("sidebar.moderated"), value: t("common.yes"), color: "yellow" as const }]
@@ -471,32 +545,34 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 	if (step === "no-models") {
 		return (
 			<AppShell footerItems={[{ key: "esc", label: t("footer.back") }]}>
-				<StatusMessage variant="error">
-					{t("selector.noModels")}
-				</StatusMessage>
+				<StatusMessage variant="error">{t("selector.noModels")}</StatusMessage>
 			</AppShell>
 		);
 	}
 
 	if (step === "error") {
-		const errorMessage = fetchError === "auth"
-			? t("apiModels.authError", { provider: providerLabel })
-			: fetchError === "network"
-				? t("apiModels.networkError", { provider: providerLabel })
-				: t("apiModels.fetchError", { provider: providerLabel });
+		const errorMessage =
+			fetchError === "auth"
+				? t("apiModels.authError", { provider: providerLabel })
+				: fetchError === "network"
+					? t("apiModels.networkError", { provider: providerLabel })
+					: t("apiModels.fetchError", { provider: providerLabel });
 
 		return (
 			<AppShell footerItems={[{ key: "esc", label: t("footer.back") }]}>
-				<StatusMessage variant="error">
-					{errorMessage}
-				</StatusMessage>
+				<StatusMessage variant="error">{errorMessage}</StatusMessage>
 			</AppShell>
 		);
 	}
 
 	if (step === "auth-expired" && selectedProvider) {
 		return (
-			<AppShell footerItems={[{ key: "\u23CE", label: t("anthropic.reAuthenticate") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "\u23CE", label: t("anthropic.reAuthenticate") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<StatusMessage variant="warning">{t("anthropic.authExpired")}</StatusMessage>
 			</AppShell>
 		);
@@ -528,7 +604,10 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 						// otherwise go back to model selection (or cancel for OAuth/default)
 						if (installationListItems.length > 1) {
 							setStep("select-installation");
-						} else if (selectedProvider.type === "oauth" || selectedProvider.templateId === DEFAULT_LAUNCH_TEMPLATE_ID) {
+						} else if (
+							selectedProvider.type === "oauth" ||
+							selectedProvider.templateId === DEFAULT_LAUNCH_TEMPLATE_ID
+						) {
 							onCancel();
 						} else {
 							setStep("select-model");
@@ -541,12 +620,15 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 
 	if (step === "select-installation" && selectedProvider) {
 		const highlightedInstallation = installationListItems[installationActiveIndex];
-		const installationSidebar = highlightedInstallation
-			? <Sidebar title={t("sidebar.installationInfo")} items={[
-				{ label: t("sidebar.name"), value: highlightedInstallation.name },
-				{ label: t("sidebar.installationPath"), value: highlightedInstallation.path },
-			]} />
-			: null;
+		const installationSidebar = highlightedInstallation ? (
+			<Sidebar
+				title={t("sidebar.installationInfo")}
+				items={[
+					{ label: t("sidebar.name"), value: highlightedInstallation.name },
+					{ label: t("sidebar.installationPath"), value: highlightedInstallation.path },
+				]}
+			/>
+		) : null;
 
 		const installationFooter = [
 			{ key: "\u2191\u2193", label: t("footer.navigate") },
@@ -603,9 +685,7 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 					</Box>
 				)}
 				<Box flexDirection="column">
-					{scrollOffset > 0 && (
-						<Text dimColor>  \u2191 ...</Text>
-					)}
+					{scrollOffset > 0 && <Text dimColor> \u2191 ...</Text>}
 					{visibleItems.map((item) => {
 						const globalIdx = filteredItems.indexOf(item);
 						const isActive = globalIdx === activeIndex;
@@ -616,20 +696,22 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 									{item.meta?.name ?? item.name}
 								</Text>
 								{item.meta?.context_length !== undefined && (
-									<Text dimColor>{"  "}{formatContextLength(item.meta.context_length)} ctx</Text>
+									<Text dimColor>
+										{"  "}
+										{formatContextLength(item.meta.context_length)} ctx
+									</Text>
 								)}
 								{item.meta?.pricing && (
 									<Text dimColor>
-										{"  "}{formatPricePerMillion(item.meta.pricing.prompt)}/
+										{"  "}
+										{formatPricePerMillion(item.meta.pricing.prompt)}/
 										{formatPricePerMillion(item.meta.pricing.completion)}
 									</Text>
 								)}
 							</Box>
 						);
 					})}
-					{scrollOffset + visibleLimit < filteredItems.length && (
-						<Text dimColor>  \u2193 ...</Text>
-					)}
+					{scrollOffset + visibleLimit < filteredItems.length && <Text dimColor> \u2193 ...</Text>}
 				</Box>
 			</AppShell>
 		);

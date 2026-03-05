@@ -1,9 +1,9 @@
 import { Text, useInput } from "ink";
-import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useState } from "react";
 import { resetAllConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { ConfirmPrompt } from "../common/ConfirmPrompt.tsx";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
@@ -60,9 +60,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 
 	return (
 		<AppShell footerItems={footerItems}>
-			{message && (
-				<StatusMessage variant={message.variant}>{message.text}</StatusMessage>
-			)}
+			{message && <StatusMessage variant={message.variant}>{message.text}</StatusMessage>}
 			<Text bold color="cyan">
 				{t("settings.title")}
 			</Text>

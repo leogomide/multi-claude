@@ -1,8 +1,8 @@
 import { Text, useInput } from "ink";
-import CyanSelectInput from "./CyanSelectInput.tsx";
 import React from "react";
 import { useTranslation } from "../../i18n/context.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
+import CyanSelectInput from "./CyanSelectInput.tsx";
 
 interface LanguageSelectorProps {
 	onSelect: (locale: string) => void;

@@ -1,10 +1,10 @@
+import { getTemplate } from "../providers.ts";
+import { fetchLlamaCppModels } from "./llamacpp.ts";
+import { fetchLMStudioModels } from "./lmstudio.ts";
+import { fetchOllamaModels } from "./ollama.ts";
 import type { OpenRouterModelMeta } from "./openrouter.ts";
 import { fetchOpenRouterModels, validateOpenRouterApiKey } from "./openrouter.ts";
 import { fetchRequestyModels, validateRequestyApiKey } from "./requesty.ts";
-import { fetchOllamaModels } from "./ollama.ts";
-import { fetchLMStudioModels } from "./lmstudio.ts";
-import { fetchLlamaCppModels } from "./llamacpp.ts";
-import { getTemplate } from "../providers.ts";
 
 export interface ApiModelMeta {
 	id: string;
@@ -30,12 +30,16 @@ export type ApiFetchResult =
 	| { ok: true; models: ApiModelMeta[] }
 	| { ok: false; error: ApiModelError };
 
-export type ApiKeyValidation =
-	| { valid: true }
-	| { valid: false; error: ApiModelError };
+export type ApiKeyValidation = { valid: true } | { valid: false; error: ApiModelError };
 
 const API_KEY_VALIDATION_PROVIDERS = new Set(["openrouter", "requesty"]);
-const MODEL_FETCHING_PROVIDERS = new Set(["openrouter", "requesty", "ollama", "lmstudio", "llamacpp"]);
+const MODEL_FETCHING_PROVIDERS = new Set([
+	"openrouter",
+	"requesty",
+	"ollama",
+	"lmstudio",
+	"llamacpp",
+]);
 
 export function hasApiModelFetching(templateId: string): boolean {
 	return MODEL_FETCHING_PROVIDERS.has(templateId);
@@ -51,16 +55,18 @@ function mapOpenRouterModel(m: OpenRouterModelMeta): ApiModelMeta {
 		name: m.name,
 		context_length: m.context_length,
 		max_output_tokens: m.top_provider?.max_completion_tokens ?? undefined,
-		pricing: m.pricing
-			? { prompt: m.pricing.prompt, completion: m.pricing.completion }
-			: undefined,
+		pricing: m.pricing ? { prompt: m.pricing.prompt, completion: m.pricing.completion } : undefined,
 		input_modalities: m.architecture?.input_modalities,
 		supported_parameters: m.supported_parameters,
 		is_moderated: m.top_provider?.is_moderated,
 	};
 }
 
-export async function fetchApiModels(templateId: string, apiKey: string, customBaseUrl?: string): Promise<ApiFetchResult> {
+export async function fetchApiModels(
+	templateId: string,
+	apiKey: string,
+	customBaseUrl?: string,
+): Promise<ApiFetchResult> {
 	switch (templateId) {
 		case "openrouter": {
 			const result = await fetchOpenRouterModels(apiKey);
@@ -83,7 +89,10 @@ export async function fetchApiModels(templateId: string, apiKey: string, customB
 	}
 }
 
-export async function validateApiKey(templateId: string, apiKey: string): Promise<ApiKeyValidation> {
+export async function validateApiKey(
+	templateId: string,
+	apiKey: string,
+): Promise<ApiKeyValidation> {
 	switch (templateId) {
 		case "openrouter":
 			return validateOpenRouterApiKey(apiKey);

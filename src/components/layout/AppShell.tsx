@@ -24,7 +24,10 @@ export function AppShell({ children, sidebar, footerItems = [] }: AppShellProps)
 		return (
 			<Box height={rows} width={columns} alignItems="center" justifyContent="center">
 				<Text color="yellow">
-					{t("terminal.tooSmall", { current: `${columns}x${rows}`, min: `${MIN_COLS}x${MIN_ROWS}` })}
+					{t("terminal.tooSmall", {
+						current: `${columns}x${rows}`,
+						min: `${MIN_COLS}x${MIN_ROWS}`,
+					})}
 				</Text>
 			</Box>
 		);
@@ -37,12 +40,14 @@ export function AppShell({ children, sidebar, footerItems = [] }: AppShellProps)
 		<Box flexDirection="column" height={rows} width={columns} overflow="hidden">
 			<Header />
 
-			<Box
-				flexGrow={1}
-				flexDirection="row"
-				overflow="hidden"
-			>
-				<Box flexDirection="column" width={showSidebar ? halfWidth : undefined} flexGrow={showSidebar ? 0 : 1} paddingX={2} overflow="hidden">
+			<Box flexGrow={1} flexDirection="row" overflow="hidden">
+				<Box
+					flexDirection="column"
+					width={showSidebar ? halfWidth : undefined}
+					flexGrow={showSidebar ? 0 : 1}
+					paddingX={2}
+					overflow="hidden"
+				>
 					{children}
 				</Box>
 				{showSidebar && (

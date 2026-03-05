@@ -21,7 +21,8 @@ export const ptBR: TranslationDictionary = {
 		selectProvider: "Selecione um provedor",
 		selectModel: "Selecione um modelo",
 		noProviders: "Nenhum provedor configurado. Use 'Gerenciar provedores' para adicionar.",
-		noModels: "Nenhum modelo configurado para este provedor. Adicione modelos em 'Gerenciar modelos'.",
+		noModels:
+			"Nenhum modelo configurado para este provedor. Adicione modelos em 'Gerenciar modelos'.",
 		providerLabel: "Provedor",
 	},
 	menu: {
@@ -112,19 +113,25 @@ export const ptBR: TranslationDictionary = {
 		none: "Desativada",
 		noneDesc: "Sem linha de status (padr\u00e3o)",
 		default: "Padr\u00e3o",
-		defaultDesc: "Quatro linhas: modelo, tokens + I/O + cache, sess\u00e3o + git, barra de contexto no final",
+		defaultDesc:
+			"Quatro linhas: modelo, tokens + I/O + cache, sess\u00e3o + git, barra de contexto no final",
 		full: "Completa",
-		fullDesc: "Quatro linhas: modelo, info de contexto textual, tokens + I/O + cache, sess\u00e3o + git (sem barra)",
+		fullDesc:
+			"Quatro linhas: modelo, info de contexto textual, tokens + I/O + cache, sess\u00e3o + git (sem barra)",
 		slim: "Slim",
 		slimDesc: "Tr\u00eas linhas: modelo, barra de contexto, tokens + custo + sess\u00e3o + git",
 		mini: "Mini",
-		miniDesc: "Uma linha: modelo, contexto %, custo, dura\u00e7\u00e3o, branch git, linhas alteradas",
+		miniDesc:
+			"Uma linha: modelo, contexto %, custo, dura\u00e7\u00e3o, branch git, linhas alteradas",
 		cost: "Custos",
-		costDesc: "Foco em gastos: custo total em destaque, taxa/min, proje\u00e7\u00e3o por hora e breakdown de custo por dire\u00e7\u00e3o (in vs out)",
-perf: "Performance",
-		perfDesc: "Foco em efici\u00eancia: taxa de cache hit, ratio I/O, % do tempo em API e throughput de tokens por segundo",
+		costDesc:
+			"Foco em gastos: custo total em destaque, taxa/min, proje\u00e7\u00e3o por hora e breakdown de custo por dire\u00e7\u00e3o (in vs out)",
+		perf: "Performance",
+		perfDesc:
+			"Foco em efici\u00eancia: taxa de cache hit, ratio I/O, % do tempo em API e throughput de tokens por segundo",
 		context: "Janela de Contexto",
-		contextDesc: "Foco na janela de contexto: barra de uso maior, breakdown detalhado por tipo de token e total usado vs limite",
+		contextDesc:
+			"Foco na janela de contexto: barra de uso maior, breakdown detalhado por tipo de token e total usado vs limite",
 		changed: "Template de linha de status alterado para {{template}}.",
 	},
 	languageSelect: {

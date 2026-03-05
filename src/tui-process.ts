@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { loadConfig, migrateInstallations, saveConfig, CONFIG_DIR } from "./config.ts";
+import { CONFIG_DIR, loadConfig, migrateInstallations, saveConfig } from "./config.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { initLocale } from "./i18n/index.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
@@ -81,7 +81,11 @@ if (result) {
 	}
 
 	if (result.type === "start-claude") {
-		if (!result.model && result.provider.type !== "oauth" && result.provider.templateId !== DEFAULT_LAUNCH_TEMPLATE_ID) {
+		if (
+			!result.model &&
+			result.provider.type !== "oauth" &&
+			result.provider.templateId !== DEFAULT_LAUNCH_TEMPLATE_ID
+		) {
 			log.error("model is null for API provider, aborting");
 			process.exit(1);
 		}

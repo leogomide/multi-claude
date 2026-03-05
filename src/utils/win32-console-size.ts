@@ -33,7 +33,10 @@ function init(): boolean {
 		const getCSBI = lib.symbols.GetConsoleScreenBufferInfo as unknown as SymbolFn;
 
 		// Try stdout first, then stderr as fallback
-		if (tryHandle(getStdHandle, getCSBI, STD_OUTPUT_HANDLE) || tryHandle(getStdHandle, getCSBI, STD_ERROR_HANDLE)) {
+		if (
+			tryHandle(getStdHandle, getCSBI, STD_OUTPUT_HANDLE) ||
+			tryHandle(getStdHandle, getCSBI, STD_ERROR_HANDLE)
+		) {
 			getConsoleScreenBufferInfoFn = getCSBI;
 			return true;
 		}

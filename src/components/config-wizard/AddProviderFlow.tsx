@@ -1,13 +1,19 @@
 import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useMemo, useState } from "react";
-import { computeDirName, ensureInstallationDir, generateShortId, loadConfig, saveConfig } from "../../config.ts";
+import {
+	computeDirName,
+	ensureInstallationDir,
+	generateShortId,
+	loadConfig,
+	saveConfig,
+} from "../../config.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { PROVIDER_TEMPLATES } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
 import { hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { TextPrompt } from "../common/TextPrompt.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
@@ -30,7 +36,9 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const [templateId, setTemplateId] = useState("");
 	const [name, setName] = useState("");
 	const [activeField, setActiveField] = useState<"name" | "url" | "key">("name");
-	const [highlightedTemplateId, setHighlightedTemplateId] = useState<string | null>(PROVIDER_TEMPLATES[0]?.id ?? null);
+	const [highlightedTemplateId, setHighlightedTemplateId] = useState<string | null>(
+		PROVIDER_TEMPLATES[0]?.id ?? null,
+	);
 	const [baseUrl, setBaseUrl] = useState("");
 	const [apiKey, setApiKey] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
@@ -48,7 +56,9 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 				}
 			}
 		},
-		{ isActive: step === "template" || step === "validating-key" || step === "create-installation" },
+		{
+			isActive: step === "template" || step === "validating-key" || step === "create-installation",
+		},
 	);
 
 	const isOAuthTemplate = (id: string) => id === "anthropic";
@@ -78,18 +88,21 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 				});
 			} else {
 				const providerLabel = template?.description ?? templateId;
-				const errorMsg = result.error === "auth"
-					? t("apiModels.keyInvalid")
-					: result.error === "network"
-						? t("apiModels.networkError", { provider: providerLabel })
-						: t("apiModels.fetchError", { provider: providerLabel });
+				const errorMsg =
+					result.error === "auth"
+						? t("apiModels.keyInvalid")
+						: result.error === "network"
+							? t("apiModels.networkError", { provider: providerLabel })
+							: t("apiModels.fetchError", { provider: providerLabel });
 				setValidationError(errorMsg);
 				setActiveField("key");
 				setStep("details");
 			}
 		});
 
-		return () => { cancelled = true; };
+		return () => {
+			cancelled = true;
+		};
 	}, [step]);
 
 	const template = PROVIDER_TEMPLATES.find((tmpl) => tmpl.id === templateId);
@@ -106,9 +119,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		const tmpl = PROVIDER_TEMPLATES.find((tp) => tp.id === currentId);
 		if (!tmpl) return undefined;
 
-		const items: SidebarItem[] = [
-			{ label: t("sidebar.name"), value: tmpl.description },
-		];
+		const items: SidebarItem[] = [{ label: t("sidebar.name"), value: tmpl.description }];
 
 		if (isOAuthTemplate(tmpl.id)) {
 			items.push(
@@ -187,10 +198,14 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 
 	if (step === "create-installation") {
 		return (
-			<AppShell sidebar={sidebarContent} footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
-				<StatusMessage variant="info">
-					{t("installations.requiredForAnthropic")}
-				</StatusMessage>
+			<AppShell
+				sidebar={sidebarContent}
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
+				<StatusMessage variant="info">{t("installations.requiredForAnthropic")}</StatusMessage>
 				<Text>{t("installations.createForAnthropic")}</Text>
 				<Box marginTop={1}>
 					<TextPrompt
@@ -225,7 +240,13 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 
 	if (step === "oauth-name") {
 		return (
-			<AppShell sidebar={sidebarContent} footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				sidebar={sidebarContent}
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<TextPrompt
 					label={t("addFlow.nameLabel")}
 					initialValue={name}

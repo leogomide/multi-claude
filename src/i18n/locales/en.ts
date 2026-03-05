@@ -112,19 +112,24 @@ export const en: TranslationDictionary = {
 		none: "Disabled",
 		noneDesc: "No status line (default)",
 		default: "Default",
-		defaultDesc: "Four lines: model, tokens + I/O + cache, session + git, context bar at the bottom",
+		defaultDesc:
+			"Four lines: model, tokens + I/O + cache, session + git, context bar at the bottom",
 		full: "Full",
-		fullDesc: "Four lines: model, textual context info, tokens + I/O + cache, session + git (no bar)",
+		fullDesc:
+			"Four lines: model, textual context info, tokens + I/O + cache, session + git (no bar)",
 		slim: "Slim",
 		slimDesc: "Three lines: model, context bar, tokens + cost + session + git",
 		mini: "Mini",
 		miniDesc: "Single line: model, context %, cost, duration, git branch, lines changed",
 		cost: "Cost Monitor",
-		costDesc: "Cost-focused: total cost highlighted, cost/min, hourly projection and cost breakdown by direction (in vs out)",
-perf: "Performance",
-		perfDesc: "Efficiency-focused: cache hit rate, I/O ratio, API time percentage and token throughput per second",
+		costDesc:
+			"Cost-focused: total cost highlighted, cost/min, hourly projection and cost breakdown by direction (in vs out)",
+		perf: "Performance",
+		perfDesc:
+			"Efficiency-focused: cache hit rate, I/O ratio, API time percentage and token throughput per second",
 		context: "Context Window",
-		contextDesc: "Context window focused: larger usage bar, detailed token breakdown by type and total used vs window limit",
+		contextDesc:
+			"Context window focused: larger usage bar, detailed token breakdown by type and total used vs window limit",
 		changed: "Status line template changed to {{template}}.",
 	},
 	languageSelect: {
@@ -183,7 +188,8 @@ perf: "Performance",
 		nameLabel: "Installation name",
 		defaultName: "Default (~/.claude/)",
 		defaultDesc: "System Claude Code configuration (read-only)",
-		confirmRemove: 'Remove installation "{{name}}"? The directory and all its data will be deleted.',
+		confirmRemove:
+			'Remove installation "{{name}}"? The directory and all its data will be deleted.',
 		added: 'Installation "{{name}}" created!',
 		removed: 'Installation "{{name}}" removed.',
 		renamed: 'Installation renamed to "{{name}}".',

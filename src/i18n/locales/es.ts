@@ -21,7 +21,8 @@ export const es: TranslationDictionary = {
 		selectProvider: "Seleccione un proveedor",
 		selectModel: "Seleccione un modelo",
 		noProviders: "No hay proveedores configurados. Use 'Gestionar proveedores' para agregar uno.",
-		noModels: "No hay modelos configurados para este proveedor. Agregue modelos en 'Gestionar modelos'.",
+		noModels:
+			"No hay modelos configurados para este proveedor. Agregue modelos en 'Gestionar modelos'.",
 		providerLabel: "Proveedor",
 	},
 	menu: {
@@ -102,7 +103,8 @@ export const es: TranslationDictionary = {
 		changeLanguage: "Cambiar idioma",
 		statusLine: "Línea de estado",
 		resetAll: "Restablecer toda la configuración",
-		confirmResetAll: "Esto eliminará todos los proveedores, cuentas e instalaciones. ¿Estás seguro?",
+		confirmResetAll:
+			"Esto eliminará todos los proveedores, cuentas e instalaciones. ¿Estás seguro?",
 		resetAllSuccess: "Toda la configuración ha sido restablecida",
 		back: "Volver",
 	},
@@ -112,19 +114,25 @@ export const es: TranslationDictionary = {
 		none: "Desactivada",
 		noneDesc: "Sin l\u00ednea de estado (predeterminado)",
 		default: "Predeterminada",
-		defaultDesc: "Cuatro l\u00edneas: modelo, tokens + I/O + cache, sesi\u00f3n + git, barra de contexto al final",
+		defaultDesc:
+			"Cuatro l\u00edneas: modelo, tokens + I/O + cache, sesi\u00f3n + git, barra de contexto al final",
 		full: "Completa",
-		fullDesc: "Cuatro l\u00edneas: modelo, info de contexto textual, tokens + I/O + cache, sesi\u00f3n + git (sin barra)",
+		fullDesc:
+			"Cuatro l\u00edneas: modelo, info de contexto textual, tokens + I/O + cache, sesi\u00f3n + git (sin barra)",
 		slim: "Slim",
 		slimDesc: "Tres l\u00edneas: modelo, barra de contexto, tokens + costo + sesi\u00f3n + git",
 		mini: "Mini",
-		miniDesc: "Una l\u00ednea: modelo, contexto %, costo, duraci\u00f3n, rama git, l\u00edneas cambiadas",
+		miniDesc:
+			"Una l\u00ednea: modelo, contexto %, costo, duraci\u00f3n, rama git, l\u00edneas cambiadas",
 		cost: "Costos",
-		costDesc: "Enfocado en costos: costo total destacado, tasa/min, proyecci\u00f3n por hora y desglose por direcci\u00f3n (in vs out)",
-perf: "Rendimiento",
-		perfDesc: "Enfocado en eficiencia: tasa de cache hit, ratio I/O, % de tiempo en API y throughput de tokens por segundo",
+		costDesc:
+			"Enfocado en costos: costo total destacado, tasa/min, proyecci\u00f3n por hora y desglose por direcci\u00f3n (in vs out)",
+		perf: "Rendimiento",
+		perfDesc:
+			"Enfocado en eficiencia: tasa de cache hit, ratio I/O, % de tiempo en API y throughput de tokens por segundo",
 		context: "Ventana de Contexto",
-		contextDesc: "Enfocado en la ventana de contexto: barra de uso m\u00e1s grande, desglose detallado por tipo de token y total usado vs l\u00edmite",
+		contextDesc:
+			"Enfocado en la ventana de contexto: barra de uso m\u00e1s grande, desglose detallado por tipo de token y total usado vs l\u00edmite",
 		changed: "Plantilla de l\u00ednea de estado cambiada a {{template}}.",
 	},
 	languageSelect: {
@@ -143,7 +151,8 @@ perf: "Rendimiento",
 		addProvider: "Agregar Proveedor",
 		noProviders: "No hay proveedores configurados",
 		defaultLaunch: "Claude Code (predeterminado)",
-		defaultLaunchDesc: "Iniciar con su cuenta Anthropic predeterminada (sin overrides de proveedor)",
+		defaultLaunchDesc:
+			"Iniciar con su cuenta Anthropic predeterminada (sin overrides de proveedor)",
 	},
 	providerSubmenu: {
 		title: "Gestionar proveedores",
@@ -184,7 +193,8 @@ perf: "Rendimiento",
 		nameLabel: "Nombre de la instalación",
 		defaultName: "Predeterminada (~/.claude/)",
 		defaultDesc: "Configuración del Claude Code del sistema (solo lectura)",
-		confirmRemove: '¿Eliminar instalación "{{name}}"? El directorio y todos sus datos serán eliminados.',
+		confirmRemove:
+			'¿Eliminar instalación "{{name}}"? El directorio y todos sus datos serán eliminados.',
 		added: '¡Instalación "{{name}}" creada!',
 		removed: 'Instalación "{{name}}" eliminada.',
 		renamed: 'Instalación renombrada a "{{name}}".',

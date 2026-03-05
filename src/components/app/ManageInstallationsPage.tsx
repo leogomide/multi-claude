@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { loadConfig } from "../../config.ts";
-import { getInstallationPath } from "../../config.ts";
+import { getInstallationPath, loadConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import type { Installation } from "../../schema.ts";
 import type { GroupedSelectItem } from "../common/GroupedSelect.tsx";
 import { GroupedSelect } from "../common/GroupedSelect.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
-import { Sidebar } from "../layout/Sidebar.tsx";
 import type { SidebarItem } from "../layout/Sidebar.tsx";
+import { Sidebar } from "../layout/Sidebar.tsx";
 import type { FlowMessage } from "../types.ts";
 
 export type ManageInstallationsResult =
@@ -22,7 +21,11 @@ interface ManageInstallationsPageProps {
 	lastMessage?: FlowMessage | null;
 }
 
-export function ManageInstallationsPage({ onSelect, onEscape, lastMessage }: ManageInstallationsPageProps) {
+export function ManageInstallationsPage({
+	onSelect,
+	onEscape,
+	lastMessage,
+}: ManageInstallationsPageProps) {
 	const { t } = useTranslation();
 	const [installations, setInstallations] = useState<Installation[]>([]);
 	const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
@@ -43,7 +46,16 @@ export function ManageInstallationsPage({ onSelect, onEscape, lastMessage }: Man
 		const installationGroup =
 			installationItems.length > 0
 				? { label: t("installations.title"), items: installationItems }
-				: { label: t("installations.title"), items: [{ label: t("installations.noInstallations"), value: "__no-installations__", icon: "💤" }] };
+				: {
+						label: t("installations.title"),
+						items: [
+							{
+								label: t("installations.noInstallations"),
+								value: "__no-installations__",
+								icon: "💤",
+							},
+						],
+					};
 
 		const actionsGroup = {
 			label: t("mainMenu.options"),
@@ -61,7 +73,11 @@ export function ManageInstallationsPage({ onSelect, onEscape, lastMessage }: Man
 		if (item.value.startsWith("installation:")) {
 			const installationId = item.value.replace("installation:", "");
 			const installation = installations.find((i) => i.id === installationId);
-			onSelect({ type: "select-installation", installationId, installationName: installation?.name ?? "" });
+			onSelect({
+				type: "select-installation",
+				installationId,
+				installationName: installation?.name ?? "",
+			});
 		} else if (item.value === "add-installation") {
 			onSelect({ type: "add-installation" });
 		} else if (item.value === "back") {
@@ -109,7 +125,12 @@ export function ManageInstallationsPage({ onSelect, onEscape, lastMessage }: Man
 			{lastMessage && (
 				<StatusMessage variant={lastMessage.variant}>{lastMessage.text}</StatusMessage>
 			)}
-			<GroupedSelect groups={groups} onSelect={handleSelect} onHighlight={handleHighlight} onEscape={onEscape} />
+			<GroupedSelect
+				groups={groups}
+				onSelect={handleSelect}
+				onHighlight={handleHighlight}
+				onEscape={onEscape}
+			/>
 		</AppShell>
 	);
 }

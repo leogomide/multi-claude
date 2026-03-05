@@ -1,10 +1,16 @@
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
-import { computeDirName, loadConfig, removeInstallationDir, renameInstallationDir, saveConfig } from "../../config.ts";
+import {
+	computeDirName,
+	loadConfig,
+	removeInstallationDir,
+	renameInstallationDir,
+	saveConfig,
+} from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import type { Installation } from "../../schema.ts";
 import { ConfirmPrompt } from "../common/ConfirmPrompt.tsx";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { TextPrompt } from "../common/TextPrompt.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
@@ -18,7 +24,11 @@ interface EditInstallationFlowProps {
 	onCancel: () => void;
 }
 
-export function EditInstallationFlow({ installationId, onDone, onCancel }: EditInstallationFlowProps) {
+export function EditInstallationFlow({
+	installationId,
+	onDone,
+	onCancel,
+}: EditInstallationFlowProps) {
 	const { t } = useTranslation();
 	const [step, setStep] = useState<Step>("loading");
 	const [installation, setInstallation] = useState<Installation | null>(null);
@@ -75,9 +85,7 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 
 		return (
 			<AppShell footerItems={footerItems}>
-				<StatusMessage variant="info">
-					{installation.name}
-				</StatusMessage>
+				<StatusMessage variant="info">{installation.name}</StatusMessage>
 				{message && <StatusMessage variant={message.variant}>{message.text}</StatusMessage>}
 				<Box marginTop={1} flexDirection="column">
 					<Text bold color="cyan">
@@ -103,7 +111,12 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 
 	if (step === "edit-name" && installation) {
 		return (
-			<AppShell footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<TextPrompt
 					label={t("installations.nameLabel")}
 					initialValue={installation.name}
@@ -122,7 +135,10 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 							}
 							await saveConfig(config);
 							await refreshInstallation();
-							setMessage({ text: t("installations.renamed", { name: val.trim() }), variant: "success" });
+							setMessage({
+								text: t("installations.renamed", { name: val.trim() }),
+								variant: "success",
+							});
 							setStep("menu");
 						});
 					}}
@@ -133,7 +149,12 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 
 	if (step === "confirm-remove" && installation) {
 		return (
-			<AppShell footerItems={[{ key: "y/n", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "y/n", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<ConfirmPrompt
 					message={t("installations.confirmRemove", { name: installation.name })}
 					onConfirm={(confirmed) => {

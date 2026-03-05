@@ -34,10 +34,12 @@ initLogger("cli", sessionId);
 const log = createLogger("cli");
 
 const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
-	"--resume", "-r",
+	"--resume",
+	"-r",
 	"--dangerously-skip-permissions",
 	"--verbose",
-	"--worktree", "-w",
+	"--worktree",
+	"-w",
 	"--chrome",
 ]);
 
@@ -83,8 +85,8 @@ function resetTerminal(): void {
 	if (process.stdin.isTTY && process.stdin.setRawMode) {
 		process.stdin.setRawMode(false);
 	}
-	process.stdout.write("\x1b[?25h");   // Show cursor
-	process.stdout.write("\x1b[0m");     // Reset all attributes
+	process.stdout.write("\x1b[?25h"); // Show cursor
+	process.stdout.write("\x1b[0m"); // Reset all attributes
 	process.stdout.write("\x1b[?1049l"); // Exit alternate screen
 }
 
@@ -177,146 +179,170 @@ const tuiPath = join(import.meta.dir, "src", "tui-process.ts");
 // Main loop: return to TUI after Claude Code exits
 while (true) {
 	let tuiExitCode: number | null = null;
-do {
-	log.info("spawning TUI process: " + tuiPath);
-	const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], { stdio: "inherit", env: process.env });
+	do {
+		log.info("spawning TUI process: " + tuiPath);
+		const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], {
+			stdio: "inherit",
+			env: process.env,
+		});
 
-	if (tuiResult.error) {
-		log.error("TUI spawn error", tuiResult.error);
-		console.error("Failed to start TUI:", tuiResult.error.message);
+		if (tuiResult.error) {
+			log.error("TUI spawn error", tuiResult.error);
+			console.error("Failed to start TUI:", tuiResult.error.message);
+			process.exit(1);
+		}
+
+		tuiExitCode = tuiResult.status;
+
+		if (tuiExitCode === 2) {
+			log.debug("TUI exited with code 2, restarting TUI");
+			continue;
+		}
+
+		if (tuiExitCode === 3) {
+			// OAuth login requested — handle in clean process context (no Ink residue)
+			try {
+				const raw = await readFile(SELECTION_FILE, "utf-8");
+				const oauthData = JSON.parse(raw) as OAuthSelection;
+				await unlink(SELECTION_FILE);
+
+				const {
+					ensureAccountDir,
+					isAccountAuthenticated,
+					removeAccountDir,
+					loadConfig,
+					saveConfig,
+				} = await import("./src/config.ts");
+				const accountDir = await ensureAccountDir(oauthData.providerId);
+				const claudePath = resolveClaudePath();
+
+				log.info("running claude for OAuth login, provider=" + oauthData.providerName);
+				const loginResult = spawnSync(claudePath, [], {
+					stdio: "inherit",
+					env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
+				});
+
+				if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
+					log.info("OAuth login successful");
+					console.log(`\n\u2713 Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
+				} else {
+					log.info("OAuth login failed");
+					if (oauthData.isNew) {
+						const cfg = await loadConfig();
+						cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
+						await saveConfig(cfg);
+						await removeAccountDir(oauthData.providerId);
+						console.error(
+							"\n\u2717 Autentica\u00e7\u00e3o falhou. Provedor n\u00e3o foi adicionado.\n",
+						);
+					} else {
+						console.error("\n\u2717 Re-autentica\u00e7\u00e3o falhou.\n");
+					}
+				}
+			} catch (err) {
+				log.error("OAuth handling error", err);
+			}
+			continue; // restart TUI
+		}
+
+		if (tuiExitCode === 4) {
+			resetTerminal();
+			console.log("\n\u2B06\uFE0F  Updating mclaude...\n");
+			const updateResult = spawnSync(
+				process.execPath,
+				["install", "-g", "@leogomide/multi-claude@latest"],
+				{
+					stdio: "inherit",
+				},
+			);
+			if (updateResult.status === 0) {
+				console.log(
+					"\n\u2713 mclaude updated successfully! Run 'mclaude' to use the new version.\n",
+				);
+				process.exit(0);
+			} else {
+				console.error(
+					"\n\u2717 Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n",
+				);
+				process.exit(1);
+			}
+		}
+
+		if (tuiExitCode !== 0) {
+			log.info("TUI exited with status=" + tuiExitCode);
+			process.exit(tuiExitCode ?? 1);
+		}
+	} while (tuiExitCode === 2 || tuiExitCode === 3);
+
+	// Read selection from JSON file
+	let selection: TuiSelection;
+	try {
+		const raw = await readFile(SELECTION_FILE, "utf-8");
+		selection = JSON.parse(raw) as TuiSelection;
+		await unlink(SELECTION_FILE);
+		log.info("selection read and deleted, provider=" + selection.providerName);
+	} catch (err) {
+		log.error("failed to read selection file", err);
+		console.error("Failed to read TUI selection.");
 		process.exit(1);
 	}
 
-	tuiExitCode = tuiResult.status;
+	const isOAuth = selection.type === "oauth";
+	const isDefault = selection.templateId === DEFAULT_LAUNCH_TEMPLATE_ID;
 
-	if (tuiExitCode === 2) {
-		log.debug("TUI exited with code 2, restarting TUI");
-		continue;
+	if (!selection.model && !isOAuth && !isDefault) {
+		log.info("no model selected, aborting");
+		console.error("No model selected. Add models to this provider in 'Manage models'.");
+		process.exit(1);
 	}
 
-	if (tuiExitCode === 3) {
-		// OAuth login requested — handle in clean process context (no Ink residue)
-		try {
-			const raw = await readFile(SELECTION_FILE, "utf-8");
-			const oauthData = JSON.parse(raw) as OAuthSelection;
-			await unlink(SELECTION_FILE);
-
-			const { ensureAccountDir, isAccountAuthenticated, removeAccountDir, loadConfig, saveConfig } = await import("./src/config.ts");
-			const accountDir = await ensureAccountDir(oauthData.providerId);
-			const claudePath = resolveClaudePath();
-
-			log.info("running claude for OAuth login, provider=" + oauthData.providerName);
-			const loginResult = spawnSync(claudePath, [], {
-				stdio: "inherit",
-				env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
-			});
-
-			if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
-				log.info("OAuth login successful");
-				console.log(`\n\u2713 Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
-			} else {
-				log.info("OAuth login failed");
-				if (oauthData.isNew) {
-					const cfg = await loadConfig();
-					cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
-					await saveConfig(cfg);
-					await removeAccountDir(oauthData.providerId);
-					console.error("\n\u2717 Autentica\u00e7\u00e3o falhou. Provedor n\u00e3o foi adicionado.\n");
-				} else {
-					console.error("\n\u2717 Re-autentica\u00e7\u00e3o falhou.\n");
-				}
-			}
-		} catch (err) {
-			log.error("OAuth handling error", err);
-		}
-		continue; // restart TUI
+	// Ensure stdin raw mode is off (precaution)
+	if (process.stdin.isTTY && process.stdin.setRawMode) {
+		process.stdin.setRawMode(false);
 	}
 
-	if (tuiExitCode === 4) {
-		resetTerminal();
-		console.log("\n\u2B06\uFE0F  Updating mclaude...\n");
-		const updateResult = spawnSync(process.execPath, ["install", "-g", "@leogomide/multi-claude@latest"], {
-			stdio: "inherit",
-		});
-		if (updateResult.status === 0) {
-			console.log("\n\u2713 mclaude updated successfully! Run 'mclaude' to use the new version.\n");
-			process.exit(0);
-		} else {
-			console.error("\n\u2717 Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n");
-			process.exit(1);
-		}
+	// Reconstruct ConfiguredProvider from selection
+	const provider: ConfiguredProvider = {
+		id: selection.providerId,
+		name: selection.providerName,
+		templateId: selection.templateId,
+		type: selection.type ?? "api",
+		apiKey: selection.apiKey ?? "",
+		models: selection.models,
+	};
+
+	// Merge TUI-selected flags with original CLI args
+	const mergedArgs = mergeFlags(cliArgs, selection.selectedFlags ?? []);
+
+	let exitCode: number;
+	if (isDefault) {
+		const { runClaudeDefault } = await import("./src/runner.ts");
+		log.info("calling runClaudeDefault()");
+		exitCode = await runClaudeDefault(mergedArgs, selection.installationId);
+		log.info("runClaudeDefault() returned exitCode=" + exitCode);
+	} else {
+		const { runClaude } = await import("./src/runner.ts");
+		log.info("calling runClaude()");
+		exitCode = await runClaude(
+			provider,
+			selection.model ?? "",
+			mergedArgs,
+			selection.installationId,
+		);
+		log.info("runClaude() returned exitCode=" + exitCode);
 	}
 
-	if (tuiExitCode !== 0) {
-		log.info("TUI exited with status=" + tuiExitCode);
-		process.exit(tuiExitCode ?? 1);
+	resetTerminal();
+
+	const providerInfo = isDefault
+		? "Claude Code (default)"
+		: isOAuth
+			? selection.providerName
+			: `${selection.providerName} (${selection.model})`;
+
+	if (exitCode !== 0) {
+		console.log(`\n[mclaude] ${providerInfo} \u2014 exited with code ${exitCode}`);
+	} else {
+		console.log(`\n[mclaude] ${providerInfo} \u2014 session ended`);
 	}
-} while (tuiExitCode === 2 || tuiExitCode === 3);
-
-// Read selection from JSON file
-let selection: TuiSelection;
-try {
-	const raw = await readFile(SELECTION_FILE, "utf-8");
-	selection = JSON.parse(raw) as TuiSelection;
-	await unlink(SELECTION_FILE);
-	log.info("selection read and deleted, provider=" + selection.providerName);
-} catch (err) {
-	log.error("failed to read selection file", err);
-	console.error("Failed to read TUI selection.");
-	process.exit(1);
-}
-
-const isOAuth = selection.type === "oauth";
-const isDefault = selection.templateId === DEFAULT_LAUNCH_TEMPLATE_ID;
-
-if (!selection.model && !isOAuth && !isDefault) {
-	log.info("no model selected, aborting");
-	console.error("No model selected. Add models to this provider in 'Manage models'.");
-	process.exit(1);
-}
-
-// Ensure stdin raw mode is off (precaution)
-if (process.stdin.isTTY && process.stdin.setRawMode) {
-	process.stdin.setRawMode(false);
-}
-
-// Reconstruct ConfiguredProvider from selection
-const provider: ConfiguredProvider = {
-	id: selection.providerId,
-	name: selection.providerName,
-	templateId: selection.templateId,
-	type: selection.type ?? "api",
-	apiKey: selection.apiKey ?? "",
-	models: selection.models,
-};
-
-// Merge TUI-selected flags with original CLI args
-const mergedArgs = mergeFlags(cliArgs, selection.selectedFlags ?? []);
-
-let exitCode: number;
-if (isDefault) {
-	const { runClaudeDefault } = await import("./src/runner.ts");
-	log.info("calling runClaudeDefault()");
-	exitCode = await runClaudeDefault(mergedArgs, selection.installationId);
-	log.info("runClaudeDefault() returned exitCode=" + exitCode);
-} else {
-	const { runClaude } = await import("./src/runner.ts");
-	log.info("calling runClaude()");
-	exitCode = await runClaude(provider, selection.model ?? "", mergedArgs, selection.installationId);
-	log.info("runClaude() returned exitCode=" + exitCode);
-}
-
-resetTerminal();
-
-const providerInfo = isDefault
-	? "Claude Code (default)"
-	: isOAuth
-		? selection.providerName
-		: `${selection.providerName} (${selection.model})`;
-
-if (exitCode !== 0) {
-	console.log(`\n[mclaude] ${providerInfo} \u2014 exited with code ${exitCode}`);
-} else {
-	console.log(`\n[mclaude] ${providerInfo} \u2014 session ended`);
-}
 } // end main loop

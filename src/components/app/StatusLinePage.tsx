@@ -1,10 +1,10 @@
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { loadConfig, saveConfig } from "../../config.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { STATUSLINE_TEMPLATES, type StatusLineTemplateId } from "../../statusline.ts";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
 
@@ -22,21 +22,40 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		const W = W4;
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
-					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+					<Text color="red">-7</Text>
+					<Text dimColor>)</Text>
+				</Text>
+				<Text>
+					<Text color="cyan">{P("Input:84.2k", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("Output:62.8k", W)}</Text>
+					<Sep />
 					<Text color="green">{P("Cache:20.6M", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("Session:3h31m", W)}</Text><Sep />
-					<Text color="yellow">{P("API:1h38m", W)}</Text><Sep />
-					<Text color="green">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="cyan">{P("Session:3h31m", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("API:1h38m", W)}</Text>
+					<Sep />
+					<Text color="green">{P("Cost:$11.15", W)}</Text>
+					<Sep />
 					<Text color="green">$0.19/min</Text>
 				</Text>
 				<Text>
-					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
-					<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="yellow">{P("153.9k/77%", W)}</Text>
+					<Sep />
 					<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 				</Text>
 			</Box>
@@ -48,21 +67,33 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		const W = W4;
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("Ctx:153.9k/77%", W)}</Text><Sep />
-					<Text color="yellow">{P("Left:46.1k/23%", W)}</Text><Sep />
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+					<Text color="red">-7</Text>
+					<Text dimColor>)</Text>
+				</Text>
+				<Text>
+					<Text color="cyan">{P("Ctx:153.9k/77%", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("Left:46.1k/23%", W)}</Text>
+					<Sep />
 					<Text color="green">{P("Win:200k", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
-					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
+					<Text color="cyan">{P("Input:84.2k", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("Output:62.8k", W)}</Text>
+					<Sep />
 					<Text color="green">{P("Cache:20.6M", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("Session:3h31m", W)}</Text><Sep />
-					<Text color="yellow">{P("API:1h38m", W)}</Text><Sep />
-					<Text color="green">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="cyan">{P("Session:3h31m", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("API:1h38m", W)}</Text>
+					<Sep />
+					<Text color="green">{P("Cost:$11.15", W)}</Text>
+					<Sep />
 					<Text color="green">$0.19/min</Text>
 				</Text>
 			</Box>
@@ -74,16 +105,33 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		const W = W4;
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
-					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
-					<Text color="green">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+					<Text color="red">-7</Text>
+					<Text dimColor>)</Text>
+				</Text>
+				<Text>
+					<Text color="cyan">{P("Input:84.2k", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("Output:62.8k", W)}</Text>
+					<Sep />
+					<Text color="green">{P("Cost:$11.15", W)}</Text>
+					<Sep />
 					<Text color="cyan">{P("Session:3h31m", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
-					<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="yellow">{P("153.9k/77%", W)}</Text>
+					<Sep />
 					<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 				</Text>
 			</Box>
@@ -93,10 +141,17 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "mini") {
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="yellow">Ctx 77%</Text><Sep />
-					<Text color="green">$11.15</Text><Sep />
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+					<Text color="red">-7</Text>
+					<Text dimColor>)</Text>
+				</Text>
+				<Text>
+					<Text color="yellow">Ctx 77%</Text>
+					<Sep />
+					<Text color="green">$11.15</Text>
+					<Sep />
 					<Text color="cyan">3h31m</Text>
 				</Text>
 			</Box>
@@ -108,45 +163,81 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		const W = W4;
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("Input:$3.40", W)}</Text><Sep />
-					<Text color="yellow">{P("Output:$7.75", W)}</Text><Sep />
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+					<Text color="red">-7</Text>
+					<Text dimColor>)</Text>
+				</Text>
+				<Text>
+					<Text color="cyan">{P("Input:$3.40", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("Output:$7.75", W)}</Text>
+					<Sep />
 					<Text color="green">{P("Cost:$11.15", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("$0.19/min", W)}</Text><Sep />
-					<Text color="yellow">{P("~$11.40/h", W)}</Text><Sep />
+					<Text color="cyan">{P("$0.19/min", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("~$11.40/h", W)}</Text>
+					<Sep />
 					<Text color="green">{P("Session:3h31m", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
-					<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="yellow">{P("153.9k/77%", W)}</Text>
+					<Sep />
 					<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 				</Text>
 			</Box>
 		);
 	}
 
-if (id === "perf") {
+	if (id === "perf") {
 		// Grid: 3 columns — performance-focused
 		const W = W4;
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("Cache:71% hit", W)}</Text><Sep />
-					<Text color="yellow">{P("I/O 1.3:1", W)}</Text><Sep />
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+					<Text color="red">-7</Text>
+					<Text dimColor>)</Text>
+				</Text>
+				<Text>
+					<Text color="cyan">{P("Cache:71% hit", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("I/O 1.3:1", W)}</Text>
+					<Sep />
 					<Text color="green">{P("API:47% time", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("Output:~297tok/s", W)}</Text><Sep />
-					<Text color="yellow">{P("Session:3h31m", W)}</Text><Sep />
+					<Text color="cyan">{P("Output:~297tok/s", W)}</Text>
+					<Sep />
+					<Text color="yellow">{P("Session:3h31m", W)}</Text>
+					<Sep />
 					<Text color="green">{P("$11.15", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
-					<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="yellow">{P("153.9k/77%", W)}</Text>
+					<Sep />
 					<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 				</Text>
 			</Box>
@@ -157,20 +248,38 @@ if (id === "perf") {
 	const W = W4;
 	return (
 		<Box flexDirection="column">
-			<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 			<Text>
-				<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
-				<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
+				<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+				<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
+				<Text color="red">-7</Text>
+				<Text dimColor>)</Text>
+			</Text>
+			<Text>
+				<Text color="cyan">{P("Input:84.2k", W)}</Text>
+				<Sep />
+				<Text color="yellow">{P("Output:62.8k", W)}</Text>
+				<Sep />
 				<Text color="green">{P("Total:167.6k/200k", W)}</Text>
 			</Text>
 			<Text>
-				<Text color="cyan">{P("CacheCreate:2.1k", W)}</Text><Sep />
-				<Text color="yellow">{P("CacheRead:18.5k", W)}</Text><Sep />
+				<Text color="cyan">{P("CacheCreate:2.1k", W)}</Text>
+				<Sep />
+				<Text color="yellow">{P("CacheRead:18.5k", W)}</Text>
+				<Sep />
 				<Text color="green">{P("Cache:20.6M", W)}</Text>
 			</Text>
 			<Text>
-				<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
-				<Text color="yellow">{P("153.9k/77%", W)}</Text><Sep />
+				<Text color="yellow">
+					{(() => {
+						const bW = 2 * W + 3;
+						return (
+							"\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77))
+						);
+					})()}
+				</Text>
+				<Sep />
+				<Text color="yellow">{P("153.9k/77%", W)}</Text>
+				<Sep />
 				<Text color="yellow">{P("46.1k/23% left", W)}</Text>
 			</Text>
 		</Box>

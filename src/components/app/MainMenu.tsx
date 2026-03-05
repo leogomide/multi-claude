@@ -76,12 +76,14 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			result.push({
 				label: t("update.groupLabel"),
 				labelColor: "yellow",
-				items: [{
-					label: t("update.menuItem", { version: latestVersion }),
-					value: "update",
-					icon: "⬆️",
-					color: "yellow",
-				}],
+				items: [
+					{
+						label: t("update.menuItem", { version: latestVersion }),
+						value: "update",
+						icon: "⬆️",
+						color: "yellow",
+					},
+				],
 			});
 		}
 		result.push(launchGroup, actionsGroup);
@@ -133,15 +135,20 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 					{ label: t("sidebar.name"), value: provider.name },
 					{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
 					{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
-					{ label: t("sidebar.authStatus"), value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"), color: authenticated ? "green" : "red" },
+					{
+						label: t("sidebar.authStatus"),
+						value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"),
+						color: authenticated ? "green" : "red",
+					},
 				];
 				return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
 			}
 
 			const modelCount = getEffectiveModels(provider).length;
-			const modelsValue = hasApiModelFetching(provider.templateId) && modelCount === 0
-				? t("sidebar.modelsViaApi")
-				: String(modelCount);
+			const modelsValue =
+				hasApiModelFetching(provider.templateId) && modelCount === 0
+					? t("sidebar.modelsViaApi")
+					: String(modelCount);
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: provider.name },
 				{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
@@ -149,15 +156,20 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 				{ label: t("sidebar.models"), value: modelsValue },
 			];
 			if (template?.baseUrl) {
-				items.push({ label: t("sidebar.baseUrl"), value: template.baseUrl.replace("https://", "") });
+				items.push({
+					label: t("sidebar.baseUrl"),
+					value: template.baseUrl.replace("https://", ""),
+				});
 			}
 			return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
 		}
 
 		let description = "";
 		if (highlightedValue === "update") description = t("update.sidebarDesc");
-		else if (highlightedValue === "manage-providers") description = t("sidebar.manageProvidersDesc");
-		else if (highlightedValue === "manage-installations") description = t("sidebar.manageInstallationsDesc");
+		else if (highlightedValue === "manage-providers")
+			description = t("sidebar.manageProvidersDesc");
+		else if (highlightedValue === "manage-installations")
+			description = t("sidebar.manageInstallationsDesc");
 		else if (highlightedValue === "settings") description = t("sidebar.settingsDesc");
 		else if (highlightedValue === "exit") description = t("sidebar.exitDesc");
 
@@ -179,7 +191,12 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			{lastMessage && (
 				<StatusMessage variant={lastMessage.variant}>{lastMessage.text}</StatusMessage>
 			)}
-			<GroupedSelect groups={groups} onSelect={handleSelect} onHighlight={handleHighlight} onEscape={onEscape} />
+			<GroupedSelect
+				groups={groups}
+				onSelect={handleSelect}
+				onHighlight={handleHighlight}
+				onEscape={onEscape}
+			/>
 		</AppShell>
 	);
 }

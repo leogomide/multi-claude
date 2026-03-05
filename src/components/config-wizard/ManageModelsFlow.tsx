@@ -1,10 +1,10 @@
 import { Box, Text, useInput } from "ink";
-import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { loadConfig, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { getTemplate } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { Note } from "../common/Note.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { TextPrompt } from "../common/TextPrompt.tsx";
@@ -136,7 +136,12 @@ export function ManageModelsFlow({ providerId, onDone, onCancel }: ManageModelsF
 
 	if (step === "add-model") {
 		return (
-			<AppShell footerItems={[{ key: "⏎", label: t("footer.confirm") }, { key: "esc", label: t("footer.back") }]}>
+			<AppShell
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
 				<TextPrompt
 					label={t("modelsFlow.modelNameLabel")}
 					validate={(val) => {
