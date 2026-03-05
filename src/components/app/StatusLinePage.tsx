@@ -17,19 +17,31 @@ const BAR_FREE_L = "\u2591".repeat(12);
 function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "none") return null;
 
-	const line1 = (
+	const provLine = (
+		<Text><Text color="cyan">Provider</Text>/Model</Text>
+	);
+
+	const ctxBar = (
 		<Text>
-			<Text color="cyan">Provider</Text>/Model{"  "}
 			<Text color="yellow">{BAR_USED + BAR_FREE} 153.9k/77%</Text>
 			<Sep />
 			<Text color="yellow">46.1k/23% left</Text>
 		</Text>
 	);
 
+	const ctxBarWide = (
+		<Text>
+			<Text color="yellow">{BAR_USED_L + BAR_FREE_L} 153.9k/77%</Text>
+			<Sep />
+			<Text color="yellow">46.1k left</Text>
+		</Text>
+	);
+
 	if (id === "full") {
 		return (
 			<Box flexDirection="column">
-				{line1}
+				{provLine}
+				{ctxBar}
 				<Text>
 					<Text color="cyan">In:84.2k</Text><Sep />
 					<Text color="yellow">Out:62.8k</Text><Sep />
@@ -52,7 +64,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "slim") {
 		return (
 			<Box flexDirection="column">
-				{line1}
+				{provLine}
+				{ctxBar}
 				<Text>
 					<Text color="cyan">In:84.2k</Text>{" "}
 					<Text color="yellow">Out:62.8k</Text><Sep />
@@ -81,7 +94,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "cost") {
 		return (
 			<Box flexDirection="column">
-				{line1}
+				{provLine}
+				{ctxBar}
 				<Text>
 					<Text bold color="green">Cost:$11.15</Text><Sep />
 					<Text color="cyan">$0.19/min</Text><Sep />
@@ -96,6 +110,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "dev") {
 		return (
 			<Box flexDirection="column">
+				{provLine}
 				<Text>
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+145</Text>{" "}<Text color="red">-32</Text><Sep />
@@ -104,7 +119,6 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text dimColor>{"("}</Text><Text color="magenta">feat</Text>{" "}<Text dimColor>{"<-"}</Text>{" "}<Text color="white">main</Text><Text dimColor>{")"}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">Provider</Text>/Model<Sep />
 					<Text color="yellow">Ctx 77%</Text><Sep />
 					<Text bold color="green">$11.15</Text><Sep />
 					<Text color="white">3h31m</Text>
@@ -116,7 +130,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "perf") {
 		return (
 			<Box flexDirection="column">
-				{line1}
+				{provLine}
+				{ctxBar}
 				<Text>
 					<Text color="green">Cache:71% hit</Text><Sep />
 					<Text color="blueBright">I/O 1.3:1</Text><Sep />
@@ -131,12 +146,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	// context
 	return (
 		<Box flexDirection="column">
-			<Text>
-				<Text color="cyan">Provider</Text>/Model{"  "}
-				<Text color="yellow">{BAR_USED_L + BAR_FREE_L} 153.9k/77%</Text>
-				<Sep />
-				<Text color="yellow">46.1k left</Text>
-			</Text>
+			{provLine}
+			{ctxBarWide}
 			<Text>
 				{" "}<Text color="cyan">Input:84.2k</Text><Sep />
 				<Text color="green">CacheCreate:2.1k</Text><Sep />

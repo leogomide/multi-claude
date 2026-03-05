@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
-const SCRIPT_VERSION = "6";
+const SCRIPT_VERSION = "7";
 
 export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
@@ -22,13 +22,13 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "full",
 		nameKey: "statusLine.full",
 		descKey: "statusLine.fullDesc",
-		preview: "Provider/Opus  \u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left\nIn:84.2k | Out:62.8k | I/O 1.3:1 | Cache:20.6M (71% hit) | $0.19/min | Cost:$11.15\nSession:3h31m | API:1h38m | master | (+45,-7)",
+		preview: "Provider/Opus\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left\nIn:84.2k | Out:62.8k | I/O 1.3:1 | Cache:20.6M (71% hit) | $0.19/min | Cost:$11.15\nSession:3h31m | API:1h38m | master | (+45,-7)",
 	},
 	{
 		id: "slim",
 		nameKey: "statusLine.slim",
 		descKey: "statusLine.slimDesc",
-		preview: "Provider/Opus  \u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left\nIn:84.2k Out:62.8k | $11.15 | 3h31m | master | (+45,-7)",
+		preview: "Provider/Opus\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left\nIn:84.2k Out:62.8k | $11.15 | 3h31m | master | (+45,-7)",
 	},
 	{
 		id: "mini",
@@ -133,19 +133,21 @@ process.stdin.on('end', () => {
         if (agentName) gitPart += (gitPart ? SEP : '') + C.yellow + 'Agent:' + agentName + C.reset;
         const linesPart = (linesAdd || linesRem) ? SEP + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset : '';
 
-        // Line 1 (shared by full and slim): model + context bar
+        // Shared parts
         const provModel = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + model : model;
-        const line1 = provModel + '  ' + cc + mkBar(pct, 30) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+        const ctxBar = cc + mkBar(pct, 30) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+        const ctxBarWide = cc + mkBar(pct, 50) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + ' ' + L.left + C.reset;
 
+        // All templates start with provider/model on line 1
         switch (TEMPLATE) {
             case 'full': {
-                console.log(line1);
+                console.log(provModel);
+                console.log(ctxBar);
 
                 const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\\u221e';
                 const totalCch = cacheCreate + cacheRead;
                 const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
                 const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
-                const allTokens = ctxTokens + curOut;
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
                 const cCol = costC(cost);
                 console.log(
@@ -158,35 +160,36 @@ process.stdin.on('end', () => {
                     C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset
                 );
 
-                let l3 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset;
+                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset;
+                if (gitPart) l4 += SEP + gitPart;
+                l4 += linesPart;
+                console.log(l4);
+                break;
+            }
+            case 'slim': {
+                console.log(provModel);
+                console.log(ctxBar);
+
+                const cCol = costC(cost);
+                let l3 = C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset + SEP +
+                    C.bold + cCol + fmtCost(cost) + C.reset + SEP +
+                    C.white + fmtDur(durMs) + C.reset;
                 if (gitPart) l3 += SEP + gitPart;
                 l3 += linesPart;
                 console.log(l3);
                 break;
             }
-            case 'slim': {
-                console.log(line1);
-
-                const cCol = costC(cost);
-                let l2 = C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset + SEP +
-                    C.bold + cCol + fmtCost(cost) + C.reset + SEP +
-                    C.white + fmtDur(durMs) + C.reset;
-                if (gitPart) l2 += SEP + gitPart;
-                l2 += linesPart;
-                console.log(l2);
-                break;
-            }
             case 'mini': {
-                const p = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + model : model;
                 const cCol = costC(cost);
-                let line = p + SEP + cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDurShort(durMs) + C.reset;
+                let line = provModel + SEP + cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDurShort(durMs) + C.reset;
                 if (gitPart) line += SEP + gitPart;
                 line += linesPart;
                 console.log(line);
                 break;
             }
             case 'cost': {
-                console.log(line1);
+                console.log(provModel);
+                console.log(ctxBar);
                 const cCol = costC(cost);
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
                 const cph = cpm * 60;
@@ -203,17 +206,19 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'dev': {
-                let l1 = '';
-                if (gitPart) l1 += gitPart;
-                if (linesAdd || linesRem) l1 += (l1 ? SEP : '') + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset;
-                if (!l1) l1 = C.dim + '(no git)' + C.reset;
-                console.log(l1);
+                console.log(provModel);
+                let l2 = '';
+                if (gitPart) l2 += gitPart;
+                if (linesAdd || linesRem) l2 += (l2 ? SEP : '') + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset;
+                if (!l2) l2 = C.dim + '(no git)' + C.reset;
+                console.log(l2);
                 const cCol = costC(cost);
-                console.log(provModel + SEP + cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDur(durMs) + C.reset);
+                console.log(cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDur(durMs) + C.reset);
                 break;
             }
             case 'perf': {
-                console.log(line1);
+                console.log(provModel);
+                console.log(ctxBar);
                 const totalCch = cacheCreate + cacheRead;
                 const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
                 const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
@@ -231,8 +236,8 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'context': {
-                const ctxLine = provModel + '  ' + cc + mkBar(pct, 50) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + ' ' + L.left + C.reset;
-                console.log(ctxLine);
+                console.log(provModel);
+                console.log(ctxBarWide);
                 const totalUsed = ctxTokens + curOut;
                 console.log(
                     ' ' + C.cyan + 'Input:' + fmtK(curIn) + C.reset + SEP +
