@@ -17,16 +17,19 @@ export function Footer({ items }: FooterProps) {
 	const visibleItems = columns < 35 ? items.slice(-1) : items;
 
 	return (
-		<Box borderStyle="round" borderColor="gray" paddingX={1} gap={gap}>
-			{visibleItems.length > 0 ? (
-				visibleItems.map((item) => (
-					<Text key={item.key}>
-						<Text color="cyan">{item.key}</Text> {item.label}
-					</Text>
-				))
-			) : (
-				<Text>{" "}</Text>
-			)}
+		<Box flexDirection="column" paddingX={1}>
+			<Text color="gray">{"─".repeat(Math.max(0, columns - 2))}</Text>
+			<Box gap={gap}>
+				{visibleItems.length > 0 ? (
+					visibleItems.map((item) => (
+						<Text key={item.key}>
+							<Text color="cyan">{item.key}</Text> {item.label}
+						</Text>
+					))
+				) : (
+					<Text>{" "}</Text>
+				)}
+			</Box>
 		</Box>
 	);
 }

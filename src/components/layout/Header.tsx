@@ -20,11 +20,8 @@ export function Header() {
 	const { columns } = useTerminalSize();
 	const [claudeVersion] = useState(detectClaudeVersion);
 	const hasCrumbs = crumbs.length > 0;
-	// inner width = columns - 2 (border) - 2 (paddingX)
-	const dividerWidth = Math.max(0, columns - 4);
-
 	return (
-		<Box borderStyle="round" borderColor="gray" flexDirection="column" paddingX={1}>
+		<Box flexDirection="column" paddingX={1}>
 			<Box justifyContent="space-between">
 				<Text bold color="magenta">
 					{`✨ multi-claude v${pkg.version}`}
@@ -34,18 +31,16 @@ export function Header() {
 				</Text>
 			</Box>
 			{hasCrumbs && (
-				<>
-					<Text color="gray">{"─".repeat(dividerWidth)}</Text>
-					<Box>
-						{crumbs.map((crumb, i) => (
-							<Text key={i}>
-								{i > 0 && <Text color="gray">{" › "}</Text>}
-								<Text color="white">{crumb}</Text>
-							</Text>
-						))}
-					</Box>
-				</>
+				<Box>
+					{crumbs.map((crumb, i) => (
+						<Text key={i}>
+							{i > 0 && <Text color="gray">{" › "}</Text>}
+							<Text color="white">{crumb}</Text>
+						</Text>
+					))}
+				</Box>
 			)}
+			<Text color="gray">{"─".repeat(Math.max(0, columns - 2))}</Text>
 		</Box>
 	);
 }
