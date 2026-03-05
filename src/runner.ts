@@ -112,24 +112,6 @@ export async function runClaudeDefault(
 		}
 	}
 
-	// Clean provider-related env vars that might interfere
-	// Keep ANTHROPIC_API_KEY (user's native authentication)
-	delete env["ANTHROPIC_BASE_URL"];
-	delete env["ANTHROPIC_AUTH_TOKEN"];
-	delete env["OPENROUTER_API_KEY"];
-	delete env["ANTHROPIC_MODEL"];
-	delete env["ANTHROPIC_SMALL_FAST_MODEL"];
-	delete env["ANTHROPIC_DEFAULT_SONNET_MODEL"];
-	delete env["ANTHROPIC_DEFAULT_OPUS_MODEL"];
-	delete env["ANTHROPIC_DEFAULT_HAIKU_MODEL"];
-	delete env["API_TIMEOUT_MS"];
-	delete env["CLAUDE_CONFIG_DIR"];
-	for (const key of Object.keys(env)) {
-		if (key.startsWith("CLAUDECODE") || key.startsWith("CLAUDE_CODE")) {
-			delete env[key];
-		}
-	}
-
 	// Set installation dir for custom installations
 	if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
 		env["CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
