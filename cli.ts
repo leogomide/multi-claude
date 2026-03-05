@@ -163,8 +163,9 @@ if (headlessArgs) {
 // Spawn TUI in a separate process — never import Ink/React here
 const tuiPath = join(import.meta.dir, "src", "tui-process.ts");
 
-// Loop: restart TUI when exit code 2 (OAuth login completed)
-let tuiExitCode: number | null = null;
+// Main loop: return to TUI after Claude Code exits
+while (true) {
+	let tuiExitCode: number | null = null;
 do {
 	debugLog("cli.ts: spawning TUI process: " + tuiPath);
 	const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], { stdio: "inherit" });
@@ -296,5 +297,4 @@ if (exitCode !== 0) {
 } else {
 	console.log(`\n[mclaude] ${providerInfo} \u2014 session ended`);
 }
-
-process.exit(exitCode);
+} // end main loop
