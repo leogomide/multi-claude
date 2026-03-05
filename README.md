@@ -169,7 +169,7 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **Docs:** [Alibaba Cloud Coding Plan](https://www.alibabacloud.com/help/en/model-studio/coding-plan#79cb18916c1fl)
 - **Base URL:** `https://coding-intl.dashscope.aliyuncs.com/apps/anthropic`
 - **API key:** Get a coding plan key (`sk-sp-xxxxx`) at [Alibaba Cloud Model Studio](https://bailian.console.alibabacloud.com/)
-- **Default models:** `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3.5-plus`, `qwen3-max-2026-01-23`, `glm-4.7`, `kimi-k2.5`
+- **Default models:** `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3.5-plus`, `qwen3-max-2026-01-23`, `glm-5`, `glm-4.7`, `kimi-k2.5`, `MiniMax-M2.5`
 
 ### DeepSeek
 
