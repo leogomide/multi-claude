@@ -8,6 +8,74 @@ import { STATUSLINE_TEMPLATES, type StatusLineTemplateId } from "../../statuslin
 import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
 
+const Sep = () => <Text dimColor>{" | "}</Text>;
+const BAR_USED = "\u2593".repeat(23);
+const BAR_FREE = "\u2591".repeat(7);
+
+function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
+	if (id === "none") return null;
+
+	const line1 = (
+		<Text>
+			<Text color="cyan">Provider</Text>/Model{"  "}
+			<Text color="yellow">{BAR_USED + BAR_FREE} 153.9k/77%</Text>
+			<Sep />
+			<Text color="yellow">46.1k/23% left</Text>
+		</Text>
+	);
+
+	if (id === "full") {
+		return (
+			<Box flexDirection="column">
+				{line1}
+				<Text>
+					<Text color="cyan">In:84.2k</Text><Sep />
+					<Text color="yellow">Out:62.8k</Text><Sep />
+					<Text color="blueBright">I/O 1.3:1</Text><Sep />
+					<Text color="green">Cache:20.6M</Text>
+					<Text dimColor>{" ("}</Text><Text color="green">71% hit</Text><Text dimColor>{")"}</Text><Sep />
+					<Text color="cyan">$0.19/min</Text><Sep />
+					<Text bold color="green">Cost:$11.15</Text>
+				</Text>
+				<Text>
+					<Text color="white">Session:3h31m</Text><Sep />
+					<Text color="cyan">API:1h38m</Text><Sep />
+					<Text color="magenta">master</Text><Sep />
+					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+				</Text>
+			</Box>
+		);
+	}
+
+	if (id === "slim") {
+		return (
+			<Box flexDirection="column">
+				{line1}
+				<Text>
+					<Text color="cyan">In:84.2k</Text>{" "}
+					<Text color="yellow">Out:62.8k</Text><Sep />
+					<Text bold color="green">$11.15</Text><Sep />
+					<Text color="white">3h31m</Text><Sep />
+					<Text color="magenta">master</Text><Sep />
+					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+				</Text>
+			</Box>
+		);
+	}
+
+	// mini
+	return (
+		<Text>
+			<Text color="cyan">Provider</Text>/Model<Sep />
+			<Text color="yellow">Ctx 77%</Text><Sep />
+			<Text bold color="green">$11.15</Text><Sep />
+			<Text color="white">3h31m</Text><Sep />
+			<Text color="magenta">master</Text><Sep />
+			<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+		</Text>
+	);
+}
+
 interface StatusLinePageProps {
 	onDone: (message?: FlowMessage) => void;
 	onCancel: () => void;
@@ -76,12 +144,12 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 		<Box flexDirection="column">
 			<Text bold>{ts.name(highlighted.id)}</Text>
 			<Text dimColor>{ts.desc(highlighted.id)}</Text>
-			{highlighted.preview && (
+			{highlighted.id !== "none" && (
 				<>
 					<Text> </Text>
 					<Text dimColor>Preview:</Text>
 					<Box borderStyle="single" paddingX={1}>
-						<Text>{highlighted.preview}</Text>
+						<StatusLinePreview id={highlighted.id} />
 					</Box>
 				</>
 			)}

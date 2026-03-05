@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
-const SCRIPT_VERSION = "4";
+const SCRIPT_VERSION = "5";
 
 export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
@@ -47,7 +47,7 @@ const MODEL_HINT = process.env.MCLAUDE_MODEL || '';
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || 'full';
 const LANG = process.env.MCLAUDE_LANG || 'en';
 
-const C = { cyan: '\\x1b[36m', green: '\\x1b[32m', yellow: '\\x1b[33m', red: '\\x1b[31m', dim: '\\x1b[2m', bold: '\\x1b[1m', reset: '\\x1b[0m', white: '\\x1b[37m', magenta: '\\x1b[35m', blue: '\\x1b[34m' };
+const C = { cyan: '\\x1b[36m', green: '\\x1b[32m', yellow: '\\x1b[33m', red: '\\x1b[31m', dim: '\\x1b[2m', bold: '\\x1b[1m', reset: '\\x1b[0m', white: '\\x1b[37m', magenta: '\\x1b[35m', blue: '\\x1b[34m', brightBlue: '\\x1b[94m' };
 
 const L = ({
     en:      { left: 'left',  hit: 'hit', session: 'Session', api: 'API', cost: 'Cost' },
@@ -62,6 +62,7 @@ const fmtCost = (usd) => '$' + usd.toFixed(2);
 const mkBar = (pct, w) => '\\u2593'.repeat(Math.floor(pct * w / 100)) + '\\u2591'.repeat(w - Math.floor(pct * w / 100));
 const ctxC = (pct) => pct > 90 ? C.red : pct > 70 ? C.yellow : C.green;
 const costC = (usd) => usd >= 5 ? C.red : usd >= 1 ? C.yellow : C.green;
+const SEP = C.dim + ' | ' + C.reset;
 
 let input = '';
 process.stdin.on('data', chunk => input += chunk);
@@ -99,17 +100,17 @@ process.stdin.on('end', () => {
         if (wt?.name) {
             const wtBr = wt.branch || '';
             const origBr = wt.original_branch || '';
-            const brInfo = wtBr ? C.magenta + wtBr + C.reset + (origBr ? ' ' + C.dim + '<-' + C.reset + ' ' + C.dim + origBr + C.reset : '') : '';
-            gitPart = C.bold + C.blue + 'WT:' + wt.name + C.reset + (brInfo ? ' ' + C.dim + '(' + C.reset + brInfo + C.dim + ')' + C.reset : '');
+            const brInfo = wtBr ? C.magenta + wtBr + C.reset + (origBr ? ' ' + C.dim + '<-' + C.reset + ' ' + C.white + origBr + C.reset : '') : '';
+            gitPart = C.bold + C.brightBlue + 'WT:' + wt.name + C.reset + (brInfo ? ' ' + C.dim + '(' + C.reset + brInfo + C.dim + ')' + C.reset : '');
         } else if (branch) {
             gitPart = C.magenta + branch + C.reset;
         }
-        if (agentName) gitPart += (gitPart ? ' | ' : '') + C.yellow + 'Agent:' + agentName + C.reset;
-        const linesPart = (linesAdd || linesRem) ? ' | ' + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset : '';
+        if (agentName) gitPart += (gitPart ? SEP : '') + C.yellow + 'Agent:' + agentName + C.reset;
+        const linesPart = (linesAdd || linesRem) ? SEP + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset : '';
 
         // Line 1 (shared by full and slim): model + context bar
         const provModel = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + model : model;
-        const line1 = provModel + '  ' + cc + mkBar(pct, 30) + C.reset + ' ' + fmtK(ctxTokens) + '/' + pct + '% | ' + C.dim + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+        const line1 = provModel + '  ' + cc + mkBar(pct, 30) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
 
         switch (TEMPLATE) {
             case 'full': {
@@ -123,17 +124,17 @@ process.stdin.on('end', () => {
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
                 const cCol = costC(cost);
                 console.log(
-                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' | ' +
-                    C.yellow + 'Out:' + fmtK(totalOut) + C.reset + ' | ' +
-                    C.blue + 'I/O ' + ioR + ':1' + C.reset + ' | ' +
+                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + SEP +
+                    C.yellow + 'Out:' + fmtK(totalOut) + C.reset + SEP +
+                    C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + SEP +
                     C.green + 'Cache:' + fmtK(cachedTokens) + C.reset +
-                    (totalCch > 0 ? ' ' + C.dim + '(' + C.reset + cchC + cchHit + '%' + C.reset + C.dim + ' ' + L.hit + ')' + C.reset : '') + ' | ' +
-                    C.cyan + fmtCost(cpm) + '/min' + C.reset + ' | ' +
+                    (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '') + SEP +
+                    C.cyan + fmtCost(cpm) + '/min' + C.reset + SEP +
                     C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset
                 );
 
-                let l3 = C.dim + L.session + ':' + fmtDur(durMs) + C.reset + ' | ' + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset;
-                if (gitPart) l3 += ' | ' + gitPart;
+                let l3 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.cyan + L.api + ':' + fmtDur(apiMs) + C.reset;
+                if (gitPart) l3 += SEP + gitPart;
                 l3 += linesPart;
                 console.log(l3);
                 break;
@@ -142,10 +143,10 @@ process.stdin.on('end', () => {
                 console.log(line1);
 
                 const cCol = costC(cost);
-                let l2 = C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset + ' | ' +
-                    C.bold + cCol + fmtCost(cost) + C.reset + ' | ' +
-                    C.dim + fmtDur(durMs) + C.reset;
-                if (gitPart) l2 += ' | ' + gitPart;
+                let l2 = C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset + SEP +
+                    C.bold + cCol + fmtCost(cost) + C.reset + SEP +
+                    C.white + fmtDur(durMs) + C.reset;
+                if (gitPart) l2 += SEP + gitPart;
                 l2 += linesPart;
                 console.log(l2);
                 break;
@@ -153,8 +154,8 @@ process.stdin.on('end', () => {
             case 'mini': {
                 const p = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + model : model;
                 const cCol = costC(cost);
-                let line = p + ' | ' + cc + 'Ctx ' + pct + '%' + C.reset + ' | ' + C.bold + cCol + fmtCost(cost) + C.reset + ' | ' + C.dim + fmtDurShort(durMs) + C.reset;
-                if (gitPart) line += ' | ' + gitPart;
+                let line = p + SEP + cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDurShort(durMs) + C.reset;
+                if (gitPart) line += SEP + gitPart;
                 line += linesPart;
                 console.log(line);
                 break;
