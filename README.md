@@ -169,7 +169,7 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **Docs:** [Alibaba Cloud Coding Plan](https://www.alibabacloud.com/help/en/model-studio/coding-plan#79cb18916c1fl)
 - **Base URL:** `https://coding-intl.dashscope.aliyuncs.com/apps/anthropic`
 - **API key:** Get a coding plan key (`sk-sp-xxxxx`) at [Alibaba Cloud Model Studio](https://bailian.console.alibabacloud.com/)
-- **Default models:** `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3.5-plus`, `qwen3-max-2026-01-23`, `glm-5`, `glm-4.7`, `kimi-k2.5`, `MiniMax-M2.5`
+- **Default models:** `glm-4.7`, `glm-5`, `kimi-k2.5`, `MiniMax-M2.5`, `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3-max-2026-01-23`, `qwen3.5-plus`
 
 ### DeepSeek
 
@@ -183,21 +183,21 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **Docs:** [MiniMax Claude Code integration](https://platform.minimax.io/docs/coding-plan/claude-code)
 - **Base URL:** `https://api.minimax.io/anthropic`
 - **API key:** Get one at [platform.minimax.io](https://platform.minimax.io)
-- **Default models:** `MiniMax-M2.5-highspeed`, `MiniMax-M2.5`, `MiniMax-M2.1`, `MiniMax-M2`
+- **Default models:** `MiniMax-M2`, `MiniMax-M2.1`, `MiniMax-M2.5`, `MiniMax-M2.5-highspeed`
 
 ### Moonshot AI
 
 - **Docs:** [Moonshot Claude Code support](https://platform.moonshot.ai/docs/guide/agent-support#configure-environment-variables-1)
 - **Base URL:** `https://api.moonshot.ai/anthropic`
 - **API key:** Get one at [platform.moonshot.ai](https://platform.moonshot.ai)
-- **Default models:** `kimi-k2.5`, `kimi-k2-0905-preview`, `kimi-k2-0711-preview`, `kimi-k2-turbo-preview`, `kimi-k2-thinking`, `kimi-k2-thinking-turbo`
+- **Default models:** `kimi-k2-0711-preview`, `kimi-k2-0905-preview`, `kimi-k2-thinking-turbo`, `kimi-k2-thinking`, `kimi-k2-turbo-preview`, `kimi-k2.5`
 
 ### Novita AI
 
 - **Docs:** [Novita AI Claude Code guide](https://novita.ai/docs/guides/claude-code) | [Supported models](https://novita.ai/docs/guides/llm-anthropic-compatibility#supported-models)
 - **Base URL:** `https://api.novita.ai/anthropic`
 - **API key:** Get one at [novita.ai](https://novita.ai)
-- **Default models:** `deepseek/deepseek-v3.2`, `deepseek/deepseek-v3.2-exp`, `deepseek/deepseek-v3.1-terminus`, `deepseek/deepseek-v3.1`, `deepseek/deepseek-v3-0324`, `minimax/minimax-m2.5`, `minimax/minimax-m2.1`, `minimax/minimax-m2`, `moonshotai/kimi-k2.5`, `moonshotai/kimi-k2-thinking`, `moonshotai/kimi-k2-0905`, `moonshotai/kimi-k2-instruct`, `qwen/qwen3-coder-next`, `qwen/qwen3-coder-480b-a35b-instruct`, `qwen/qwen3-next-80b-a3b-instruct`, `qwen/qwen3-next-80b-a3b-thinking`, `qwen/qwen3-235b-a22b-thinking-2507`, `zai-org/glm-5`, `zai-org/glm-4.7`, `zai-org/glm-4.6v`, `zai-org/glm-4.6`, `xiaomimimo/mimo-v2-flash`
+- **Default models:** `deepseek/deepseek-v3-0324`, `deepseek/deepseek-v3.1`, `deepseek/deepseek-v3.1-terminus`, `deepseek/deepseek-v3.2`, `deepseek/deepseek-v3.2-exp`, `minimax/minimax-m2`, `minimax/minimax-m2.1`, `minimax/minimax-m2.5`, `moonshotai/kimi-k2-0905`, `moonshotai/kimi-k2-instruct`, `moonshotai/kimi-k2-thinking`, `moonshotai/kimi-k2.5`, `qwen/qwen3-235b-a22b-thinking-2507`, `qwen/qwen3-coder-480b-a35b-instruct`, `qwen/qwen3-coder-next`, `qwen/qwen3-next-80b-a3b-instruct`, `qwen/qwen3-next-80b-a3b-thinking`, `xiaomimimo/mimo-v2-flash`, `zai-org/glm-4.6`, `zai-org/glm-4.6v`, `zai-org/glm-4.7`, `zai-org/glm-5`
 
 ### OpenRouter
 
@@ -213,7 +213,7 @@ OpenRouter validates your API key when you add or edit a provider.
 - **Docs:** [Poe Anthropic-compatible API](https://creator.poe.com/docs/external-applications/anthropic-compatible-api)
 - **Base URL:** `https://api.poe.com`
 - **API key:** Get one at [poe.com](https://poe.com)
-- **Default models:** `claude-sonnet-4.5`, `claude-opus-4.5`, `claude-haiku-4.5`, `claude-opus-4.1`, `claude-sonnet-4`, `claude-opus-4`, `claude-sonnet-3.7`, `claude-haiku-3.5`, `claude-haiku-3`
+- **Default models:** `claude-haiku-3`, `claude-haiku-3.5`, `claude-haiku-4.5`, `claude-opus-4`, `claude-opus-4.1`, `claude-opus-4.5`, `claude-sonnet-3.7`, `claude-sonnet-4`, `claude-sonnet-4.5`
 
 ### Requesty
 
@@ -227,7 +227,7 @@ OpenRouter validates your API key when you add or edit a provider.
 - **Docs:** [Z.AI Claude Code manual configuration](https://docs.z.ai/devpack/tool/claude#manual-configuration)
 - **Base URL:** `https://api.z.ai/api/anthropic`
 - **API key:** Get one at [z.ai](https://z.ai)
-- **Default models:** `GLM-5`, `GLM-5-Code`, `GLM-4.7`, `GLM-4.7-FlashX`, `GLM-4.6`, `GLM-4.5`, `GLM-4.5-X`, `GLM-4.5-Air`, `GLM-4.5-AirX`, `GLM-4-32B-0414-128K`, `GLM-4.7-Flash`, `GLM-4.5-Flash`
+- **Default models:** `GLM-4-32B-0414-128K`, `GLM-4.5`, `GLM-4.5-Air`, `GLM-4.5-AirX`, `GLM-4.5-Flash`, `GLM-4.5-X`, `GLM-4.6`, `GLM-4.7`, `GLM-4.7-Flash`, `GLM-4.7-FlashX`, `GLM-5`, `GLM-5-Code`
 
 ### Local Providers
 
