@@ -3,6 +3,7 @@ import { Box, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useEffect, useMemo, useState } from "react";
 import { computeDirName, ensureInstallationDir, generateShortId, loadConfig, saveConfig } from "../../config.ts";
+import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { PROVIDER_TEMPLATES } from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
@@ -24,6 +25,7 @@ interface AddProviderFlowProps {
 
 export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderFlowProps) {
 	const { t } = useTranslation();
+	const { rows } = useTerminalSize();
 	const [step, setStep] = useState<Step>("template");
 	const [templateId, setTemplateId] = useState("");
 	const [name, setName] = useState("");
@@ -155,6 +157,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 				</Text>
 				<SelectInput
 					items={templateItems}
+					limit={Math.max(3, rows - 9)}
 					onHighlight={(item) => {
 						setHighlightedTemplateId(item.value);
 					}}

@@ -221,6 +221,9 @@ export const ptBR: TranslationDictionary = {
 		architecture: "Arquitetura",
 		fileSize: "Tamanho",
 	},
+	terminal: {
+		tooSmall: "Terminal muito pequeno ({{current}}). Minimo: {{min}}",
+	},
 	localProvider: {
 		noApiKeyNeeded: "Sem chave de API (provedor local)",
 	},

@@ -23,6 +23,11 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 	};
 	process.on("SIGINT", handleSigint);
 
+	const onResize = () => {
+		process.stdout.write("\x1b[2J\x1b[H");
+	};
+	process.stdout.on("resize", onResize);
+
 	return new Promise((resolve) => {
 		let resolved = false;
 		let unmount: (() => void) | null = null;
@@ -30,6 +35,7 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 		const doResolve = (result: AppResult | null) => {
 			if (resolved) return;
 			resolved = true;
+			process.stdout.off("resize", onResize);
 			process.off("SIGINT", handleSigint);
 			try {
 				unmount?.();

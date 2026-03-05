@@ -1,6 +1,7 @@
 import { Box, Text } from "ink";
 import type React from "react";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
+import { useTranslation } from "../../i18n/context.tsx";
 import type { FooterShortcut } from "./Footer.tsx";
 import { Footer } from "./Footer.tsx";
 import { Header } from "./Header.tsx";
@@ -12,9 +13,23 @@ interface AppShellProps {
 }
 
 const MIN_SIDEBAR_WIDTH = 60;
+const MIN_COLS = 40;
+const MIN_ROWS = 12;
 
 export function AppShell({ children, sidebar, footerItems = [] }: AppShellProps) {
 	const { columns, rows } = useTerminalSize();
+	const { t } = useTranslation();
+
+	if (columns < MIN_COLS || rows < MIN_ROWS) {
+		return (
+			<Box height={rows} width={columns} alignItems="center" justifyContent="center">
+				<Text color="yellow">
+					{t("terminal.tooSmall", { current: `${columns}x${rows}`, min: `${MIN_COLS}x${MIN_ROWS}` })}
+				</Text>
+			</Box>
+		);
+	}
+
 	const showSidebar = sidebar && columns >= MIN_SIDEBAR_WIDTH;
 	const halfWidth = Math.floor((columns - 1) / 2);
 

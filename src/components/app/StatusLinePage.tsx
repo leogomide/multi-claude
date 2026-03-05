@@ -2,6 +2,7 @@ import { Box, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useEffect, useState } from "react";
 import { loadConfig, saveConfig } from "../../config.ts";
+import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { STATUSLINE_TEMPLATES, type StatusLineTemplateId } from "../../statusline.ts";
 import { AppShell } from "../layout/AppShell.tsx";
@@ -26,6 +27,7 @@ function useTemplateStrings() {
 
 export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 	const { t } = useTranslation();
+	const { rows } = useTerminalSize();
 	const ts = useTemplateStrings();
 	const [currentTemplate, setCurrentTemplate] = useState<string>("none");
 	const [highlightedId, setHighlightedId] = useState<StatusLineTemplateId>("none");
@@ -95,6 +97,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 				items={items}
 				onSelect={handleSelect}
 				onHighlight={(item) => setHighlightedId(item.value as StatusLineTemplateId)}
+				limit={Math.max(3, rows - 9)}
 			/>
 		</AppShell>
 	);

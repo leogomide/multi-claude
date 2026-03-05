@@ -218,6 +218,9 @@ export interface TranslationDictionary {
 		architecture: string;
 		fileSize: string;
 	};
+	terminal: {
+		tooSmall: string;
+	};
 	localProvider: {
 		noApiKeyNeeded: string;
 	};

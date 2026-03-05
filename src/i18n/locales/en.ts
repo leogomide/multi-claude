@@ -220,6 +220,9 @@ export const en: TranslationDictionary = {
 		architecture: "Architecture",
 		fileSize: "Size",
 	},
+	terminal: {
+		tooSmall: "Terminal too small ({{current}}). Minimum: {{min}}",
+	},
 	localProvider: {
 		noApiKeyNeeded: "No API key needed (local provider)",
 	},
