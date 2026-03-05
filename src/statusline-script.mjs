@@ -15,7 +15,7 @@ const C = {
     dim: '\x1b[2m',
     bold: '\x1b[1m',
     reset: '\x1b[0m',
-    white: '\x1b[37m',
+    white: '\x1b[97m',
     magenta: '\x1b[35m',
     blue: '\x1b[34m',
     brightBlue: '\x1b[94m',
