@@ -133,7 +133,6 @@ export function ChecklistSelect({ groups, onConfirm, onHighlight, onEscape }: Ch
 										{isChecked ? "[x] " : "[ ] "}
 										{item.label}
 									</Text>
-									<Text dimColor>{"  "}{item.description}</Text>
 								</Box>
 								{isChecked && item.acceptsValue && (
 									<Box marginLeft={6}>

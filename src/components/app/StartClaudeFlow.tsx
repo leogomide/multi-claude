@@ -232,17 +232,6 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 	const flagGroups = useMemo(() => {
 		return [
 			{
-				label: t("cliFlags.groupSession"),
-				items: [
-					{
-						label: t("cliFlags.resume"),
-						value: "--resume",
-						description: t("cliFlags.descResume"),
-						checked: preCheckedFlags.has("--resume"),
-					},
-				],
-			},
-			{
 				label: t("cliFlags.groupPermissions"),
 				items: [
 					{
@@ -250,6 +239,17 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 						value: "--dangerously-skip-permissions",
 						description: t("cliFlags.descSkipPermissions"),
 						checked: preCheckedFlags.has("--dangerously-skip-permissions"),
+					},
+				],
+			},
+			{
+				label: t("cliFlags.groupSession"),
+				items: [
+					{
+						label: t("cliFlags.resume"),
+						value: "--resume",
+						description: t("cliFlags.descResume"),
+						checked: preCheckedFlags.has("--resume"),
 					},
 				],
 			},
