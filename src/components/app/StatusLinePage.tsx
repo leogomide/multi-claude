@@ -43,8 +43,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 			<Box flexDirection="column">
 				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("In:84.2k", W)}</Text><Sep />
-					<Text color="yellow">{P("Out:62.8k", W)}</Text><Sep />
+					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
+					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
 					<Text color="green">{P("Cache:20.6M", W)}</Text>
 				</Text>
 				<Text>
@@ -74,8 +74,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text color="yellow">{P("Win: 200k", W4)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("In:84.2k", W4)}</Text><Sep />
-					<Text color="yellow">{P("Out:62.8k", W4)}</Text><Sep />
+					<Text color="cyan">{P("Input:84.2k", W4)}</Text><Sep />
+					<Text color="yellow">{P("Output:62.8k", W4)}</Text><Sep />
 					<Text color="green">{P("Cache:20.6M", W4)}</Text><Sep />
 					<Text color="blueBright">{P("I/O 1.3:1", W4)}</Text>
 				</Text>
@@ -99,7 +99,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 				{provLine}
 				{gridBar(bW, W3)}
 				<Text>
-					<Text><Text color="cyan">In:84.2k</Text>{" "}<Text color="yellow">{P("Out:62.8k", W3 - 9)}</Text></Text><Sep />
+					<Text><Text color="cyan">Input:84.2k</Text>{" "}<Text color="yellow">{P("Output:62.8k", W3 - 12)}</Text></Text><Sep />
 					<Text bold color="green">{P("$11.15", W3)}</Text><Sep />
 					<Text color="white">{P("3h31m", W3)}</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
@@ -133,7 +133,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text bold color="green">{P("Cost:$11.15", W5)}</Text><Sep />
 					<Text color="cyan">{P("$0.19/min", W5)}</Text><Sep />
 					<Text color="yellow">{P("~$11.40/h", W5)}</Text><Sep />
-					<Text><Text color="cyan">In:$3.40</Text>{" "}<Text color="yellow">{P("Out:$7.75", W5 - 8)}</Text></Text><Sep />
+					<Text><Text color="cyan">Input:$3.40</Text>{" "}<Text color="yellow">{P("Output:$7.75", W5 - 11)}</Text></Text><Sep />
 					<Text color="white">{P("Session:3h31m", W5)}</Text>
 				</Text>
 			</Box>
