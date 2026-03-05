@@ -98,10 +98,26 @@ export interface TranslationDictionary {
 		title: string;
 		openConfigFolder: string;
 		changeLanguage: string;
+		statusLine: string;
 		resetAll: string;
 		confirmResetAll: string;
 		resetAllSuccess: string;
 		back: string;
+	};
+	statusLine: {
+		title: string;
+		selectTemplate: string;
+		none: string;
+		noneDesc: string;
+		minimal: string;
+		minimalDesc: string;
+		basic: string;
+		basicDesc: string;
+		detailed: string;
+		detailedDesc: string;
+		compact: string;
+		compactDesc: string;
+		changed: string;
 	};
 	languageSelect: {
 		title: string;

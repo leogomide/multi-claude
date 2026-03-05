@@ -22,6 +22,7 @@ import { ManageProvidersPage } from "./ManageProvidersPage.tsx";
 import type { SettingsAction } from "./SettingsPage.tsx";
 import { SettingsPage } from "./SettingsPage.tsx";
 import { StartClaudeFlow } from "./StartClaudeFlow.tsx";
+import { StatusLinePage } from "./StatusLinePage.tsx";
 
 type AppView =
 	| "main-menu"
@@ -34,7 +35,8 @@ type AppView =
 	| "add-installation"
 	| "edit-installation"
 	| "settings"
-	| "change-language";
+	| "change-language"
+	| "statusline";
 
 interface UnifiedAppProps {
 	cliArgs?: string[];
@@ -195,6 +197,9 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 				case "language":
 					goTo("change-language", [settingsCrumb, t("settings.changeLanguage")]);
 					break;
+				case "statusline":
+					goTo("statusline", [settingsCrumb, t("settings.statusLine")]);
+					break;
 				case "back":
 					backToMenu();
 					break;
@@ -285,6 +290,10 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 					onDone={() => backToEditProvider()}
 					onCancel={() => backToEditProvider()}
 				/>
+			)}
+
+			{view === "statusline" && (
+				<StatusLinePage key={flowKey} onDone={(msg) => backToSettings(msg)} onCancel={() => backToSettings()} />
 			)}
 
 			{view === "change-language" && (

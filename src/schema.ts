@@ -32,11 +32,16 @@ export type Installation = z.infer<typeof installationSchema>;
 
 export const DEFAULT_INSTALLATION_ID = "default";
 
+export const statusLineConfigSchema = z.object({
+	template: z.string().default("none"),
+});
+
 export const configSchema = z.object({
 	providers: z.array(configuredProviderSchema),
 	installations: z.array(installationSchema).default([]),
 	language: z.string().optional(),
 	lastFlags: z.array(z.string()).optional(),
+	statusLine: statusLineConfigSchema.optional(),
 });
 
 export type ConfiguredProvider = z.infer<typeof configuredProviderSchema>;

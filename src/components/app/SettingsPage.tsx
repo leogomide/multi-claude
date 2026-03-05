@@ -8,7 +8,7 @@ import { StatusMessage } from "../common/StatusMessage.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
 
-export type SettingsAction = "open-folder" | "language" | "back";
+export type SettingsAction = "open-folder" | "language" | "statusline" | "back";
 
 interface SettingsPageProps {
 	onSelect: (action: SettingsAction) => void;
@@ -39,6 +39,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 	const menuItems = [
 		{ label: `📂 ${t("settings.openConfigFolder")}`, value: "open-folder" as const },
 		{ label: `🌐 ${t("settings.changeLanguage")}`, value: "language" as const },
+		{ label: `📊 ${t("settings.statusLine")}`, value: "statusline" as const },
 		{ label: `🗑️ ${t("settings.resetAll")}`, value: "reset-all" as const },
 		{ label: `↩ ${t("settings.back")}`, value: "back" as const },
 	];

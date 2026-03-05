@@ -1,7 +1,9 @@
 import { spawn, execSync } from "node:child_process";
+import { loadConfig } from "./config.ts";
 import { debugLog } from "./debug.ts";
 import { buildClaudeEnv } from "./providers.ts";
 import type { ConfiguredProvider } from "./schema.ts";
+import { buildStatusLineSettingsJson, ensureStatusLineScript, getStatusLineEnvVars } from "./statusline.ts";
 
 export async function runClaude(
 	provider: ConfiguredProvider,
@@ -51,6 +53,16 @@ export async function runClaude(
 		debugLog("runner.ts: could not resolve claude path, using 'claude'");
 	}
 	debugLog("runner.ts: claudePath=" + claudePath);
+
+	// Status line injection
+	const config = await loadConfig();
+	const slTemplate = config.statusLine?.template ?? "none";
+	if (slTemplate !== "none") {
+		const scriptPath = await ensureStatusLineScript();
+		Object.assign(env, getStatusLineEnvVars(provider, model, slTemplate));
+		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
+		debugLog("runner.ts: statusline template=" + slTemplate);
+	}
 
 	debugLog("runner.ts: spawning claude, args=" + JSON.stringify(args));
 	debugLog("runner.ts: env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
