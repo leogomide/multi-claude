@@ -24,7 +24,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		const freeW = barW - usedW;
 		return (
 			<Text>
-				<Text color="yellow">{"\u2593".repeat(usedW) + "\u2591".repeat(freeW)}</Text>
+				<Text color="yellow">{"\u2501".repeat(usedW) + "\u254c".repeat(freeW)}</Text>
 				<Sep />
 				<Text color="yellow">{P("46.1k/23% left", colW)}</Text>
 			</Text>

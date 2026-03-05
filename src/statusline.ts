@@ -22,7 +22,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "default",
 		nameKey: "statusLine.default",
 		descKey: "statusLine.defaultDesc",
-		preview: "Provider/Opus\nIn:84.2k       | Out:62.8k      | Cache:20.6M    | I/O 1.3:1\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min      | master | +45 -7\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591 | 46.1k/23% left",
+		preview: "Provider/Opus\nIn:84.2k       | Out:62.8k      | Cache:20.6M    | I/O 1.3:1\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min      | master | +45 -7\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c | 46.1k/23% left",
 	},
 	{
 		id: "full",
@@ -34,7 +34,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "slim",
 		nameKey: "statusLine.slim",
 		descKey: "statusLine.slimDesc",
-		preview: "Provider/Opus\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591 | 46.1k/23% left\nIn:84.2k Out:62.8k  | $11.15             | 3h31m              | master | +45 -7",
+		preview: "Provider/Opus\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c | 46.1k/23% left\nIn:84.2k Out:62.8k  | $11.15             | 3h31m              | master | +45 -7",
 	},
 	{
 		id: "mini",
