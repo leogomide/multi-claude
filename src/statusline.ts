@@ -6,7 +6,7 @@ import type { ConfiguredProvider } from "./schema.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export const STATUSLINE_TEMPLATE_IDS = ["none", "default", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
+export const STATUSLINE_TEMPLATE_IDS = ["none", "default", "full", "slim", "mini", "cost", "perf", "context"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
 
 export interface StatusLineTemplate {
@@ -48,13 +48,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		descKey: "statusLine.costDesc",
 		preview: "Provider/Opus (master +45 -7)\nInput:$3.40    | Output:$7.75   | Cost:$11.15\n$0.19/min      | ~$11.40/h      | Session:3h31m\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
 	},
-	{
-		id: "dev",
-		nameKey: "statusLine.dev",
-		descKey: "statusLine.devDesc",
-		preview: "Provider/Opus (master +45 -7)\nCtx 77%        | $11.15         | 3h31m",
-	},
-	{
+{
 		id: "perf",
 		nameKey: "statusLine.perf",
 		descKey: "statusLine.perfDesc",

@@ -128,22 +128,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		);
 	}
 
-	if (id === "dev") {
-		// Grid: 3 columns — developer-focused
-		const W = W4;
-		return (
-			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
-				<Text>
-					<Text color="yellow">{P("Ctx 77%", W)}</Text><Sep />
-					<Text color="green">{P("$11.15", W)}</Text><Sep />
-					<Text color="cyan">{P("3h31m", W)}</Text>
-				</Text>
-			</Box>
-		);
-	}
-
-	if (id === "perf") {
+if (id === "perf") {
 		// Grid: 3 columns — performance-focused
 		const W = W4;
 		return (

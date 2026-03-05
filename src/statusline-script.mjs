@@ -69,7 +69,7 @@ const fmtGrid = (W, coreLines, tailPerLine = []) => {
 };
 
 
-// Simple uniform padding for non-grid templates (mini, dev)
+// Simple uniform padding for non-grid templates (mini)
 const fmtLine = (core, tail = []) => {
     const fc = core.filter(Boolean);
     if (!fc.length) return tail.filter(Boolean).join(SEP);
@@ -305,26 +305,7 @@ process.stdin.on('end', () => {
                 console.log(barLine);
                 break;
             }
-            case 'dev': {
-                // Grid: 3 columns — developer-focused
-                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
-                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
-
-                const coreLines = [
-                    [
-                        cc + 'Ctx ' + pct + '%' + C.reset,
-                        C.green + fmtCost(cost) + C.reset,
-                        C.cyan + fmtDur(durMs) + C.reset,
-                    ],
-                ];
-                const W = calcW(coreLines);
-                const lines = fmtGrid(W, coreLines);
-
-                console.log(provModelLine);
-                lines.forEach(l => console.log(l));
-                break;
-            }
-            case 'perf': {
+case 'perf': {
                 // Grid: 3 columns — performance-focused
                 const totalCch = cacheCreate + cacheRead;
                 const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
