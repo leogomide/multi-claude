@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { loadConfig, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
@@ -107,7 +107,7 @@ export function ManageModelsFlow({ providerId, onDone, onCancel }: ManageModelsF
 					<Text bold color="cyan">
 						{t("common.whatToDo")}
 					</Text>
-					<SelectInput
+					<CyanSelectInput
 						items={menuItems}
 						onSelect={(item) => {
 							setMessage(null);
@@ -172,7 +172,7 @@ export function ManageModelsFlow({ providerId, onDone, onCancel }: ManageModelsF
 				<Text bold color="cyan">
 					{t("modelsFlow.selectModelToRemove")}
 				</Text>
-				<SelectInput
+				<CyanSelectInput
 					items={items}
 					onSelect={(item) => {
 						loadConfig().then((config) => {

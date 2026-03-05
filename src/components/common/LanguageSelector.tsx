@@ -1,5 +1,5 @@
 import { Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "./CyanSelectInput.tsx";
 import React from "react";
 import { useTranslation } from "../../i18n/context.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
@@ -35,7 +35,7 @@ export function LanguageSelector({ onSelect, onCancel }: LanguageSelectorProps) 
 			<Text bold color="cyan">
 				Select language / Selecione o idioma
 			</Text>
-			<SelectInput items={LANGUAGE_ITEMS} onSelect={(item) => onSelect(item.value)} />
+			<CyanSelectInput items={LANGUAGE_ITEMS} onSelect={(item) => onSelect(item.value)} />
 		</AppShell>
 	);
 }

@@ -1,6 +1,6 @@
 import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useMemo, useState } from "react";
 import { computeDirName, ensureInstallationDir, generateShortId, loadConfig, saveConfig } from "../../config.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
@@ -155,7 +155,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 				<Text bold color="cyan">
 					{t("addFlow.selectTemplate")}
 				</Text>
-				<SelectInput
+				<CyanSelectInput
 					items={templateItems}
 					limit={Math.max(3, rows - 9)}
 					onHighlight={(item) => {

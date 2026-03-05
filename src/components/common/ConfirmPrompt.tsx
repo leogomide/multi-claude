@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "./CyanSelectInput.tsx";
 import React from "react";
 import { useTranslation } from "../../i18n/context.tsx";
 
@@ -27,7 +27,7 @@ export function ConfirmPrompt({ message, onConfirm }: ConfirmPromptProps) {
 			<Text bold color="cyan">
 				{message}
 			</Text>
-			<SelectInput items={items} onSelect={(item) => onConfirm(item.value === "yes")} />
+			<CyanSelectInput items={items} onSelect={(item) => onConfirm(item.value === "yes")} />
 		</Box>
 	);
 }

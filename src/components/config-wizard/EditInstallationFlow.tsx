@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { computeDirName, loadConfig, removeInstallationDir, renameInstallationDir, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
@@ -83,7 +83,7 @@ export function EditInstallationFlow({ installationId, onDone, onCancel }: EditI
 					<Text bold color="cyan">
 						{t("common.whatToDo")}
 					</Text>
-					<SelectInput
+					<CyanSelectInput
 						items={menuItems}
 						onSelect={(item) => {
 							setMessage(null);

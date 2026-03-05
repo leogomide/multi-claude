@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "./CyanSelectInput.tsx";
 import TextInput from "ink-text-input";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "../../i18n/context.tsx";
@@ -62,7 +62,7 @@ export function SearchableSelect({
 			{filteredItems.length === 0 ? (
 				<Text color="yellow">{emptyMessage ?? t("searchSelect.noResults")}</Text>
 			) : (
-				<SelectInput items={filteredItems} onSelect={onSelect} limit={10} />
+				<CyanSelectInput items={filteredItems} onSelect={onSelect} limit={10} />
 			)}
 		</Box>
 	);

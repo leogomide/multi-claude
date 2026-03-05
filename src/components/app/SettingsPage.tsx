@@ -1,5 +1,5 @@
 import { Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useState } from "react";
 import { resetAllConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
@@ -69,7 +69,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 			{confirming ? (
 				<ConfirmPrompt message={t("settings.confirmResetAll")} onConfirm={handleResetConfirm} />
 			) : (
-				<SelectInput items={menuItems} onSelect={handleSelect} />
+				<CyanSelectInput items={menuItems} onSelect={handleSelect} />
 			)}
 		</AppShell>
 	);

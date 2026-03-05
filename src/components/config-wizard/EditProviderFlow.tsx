@@ -1,6 +1,6 @@
 import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { loadConfig, removeAccountDir, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
@@ -143,7 +143,7 @@ export function EditProviderFlow({ providerId, onDone, onManageModels, onOAuthLo
 					<Text bold color="cyan">
 						{t("common.whatToDo")}
 					</Text>
-					<SelectInput
+					<CyanSelectInput
 						items={menuItems}
 						onSelect={(item) => {
 							setMessage(null);

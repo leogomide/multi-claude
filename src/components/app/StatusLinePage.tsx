@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import SelectInput from "ink-select-input";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import React, { useEffect, useState } from "react";
 import { loadConfig, saveConfig } from "../../config.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
@@ -161,7 +161,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 			<Text bold color="cyan">
 				{t("statusLine.selectTemplate")}
 			</Text>
-			<SelectInput
+			<CyanSelectInput
 				items={items}
 				onSelect={handleSelect}
 				onHighlight={(item) => setHighlightedId(item.value as StatusLineTemplateId)}
