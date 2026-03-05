@@ -1,4 +1,6 @@
-import { debugLog } from "./debug.ts";
+import { createLogger, initLogger } from "./debug.ts";
+
+const log = createLogger("headless");
 import { loadConfig, migrateInstallations, slugify, isAccountAuthenticated, readOAuthCredentials, isOAuthTokenValid } from "./config.ts";
 import { getEffectiveModels } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";
@@ -214,7 +216,8 @@ function resolveInstallation(
 // --- Orchestrator ---
 
 export async function runHeadless(args: HeadlessArgs): Promise<number> {
-	debugLog("headless: started, provider=" + args.provider);
+	initLogger("headless");
+	log.info("started, provider=" + args.provider);
 
 	const config = await loadConfig();
 	await migrateInstallations(config);
@@ -264,7 +267,7 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 		}
 	}
 
-	debugLog(`headless: resolved provider="${provider.name}" model="${model}" installation="${installationId}"`);
+	log.info(`resolved provider="${provider.name}" model="${model}" installation="${installationId}"`);
 
 	const { runClaude } = await import("./runner.ts");
 	const exitCode = await runClaude(provider, model, args.claudeArgs, installationId);

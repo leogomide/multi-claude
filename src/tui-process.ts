@@ -1,33 +1,34 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadConfig, migrateInstallations, saveConfig, CONFIG_DIR } from "./config.ts";
-import { debugLog } from "./debug.ts";
+import { createLogger, formatError, initLogger } from "./debug.ts";
 import { initLocale } from "./i18n/index.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
 
 export const SELECTION_FILE = join(CONFIG_DIR, "last-selection.json");
 
+initLogger("tui");
+const log = createLogger("tui-process");
+
 process.on("uncaughtException", (err) => {
-	const detail = err instanceof Error ? (err.stack ?? err.message) : JSON.stringify(err);
-	debugLog("tui-process: UNCAUGHT EXCEPTION: " + detail);
-	console.error("mclaude crash:", detail);
+	log.error("UNCAUGHT EXCEPTION", err);
+	console.error("mclaude crash:", formatError(err));
 	process.exit(1);
 });
 process.on("unhandledRejection", (reason) => {
-	const detail = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
-	debugLog("tui-process: UNHANDLED REJECTION: " + detail);
-	console.error("mclaude crash (unhandled rejection):", detail);
+	log.error("UNHANDLED REJECTION", reason);
+	console.error("mclaude crash (unhandled rejection):", formatError(reason));
 	process.exit(1);
 });
 process.on("exit", (code) => {
-	debugLog("tui-process: process exit with code=" + code);
+	log.info("process exit with code=" + code);
 });
 
-debugLog("tui-process: started");
+log.info("started");
 
 // CLI args passed from parent process
 const cliArgs = process.argv.slice(2);
-debugLog("tui-process: cliArgs=" + JSON.stringify(cliArgs));
+log.debug("cliArgs=" + JSON.stringify(cliArgs));
 
 const config = await loadConfig();
 await migrateInstallations(config);
@@ -39,35 +40,35 @@ if (!config.language) {
 		config.language = locale;
 		await saveConfig(config);
 	} catch (err) {
-		debugLog("tui-process: language selection FAILED: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+		log.error("language selection FAILED", err);
 		config.language = "en";
 	}
 }
 
 initLocale(config.language);
 
-debugLog("tui-process: config loaded (lang=" + config.language + "), starting runApp()");
+log.info("config loaded (lang=" + config.language + "), starting runApp()");
 
 let result: Awaited<ReturnType<typeof import("./app.tsx")["runApp"]>>;
 try {
 	const { runApp } = await import("./app.tsx");
 	result = await runApp(cliArgs);
 } catch (err) {
-	debugLog("tui-process: runApp() THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
-	console.error("mclaude crash:", err instanceof Error ? err.message : String(err));
+	log.error("runApp() THREW", err);
+	console.error("mclaude crash:", formatError(err));
 	process.exit(1);
 }
 
-debugLog("tui-process: runApp() returned, result=" + (result ? `type=${result.type}` : "null"));
+log.info("runApp() returned, result=" + (result ? `type=${result.type}` : "null"));
 
 if (result) {
 	if (result.type === "run-update") {
-		debugLog("tui-process: update requested");
+		log.info("update requested");
 		process.exit(4);
 	}
 
 	if (result.type === "oauth-login") {
-		debugLog("tui-process: handling OAuth login for provider=" + result.providerName);
+		log.info("handling OAuth login for provider=" + result.providerName);
 		const oauthData = {
 			type: "oauth-login" as const,
 			providerId: result.providerId,
@@ -75,13 +76,13 @@ if (result) {
 			isNew: result.isNew,
 		};
 		await writeFile(SELECTION_FILE, JSON.stringify(oauthData), "utf-8");
-		debugLog("tui-process: oauth selection written to " + SELECTION_FILE);
+		log.info("oauth selection written to " + SELECTION_FILE);
 		process.exit(3); // signal cli.ts to handle OAuth login
 	}
 
 	if (result.type === "start-claude") {
 		if (!result.model && result.provider.type !== "oauth" && result.provider.templateId !== DEFAULT_LAUNCH_TEMPLATE_ID) {
-			debugLog("tui-process: model is null for API provider, aborting");
+			log.error("model is null for API provider, aborting");
 			process.exit(1);
 		}
 
@@ -90,9 +91,9 @@ if (result) {
 			const latestConfig = await loadConfig();
 			latestConfig.lastFlags = result.selectedFlags.filter((f) => f.startsWith("--"));
 			await saveConfig(latestConfig);
-			debugLog("tui-process: lastFlags saved to config");
+			log.info("lastFlags saved to config");
 		} catch (err) {
-			debugLog("tui-process: failed to save lastFlags: " + String(err));
+			log.warn("failed to save lastFlags: " + String(err));
 		}
 
 		const selection = {
@@ -107,10 +108,10 @@ if (result) {
 			selectedFlags: result.selectedFlags,
 		};
 		await writeFile(SELECTION_FILE, JSON.stringify(selection), "utf-8");
-		debugLog("tui-process: selection written to " + SELECTION_FILE);
+		log.info("selection written to " + SELECTION_FILE);
 		process.exit(0);
 	}
 }
 
-debugLog("tui-process: exiting (cancelled)");
+log.info("exiting (cancelled)");
 process.exit(1);

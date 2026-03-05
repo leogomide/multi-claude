@@ -4,7 +4,7 @@ import { execSync, spawnSync } from "node:child_process";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { debugLog } from "./src/debug.ts";
+import { createLogger, formatError, initLogger } from "./src/debug.ts";
 import type { ConfiguredProvider } from "./src/schema.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
 
@@ -28,6 +28,10 @@ interface OAuthSelection {
 }
 
 const SELECTION_FILE = join(homedir(), ".multi-claude", "last-selection.json");
+
+const sessionId = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+initLogger("cli", sessionId);
+const log = createLogger("cli");
 
 const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
 	"--resume", "-r",
@@ -85,20 +89,18 @@ function resetTerminal(): void {
 }
 
 process.on("uncaughtException", (err) => {
-	const detail = err instanceof Error ? (err.stack ?? err.message) : JSON.stringify(err);
-	debugLog("cli.ts: UNCAUGHT EXCEPTION: " + detail);
-	console.error("mclaude crash:", detail);
+	log.error("UNCAUGHT EXCEPTION", err);
+	console.error("mclaude crash:", formatError(err));
 });
 process.on("unhandledRejection", (reason) => {
-	const detail = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
-	debugLog("cli.ts: UNHANDLED REJECTION: " + detail);
-	console.error("mclaude crash (unhandled rejection):", detail);
+	log.error("UNHANDLED REJECTION", reason);
+	console.error("mclaude crash (unhandled rejection):", formatError(reason));
 });
 process.on("exit", (code) => {
-	debugLog("cli.ts: process exit with code=" + code);
+	log.info("process exit with code=" + code);
 });
 
-debugLog("cli.ts: started, argv=" + JSON.stringify(process.argv));
+log.info("started, argv=" + JSON.stringify(process.argv));
 
 const cliArgs = process.argv.slice(2);
 
@@ -134,6 +136,7 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 	console.log("Options:");
 	console.log("  --help, -h         Show this help message");
 	console.log("  --version, -v      Show version number");
+	console.log("  --logs [last|tail] Show debug log files");
 	process.exit(0);
 }
 
@@ -141,6 +144,13 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 if (cliArgs.includes("--version") || cliArgs.includes("-v")) {
 	const { version } = await import("./package.json");
 	console.log(version);
+	process.exit(0);
+}
+
+// Interceptar --logs
+if (cliArgs[0] === "--logs") {
+	const { handleLogs } = await import("./src/logs-viewer.ts");
+	await handleLogs(cliArgs[1]);
 	process.exit(0);
 }
 
@@ -168,11 +178,11 @@ const tuiPath = join(import.meta.dir, "src", "tui-process.ts");
 while (true) {
 	let tuiExitCode: number | null = null;
 do {
-	debugLog("cli.ts: spawning TUI process: " + tuiPath);
-	const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], { stdio: "inherit" });
+	log.info("spawning TUI process: " + tuiPath);
+	const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], { stdio: "inherit", env: process.env });
 
 	if (tuiResult.error) {
-		debugLog("cli.ts: TUI spawn error: " + String(tuiResult.error));
+		log.error("TUI spawn error", tuiResult.error);
 		console.error("Failed to start TUI:", tuiResult.error.message);
 		process.exit(1);
 	}
@@ -180,7 +190,7 @@ do {
 	tuiExitCode = tuiResult.status;
 
 	if (tuiExitCode === 2) {
-		debugLog("cli.ts: TUI exited with code 2, restarting TUI");
+		log.debug("TUI exited with code 2, restarting TUI");
 		continue;
 	}
 
@@ -195,17 +205,17 @@ do {
 			const accountDir = await ensureAccountDir(oauthData.providerId);
 			const claudePath = resolveClaudePath();
 
-			debugLog("cli.ts: running claude for OAuth login, provider=" + oauthData.providerName);
+			log.info("running claude for OAuth login, provider=" + oauthData.providerName);
 			const loginResult = spawnSync(claudePath, [], {
 				stdio: "inherit",
 				env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
 			});
 
 			if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
-				debugLog("cli.ts: OAuth login successful");
+				log.info("OAuth login successful");
 				console.log(`\n\u2713 Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
 			} else {
-				debugLog("cli.ts: OAuth login failed");
+				log.info("OAuth login failed");
 				if (oauthData.isNew) {
 					const cfg = await loadConfig();
 					cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
@@ -217,7 +227,7 @@ do {
 				}
 			}
 		} catch (err) {
-			debugLog("cli.ts: OAuth handling error: " + String(err));
+			log.error("OAuth handling error", err);
 		}
 		continue; // restart TUI
 	}
@@ -238,7 +248,7 @@ do {
 	}
 
 	if (tuiExitCode !== 0) {
-		debugLog("cli.ts: TUI exited with status=" + tuiExitCode);
+		log.info("TUI exited with status=" + tuiExitCode);
 		process.exit(tuiExitCode ?? 1);
 	}
 } while (tuiExitCode === 2 || tuiExitCode === 3);
@@ -249,9 +259,9 @@ try {
 	const raw = await readFile(SELECTION_FILE, "utf-8");
 	selection = JSON.parse(raw) as TuiSelection;
 	await unlink(SELECTION_FILE);
-	debugLog("cli.ts: selection read and deleted, provider=" + selection.providerName);
+	log.info("selection read and deleted, provider=" + selection.providerName);
 } catch (err) {
-	debugLog("cli.ts: failed to read selection file: " + String(err));
+	log.error("failed to read selection file", err);
 	console.error("Failed to read TUI selection.");
 	process.exit(1);
 }
@@ -260,7 +270,7 @@ const isOAuth = selection.type === "oauth";
 const isDefault = selection.templateId === DEFAULT_LAUNCH_TEMPLATE_ID;
 
 if (!selection.model && !isOAuth && !isDefault) {
-	debugLog("cli.ts: no model selected, aborting");
+	log.info("no model selected, aborting");
 	console.error("No model selected. Add models to this provider in 'Manage models'.");
 	process.exit(1);
 }
@@ -286,14 +296,14 @@ const mergedArgs = mergeFlags(cliArgs, selection.selectedFlags ?? []);
 let exitCode: number;
 if (isDefault) {
 	const { runClaudeDefault } = await import("./src/runner.ts");
-	debugLog("cli.ts: calling runClaudeDefault()");
+	log.info("calling runClaudeDefault()");
 	exitCode = await runClaudeDefault(mergedArgs, selection.installationId);
-	debugLog("cli.ts: runClaudeDefault() returned exitCode=" + exitCode);
+	log.info("runClaudeDefault() returned exitCode=" + exitCode);
 } else {
 	const { runClaude } = await import("./src/runner.ts");
-	debugLog("cli.ts: calling runClaude()");
+	log.info("calling runClaude()");
 	exitCode = await runClaude(provider, selection.model ?? "", mergedArgs, selection.installationId);
-	debugLog("cli.ts: runClaude() returned exitCode=" + exitCode);
+	log.info("runClaude() returned exitCode=" + exitCode);
 }
 
 resetTerminal();

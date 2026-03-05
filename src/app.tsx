@@ -1,7 +1,9 @@
 import { render } from "ink";
 import React from "react";
 import { UnifiedApp } from "./components/app/UnifiedApp.tsx";
-import { debugLog } from "./debug.ts";
+import { createLogger } from "./debug.ts";
+
+const log = createLogger("app");
 import { I18nProvider } from "./i18n/context.tsx";
 import type { ConfiguredProvider } from "./schema.ts";
 
@@ -34,7 +36,7 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 			try {
 				unmount?.();
 			} catch (err) {
-				debugLog("app.tsx: unmount() THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+				log.error("unmount() threw", err);
 			}
 			exitAlternateScreen();
 			resolve(result);
@@ -46,15 +48,15 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 					<UnifiedApp
 						cliArgs={cliArgs}
 						onStartClaude={(result) => {
-							debugLog("app.tsx: onStartClaude fired, provider=" + result.provider.name);
+							log.info("onStartClaude fired, provider=" + result.provider.name);
 							doResolve({ type: "start-claude", provider: result.provider, model: result.model, installationId: result.installationId, selectedFlags: result.selectedFlags });
 						}}
 						onOAuthLogin={(result) => {
-							debugLog("app.tsx: onOAuthLogin fired, provider=" + result.providerName);
+							log.info("onOAuthLogin fired, provider=" + result.providerName);
 							doResolve({ type: "oauth-login", providerId: result.providerId, providerName: result.providerName, isNew: result.isNew });
 						}}
 						onRunUpdate={() => {
-							debugLog("app.tsx: onRunUpdate fired");
+							log.info("onRunUpdate fired");
 							doResolve({ type: "run-update" });
 						}}
 					/>
@@ -66,11 +68,11 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 			renderResult.waitUntilExit().then(() => {
 				doResolve(null);
 			}).catch((err) => {
-				debugLog("app.tsx: waitUntilExit THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+				log.error("waitUntilExit threw", err);
 				doResolve(null);
 			});
 		} catch (err) {
-			debugLog("app.tsx: render THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+			log.error("render threw", err);
 			exitAlternateScreen();
 			resolve(null);
 		}

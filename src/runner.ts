@@ -1,6 +1,8 @@
 import { spawn, execSync } from "node:child_process";
 import { getInstallationPath, loadConfig } from "./config.ts";
-import { debugLog } from "./debug.ts";
+import { createLogger } from "./debug.ts";
+
+const log = createLogger("runner");
 import { buildClaudeEnv } from "./providers.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import type { ConfiguredProvider } from "./schema.ts";
@@ -51,15 +53,15 @@ export async function runClaude(
 			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
 		}
 	} catch {
-		debugLog("runner.ts: could not resolve claude path, using 'claude'");
+		log.warn("could not resolve claude path, using 'claude'");
 	}
-	debugLog("runner.ts: claudePath=" + claudePath);
+	log.info("claudePath=" + claudePath);
 
 	// Status line injection
 	const config = await loadConfig();
 	let slTemplate = config.statusLine?.template ?? "none";
 	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
-		debugLog("runner.ts: unknown template '" + slTemplate + "', falling back to 'full'");
+		log.warn("unknown template '" + slTemplate + "', falling back to 'full'");
 		slTemplate = "full";
 	}
 	if (slTemplate !== "none") {
@@ -67,11 +69,11 @@ export async function runClaude(
 		const language = config.language ?? "en";
 		Object.assign(env, getStatusLineEnvVars(provider, model, slTemplate, language));
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
-		debugLog("runner.ts: statusline template=" + slTemplate);
+		log.info("statusline template=" + slTemplate);
 	}
 
-	debugLog("runner.ts: spawning claude, args=" + JSON.stringify(args));
-	debugLog("runner.ts: env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
+	log.info("spawning claude, args=" + JSON.stringify(args));
+	log.debug("env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
 
 	return new Promise<number>((resolve, reject) => {
 		const child = spawn(claudePath, args, {
@@ -80,7 +82,7 @@ export async function runClaude(
 		});
 
 		child.on("error", (err) => {
-			debugLog("runner.ts: spawn error: " + (err.stack ?? err.message));
+			log.error("spawn error", err);
 			const msg = err.message;
 			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
 				console.error('Error: "claude" not found in PATH.\n');
@@ -95,7 +97,7 @@ export async function runClaude(
 		});
 
 		child.on("close", (code, signal) => {
-			debugLog("runner.ts: child closed, code=" + code + ", signal=" + signal);
+			log.info("child closed, code=" + code + ", signal=" + signal);
 			resolve(code ?? 1);
 		});
 	});
@@ -134,7 +136,7 @@ export async function runClaudeDefault(
 			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
 		}
 	} catch {
-		debugLog("runner.ts: could not resolve claude path, using 'claude'");
+		log.warn("could not resolve claude path, using 'claude'");
 	}
 
 	// Status line injection
@@ -152,10 +154,10 @@ export async function runClaudeDefault(
 		process.env["MCLAUDE_LANG"] = language;
 		addedEnvKeys.push("MCLAUDE_PROVIDER_NAME", "MCLAUDE_MODEL", "MCLAUDE_STATUSLINE_TEMPLATE", "MCLAUDE_LANG");
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
-		debugLog("runner.ts: statusline template=" + slTemplate + " (default launch)");
+		log.info("statusline template=" + slTemplate + " (default launch)");
 	}
 
-	debugLog("runner.ts: spawning claude (default), args=" + JSON.stringify(args));
+	log.info("spawning claude (default), args=" + JSON.stringify(args));
 
 	return new Promise<number>((resolve, reject) => {
 		// No explicit env — inherit process.env natively
@@ -171,7 +173,7 @@ export async function runClaudeDefault(
 
 		child.on("error", (err) => {
 			cleanup();
-			debugLog("runner.ts: spawn error: " + (err.stack ?? err.message));
+			log.error("spawn error", err);
 			const msg = err.message;
 			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
 				console.error('Error: "claude" not found in PATH.\n');
@@ -187,7 +189,7 @@ export async function runClaudeDefault(
 
 		child.on("close", (code, signal) => {
 			cleanup();
-			debugLog("runner.ts: child closed (default), code=" + code + ", signal=" + signal);
+			log.info("child closed (default), code=" + code + ", signal=" + signal);
 			resolve(code ?? 1);
 		});
 	});

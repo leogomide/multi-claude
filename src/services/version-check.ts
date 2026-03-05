@@ -1,4 +1,6 @@
-import { debugLog } from "../debug.ts";
+import { createLogger } from "../debug.ts";
+
+const log = createLogger("version-check");
 
 const NPM_REGISTRY_URL = "https://registry.npmjs.org/@leogomide/multi-claude/latest";
 
@@ -27,7 +29,7 @@ export async function checkForUpdate(
 		});
 
 		if (!response.ok) {
-			debugLog("version-check: registry returned status " + response.status);
+			log.warn("registry returned status " + response.status);
 			return { updateAvailable: false };
 		}
 
@@ -35,11 +37,11 @@ export async function checkForUpdate(
 		const latestVersion = data.version;
 
 		if (!latestVersion) {
-			debugLog("version-check: no version field in response");
+			log.warn("no version field in response");
 			return { updateAvailable: false };
 		}
 
-		debugLog(`version-check: current=${currentVersion}, latest=${latestVersion}`);
+		log.info(`current=${currentVersion}, latest=${latestVersion}`);
 
 		if (compareSemver(latestVersion, currentVersion) > 0) {
 			return { updateAvailable: true, latestVersion };
@@ -47,7 +49,7 @@ export async function checkForUpdate(
 
 		return { updateAvailable: false };
 	} catch (err) {
-		debugLog("version-check: fetch failed: " + String(err));
+		log.debug("fetch failed: " + String(err));
 		return { updateAvailable: false };
 	}
 }

@@ -1,7 +1,9 @@
 import { render } from "ink";
 import React from "react";
 import { LanguageSelector } from "./components/common/LanguageSelector.tsx";
-import { debugLog } from "./debug.ts";
+import { createLogger } from "./debug.ts";
+
+const log = createLogger("lang-selector");
 import { I18nProvider } from "./i18n/context.tsx";
 
 export async function selectLanguage(): Promise<string> {
@@ -24,13 +26,13 @@ export async function selectLanguage(): Promise<string> {
 			const { waitUntilExit, unmount } = render(
 				<I18nProvider>
 					<LanguageSelector onSelect={(locale) => {
-						debugLog("language-selector: locale selected=" + locale);
+						log.info("locale selected=" + locale);
 						capturedLocale = locale;
 						process.off("SIGINT", handleSigint);
 						try {
 							unmount();
 						} catch (err) {
-							debugLog("language-selector: unmount() THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+							log.error("unmount() threw", err);
 						}
 					}} />
 				</I18nProvider>,
@@ -40,19 +42,19 @@ export async function selectLanguage(): Promise<string> {
 				process.off("SIGINT", handleSigint);
 				exitAlternateScreen();
 				if (capturedLocale) {
-					debugLog("language-selector: resolving with locale=" + capturedLocale);
+					log.info("resolving with locale=" + capturedLocale);
 					resolve(capturedLocale);
 				} else {
-					debugLog("language-selector: no locale captured, rejecting");
+					log.info("no locale captured, rejecting");
 					reject(new Error("No language selected"));
 				}
 			}).catch((err) => {
-				debugLog("language-selector: waitUntilExit THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+				log.error("waitUntilExit threw", err);
 				exitAlternateScreen();
 				reject(err);
 			});
 		} catch (err) {
-			debugLog("language-selector: render THREW: " + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+			log.error("render threw", err);
 			exitAlternateScreen();
 			reject(err);
 		}
