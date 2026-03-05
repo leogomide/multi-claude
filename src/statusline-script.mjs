@@ -206,35 +206,35 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'full': {
-                // Grid: 4 columns, no bar
-                const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\u221e';
+                // Grid: 3 columns — same as default + context detail line
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
+
+                // Line 1: Provider/Model + git info + lines changed
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
 
                 const coreLines = [
                     [
-                        cc + 'Ctx: ' + pct + '%' + C.reset,
-                        cc + 'Used: ' + fmtK(ctxTokens) + C.reset,
-                        cc + 'Left: ' + fmtK(remaining) + C.reset,
-                        cc + 'Win: ' + fmtK(ctxSize) + C.reset,
+                        C.cyan + 'Ctx:' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset,
+                        C.yellow + L.left + ':' + fmtK(remaining) + '/' + remPct + '%' + C.reset,
+                        C.green + 'Win:' + fmtK(ctxSize) + C.reset,
                     ],
                     [
                         C.cyan + 'Input:' + fmtK(totalIn) + C.reset,
                         C.yellow + 'Output:' + fmtK(totalOut) + C.reset,
                         C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
-                        C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
                     ],
                     [
-                        C.white + L.session + ':' + fmtDur(durMs) + C.reset,
-                        C.white + L.api + ':' + fmtDur(apiMs) + C.reset,
-                        C.cyan + L.cost + ':' + fmtCost(cost) + C.reset,
-                        C.cyan + fmtCost(cpm) + '/min' + C.reset,
+                        C.cyan + L.session + ':' + fmtDur(durMs) + C.reset,
+                        C.yellow + L.api + ':' + fmtDur(apiMs) + C.reset,
+                        C.green + L.cost + ':' + fmtCost(cost) + C.reset,
                     ],
                 ];
-                const tailPerLine = [[], [], [gitPart, linesPart]];
+                const tailPerLine = [[], [], [C.green + fmtCost(cpm) + '/min' + C.reset]];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines, tailPerLine);
 
-                console.log(provModel);
+                console.log(provModelLine);
                 lines.forEach(l => console.log(l));
                 break;
             }

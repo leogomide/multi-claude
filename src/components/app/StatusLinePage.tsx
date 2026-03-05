@@ -63,29 +63,26 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	}
 
 	if (id === "full") {
-		// Grid: 4 columns, no bar
+		// Grid: 3 columns — same as default + context detail line
+		const W = W4;
 		return (
 			<Box flexDirection="column">
-				{provLine}
+				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="yellow">{P("Ctx: 77%", W4)}</Text><Sep />
-					<Text color="yellow">{P("Used: 153.9k", W4)}</Text><Sep />
-					<Text color="yellow">{P("Left: 46.1k", W4)}</Text><Sep />
-					<Text color="yellow">{P("Win: 200k", W4)}</Text>
+					<Text color="cyan">{P("Ctx:153.9k/77%", W)}</Text><Sep />
+					<Text color="yellow">{P("Left:46.1k/23%", W)}</Text><Sep />
+					<Text color="green">{P("Win:200k", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">{P("Input:84.2k", W4)}</Text><Sep />
-					<Text color="yellow">{P("Output:62.8k", W4)}</Text><Sep />
-					<Text color="green">{P("Cache:20.6M", W4)}</Text><Sep />
-					<Text color="blueBright">{P("I/O 1.3:1", W4)}</Text>
+					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
+					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
+					<Text color="green">{P("Cache:20.6M", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="white">{P("Session:3h31m", W4)}</Text><Sep />
-					<Text color="white">{P("API:1h38m", W4)}</Text><Sep />
-					<Text color="cyan">{P("Cost:$11.15", W4)}</Text><Sep />
-					<Text color="cyan">{P("$0.19/min", W4)}</Text><Sep />
-					<Text color="magenta">master</Text><Sep />
-					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+					<Text color="cyan">{P("Session:3h31m", W)}</Text><Sep />
+					<Text color="yellow">{P("API:1h38m", W)}</Text><Sep />
+					<Text color="green">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="green">$0.19/min</Text>
 				</Text>
 			</Box>
 		);

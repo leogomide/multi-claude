@@ -28,7 +28,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "full",
 		nameKey: "statusLine.full",
 		descKey: "statusLine.fullDesc",
-		preview: "Provider/Opus\nCtx: 77%       | Used: 153.9k   | Left: 46.1k    | Win: 200k\nInput:84.2k    | Output:62.8k   | Cache:20.6M    | I/O 1.3:1\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min      | master | +45 -7",
+		preview: "Provider/Opus (master +45 -7)\nCtx:153.9k/77% | Left:46.1k/23% | Win:200k\nInput:84.2k    | Output:62.8k   | Cache:20.6M\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min",
 	},
 	{
 		id: "slim",
