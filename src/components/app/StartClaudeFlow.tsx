@@ -116,14 +116,10 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 				};
 				setSelectedProvider(virtualProvider);
 				setSelectedModel("");
-
-				if (config.installations.length === 0) {
-					goToFlagsStep(virtualProvider, "", DEFAULT_INSTALLATION_ID);
-				} else if (config.installations.length === 1) {
-					goToFlagsStep(virtualProvider, "", config.installations[0]!.dirName);
-				} else {
-					setStep("select-installation");
-				}
+				// Always use DEFAULT_INSTALLATION_ID — custom installations override
+				// CLAUDE_CONFIG_DIR, which breaks auth for default launch (no explicit
+				// auth env vars; relies on stored credentials in ~/.claude/)
+				goToFlagsStep(virtualProvider, "", DEFAULT_INSTALLATION_ID);
 				return;
 			}
 
