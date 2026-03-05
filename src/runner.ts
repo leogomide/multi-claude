@@ -55,8 +55,12 @@ export async function runClaude(
 	debugLog("runner.ts: spawning claude, args=" + JSON.stringify(args));
 	debugLog("runner.ts: env keys=" + JSON.stringify(Object.keys(env).filter(k => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE"))));
 
-	if (process.stdout.isTTY) {
-		process.stdout.write(`\x1b]0;mclaude(${model})\x07`);
+	// Set terminal window title
+	const title = `mclaude(${model})`;
+	if (process.platform === "win32") {
+		process.title = title;
+	} else if (process.stdout.isTTY) {
+		process.stdout.write(`\x1b]0;${title}\x07`);
 	}
 
 	return new Promise<number>((resolve, reject) => {
