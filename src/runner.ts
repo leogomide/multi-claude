@@ -57,7 +57,7 @@ export async function runClaude(
 
 	// Keep terminal window title as mclaude(model) throughout the session.
 	// Subprocesses (npx, etc.) can overwrite the title, so we reapply it periodically.
-	const title = `mclaude(${model})`;
+	const title = `mclaude(${provider.name}/${model})`;
 	const setTitle = () => {
 		if (process.platform === "win32") {
 			process.title = title;
