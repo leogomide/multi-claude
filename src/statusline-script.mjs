@@ -184,12 +184,12 @@ process.stdin.on('end', () => {
                         C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
                     ],
                     [
-                        C.white + L.session + ':' + fmtDur(durMs) + C.reset,
-                        C.white + L.api + ':' + fmtDur(apiMs) + C.reset,
-                        C.cyan + L.cost + ':' + fmtCost(cost) + C.reset,
+                        C.cyan + L.session + ':' + fmtDur(durMs) + C.reset,
+                        C.yellow + L.api + ':' + fmtDur(apiMs) + C.reset,
+                        C.green + L.cost + ':' + fmtCost(cost) + C.reset,
                     ],
                 ];
-                const tailPerLine = [[], [C.cyan + fmtCost(cpm) + '/min' + C.reset]];
+                const tailPerLine = [[], [C.green + fmtCost(cpm) + '/min' + C.reset]];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines, tailPerLine);
 

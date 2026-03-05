@@ -48,10 +48,10 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text color="green">{P("Cache:20.6M", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="white">{P("Session:3h31m", W)}</Text><Sep />
-					<Text color="white">{P("API:1h38m", W)}</Text><Sep />
-					<Text color="cyan">{P("Cost:$11.15", W)}</Text><Sep />
-					<Text color="cyan">$0.19/min</Text>
+					<Text color="cyan">{P("Session:3h31m", W)}</Text><Sep />
+					<Text color="yellow">{P("API:1h38m", W)}</Text><Sep />
+					<Text color="green">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="green">$0.19/min</Text>
 				</Text>
 				<Text>
 					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
