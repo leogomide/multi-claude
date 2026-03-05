@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TerminalSize {
 	columns: number;
@@ -10,15 +10,26 @@ export function useTerminalSize(): TerminalSize {
 		columns: process.stdout.columns ?? 80,
 		rows: process.stdout.rows ?? 24,
 	});
+	const sizeRef = useRef(size);
 
 	useEffect(() => {
-		const onResize = () => {
-			setSize({ columns: process.stdout.columns, rows: process.stdout.rows });
+		const check = () => {
+			const cols = process.stdout.columns ?? 80;
+			const r = process.stdout.rows ?? 24;
+			if (cols !== sizeRef.current.columns || r !== sizeRef.current.rows) {
+				process.stdout.write("\x1b[2J\x1b[H");
+				const next = { columns: cols, rows: r };
+				sizeRef.current = next;
+				setSize(next);
+			}
 		};
 
-		process.stdout.on("resize", onResize);
+		process.stdout.on("resize", check);
+		const timer = setInterval(check, 2000);
+
 		return () => {
-			process.stdout.off("resize", onResize);
+			process.stdout.off("resize", check);
+			clearInterval(timer);
 		};
 	}, []);
 
