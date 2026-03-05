@@ -119,6 +119,10 @@ export const es: TranslationDictionary = {
 		detailedDesc: "Dos líneas: proveedor, modelo, directorio, git + barra de contexto, costo, duración",
 		compact: "Compacta",
 		compactDesc: "Una línea con contexto %, costo y rama git",
+		dashboard: "Dashboard",
+		dashboardDesc: "Dos líneas: barra de contexto amplia arriba, proveedor + costo + git + duración abajo",
+		tokens: "Tokens",
+		tokensDesc: "Conteo de tokens (entrada/salida) con contexto % y rama git",
 		changed: "Plantilla de línea de estado cambiada a {{template}}.",
 	},
 	languageSelect: {

@@ -117,6 +117,10 @@ export interface TranslationDictionary {
 		detailedDesc: string;
 		compact: string;
 		compactDesc: string;
+		dashboard: string;
+		dashboardDesc: string;
+		tokens: string;
+		tokensDesc: string;
 		changed: string;
 	};
 	languageSelect: {

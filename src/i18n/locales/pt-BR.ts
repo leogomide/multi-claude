@@ -119,6 +119,10 @@ export const ptBR: TranslationDictionary = {
 		detailedDesc: "Duas linhas: provedor, modelo, diretório, git + barra de contexto, custo, duração",
 		compact: "Compacta",
 		compactDesc: "Uma linha com contexto %, custo e branch git",
+		dashboard: "Dashboard",
+		dashboardDesc: "Duas linhas: barra de contexto larga em cima, provedor + custo + git + duração embaixo",
+		tokens: "Tokens",
+		tokensDesc: "Contagem de tokens (entrada/saída) com contexto % e branch git",
 		changed: "Template de linha de status alterado para {{template}}.",
 	},
 	languageSelect: {

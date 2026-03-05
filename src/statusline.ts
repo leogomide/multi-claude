@@ -4,9 +4,9 @@ import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
-const SCRIPT_VERSION = "1";
+const SCRIPT_VERSION = "2";
 
-export const STATUSLINE_TEMPLATE_IDS = ["none", "minimal", "basic", "detailed", "compact"] as const;
+export const STATUSLINE_TEMPLATE_IDS = ["none", "minimal", "basic", "detailed", "compact", "dashboard", "tokens"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
 
 export interface StatusLineTemplate {
@@ -27,6 +27,13 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		preview: "[Provider] model-name | my-project | main\n\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 20% | $0.05 | 3m 22s",
 	},
 	{ id: "compact", nameKey: "statusLine.compact", descKey: "statusLine.compactDesc", preview: "[Provider/model-name] 20% | $0.05 | main" },
+	{
+		id: "dashboard",
+		nameKey: "statusLine.dashboard",
+		descKey: "statusLine.dashboardDesc",
+		preview: "\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 15%\n[Provider] model-name | $0.12 | main | 5m 30s",
+	},
+	{ id: "tokens", nameKey: "statusLine.tokens", descKey: "statusLine.tokensDesc", preview: "[Provider/model-name] \u219315.2k \u21914.5k tokens | 42% | main" },
 ];
 
 function getStatusLineScript(): string {
@@ -83,6 +90,22 @@ process.stdin.on('end', () => {
             case 'compact': {
                 const branchPart = branch ? \` | \${branch}\` : '';
                 console.log(\`\${tag} \${pct}% | \${costFmt}\${branchPart}\`);
+                break;
+            }
+            case 'dashboard': {
+                const wideBar = '\\u2593'.repeat(Math.floor(pct / 5)) + '\\u2591'.repeat(20 - Math.floor(pct / 5));
+                console.log(\`\${barColor}\${wideBar}\${C.reset} \${pct}%\`);
+                const provTag = PROVIDER ? \`[\${PROVIDER}]\` : '';
+                const branchPart = branch ? \` | \${branch}\` : '';
+                console.log(\`\${C.cyan}\${provTag}\${C.reset} \${model} | \${C.yellow}\${costFmt}\${C.reset}\${branchPart} | \\u23F1\\uFE0F \${mins}m \${secs}s\`);
+                break;
+            }
+            case 'tokens': {
+                const inTok = d.context_window?.current_usage?.input_tokens || 0;
+                const outTok = d.context_window?.current_usage?.output_tokens || 0;
+                const fmtK = (n) => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
+                const branchPart = branch ? \` | \${branch}\` : '';
+                console.log(\`\${tag} \${C.green}\\u2193\${fmtK(inTok)}\${C.reset} \${C.yellow}\\u2191\${fmtK(outTok)}\${C.reset} tokens | \${pct}%\${branchPart}\`);
                 break;
             }
             default:

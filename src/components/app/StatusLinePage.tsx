@@ -22,6 +22,8 @@ function useTemplateStrings() {
 				case "basic": return t("statusLine.basic") as string;
 				case "detailed": return t("statusLine.detailed") as string;
 				case "compact": return t("statusLine.compact") as string;
+				case "dashboard": return t("statusLine.dashboard") as string;
+				case "tokens": return t("statusLine.tokens") as string;
 			}
 		},
 		desc: (id: StatusLineTemplateId): string => {
@@ -31,6 +33,8 @@ function useTemplateStrings() {
 				case "basic": return t("statusLine.basicDesc") as string;
 				case "detailed": return t("statusLine.detailedDesc") as string;
 				case "compact": return t("statusLine.compactDesc") as string;
+				case "dashboard": return t("statusLine.dashboardDesc") as string;
+				case "tokens": return t("statusLine.tokensDesc") as string;
 			}
 		},
 	};

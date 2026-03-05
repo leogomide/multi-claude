@@ -119,6 +119,10 @@ export const en: TranslationDictionary = {
 		detailedDesc: "Two lines: provider, model, dir, git + context bar, cost, duration",
 		compact: "Compact",
 		compactDesc: "Single line with context %, cost, and git branch",
+		dashboard: "Dashboard",
+		dashboardDesc: "Two lines: wide context bar on top, provider + cost + git + duration below",
+		tokens: "Tokens",
+		tokensDesc: "Token counts (in/out) with context % and git branch",
 		changed: "Status line template changed to {{template}}.",
 	},
 	languageSelect: {
