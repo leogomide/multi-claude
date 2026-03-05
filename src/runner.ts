@@ -58,12 +58,13 @@ export async function runClaude(
 	const config = await loadConfig();
 	let slTemplate = config.statusLine?.template ?? "none";
 	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
-		debugLog("runner.ts: unknown template '" + slTemplate + "', falling back to 'compact'");
-		slTemplate = "compact";
+		debugLog("runner.ts: unknown template '" + slTemplate + "', falling back to 'full'");
+		slTemplate = "full";
 	}
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
-		Object.assign(env, getStatusLineEnvVars(provider, model, slTemplate));
+		const language = config.language ?? "en";
+		Object.assign(env, getStatusLineEnvVars(provider, model, slTemplate, language));
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
 		debugLog("runner.ts: statusline template=" + slTemplate);
 	}
