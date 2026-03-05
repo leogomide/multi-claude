@@ -84,6 +84,16 @@ if (result) {
 			process.exit(1);
 		}
 
+		// Save selected flag names (without values) to config for next session
+		try {
+			const latestConfig = await loadConfig();
+			latestConfig.lastFlags = result.selectedFlags.filter((f) => f.startsWith("--"));
+			await saveConfig(latestConfig);
+			debugLog("tui-process: lastFlags saved to config");
+		} catch (err) {
+			debugLog("tui-process: failed to save lastFlags: " + String(err));
+		}
+
 		const selection = {
 			providerId: result.provider.id,
 			providerName: result.provider.name,

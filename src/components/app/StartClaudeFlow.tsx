@@ -80,7 +80,15 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 	const [installationActiveIndex, setInstallationActiveIndex] = useState(0);
 	const [selectedInstallationIdForFlags, setSelectedInstallationIdForFlags] = useState<string>("");
 	const [highlightedFlag, setHighlightedFlag] = useState<ChecklistItem | null>(null);
-	const preCheckedFlags = useMemo(() => parsePreCheckedFlags(cliArgs), [cliArgs]);
+	const [savedFlags, setSavedFlags] = useState<string[]>([]);
+	const preCheckedFlags = useMemo(() => {
+		const fromCli = parsePreCheckedFlags(cliArgs);
+		// Merge with saved flags from config (CLI args take priority)
+		for (const flag of savedFlags) {
+			fromCli.add(flag);
+		}
+		return fromCli;
+	}, [cliArgs, savedFlags]);
 
 	const goToFlagsStep = (provider: ConfiguredProvider, model: string, installationId: string) => {
 		setSelectedProvider(provider);
@@ -98,6 +106,9 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 			}
 			setSelectedProvider(provider);
 			setInstallations(config.installations);
+			if (config.lastFlags) {
+				setSavedFlags(config.lastFlags);
+			}
 
 			if (provider.type === "oauth") {
 				if (!isAccountAuthenticated(provider.id)) {

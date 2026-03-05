@@ -36,6 +36,7 @@ export const configSchema = z.object({
 	providers: z.array(configuredProviderSchema),
 	installations: z.array(installationSchema).default([]),
 	language: z.string().optional(),
+	lastFlags: z.array(z.string()).optional(),
 });
 
 export type ConfiguredProvider = z.infer<typeof configuredProviderSchema>;
