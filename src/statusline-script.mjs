@@ -55,41 +55,73 @@ process.stdin.on('data', chunk => input += chunk);
 process.stdin.on('end', () => {
     try {
         const d = JSON.parse(input);
+
+        // -- Session --
+        const cwd = d.cwd || '';
+        const sessionId = d.session_id || '';
+        const transcriptPath = d.transcript_path || '';
+        const claudeVersion = d.version || '';
+
+        // -- Model --
+        const modelId = d.model?.id || '';
         const model = d.model?.display_name || MODEL_HINT || 'unknown';
-        const pct = Math.floor(d.context_window?.used_percentage || 0);
-        const remPct = Math.floor(d.context_window?.remaining_percentage || 0);
+
+        // -- Workspace --
+        const workspaceCurrentDir = d.workspace?.current_dir || '';
+        const workspaceProjectDir = d.workspace?.project_dir || '';
+
+        // -- Output style --
+        const outputStyle = d.output_style?.name || 'default';
+
+        // -- Cost --
         const cost = d.cost?.total_cost_usd || 0;
         const durMs = d.cost?.total_duration_ms || 0;
         const apiMs = d.cost?.total_api_duration_ms || 0;
         const linesAdd = d.cost?.total_lines_added || 0;
         const linesRem = d.cost?.total_lines_removed || 0;
+
+        // -- Context window --
         const totalIn = d.context_window?.total_input_tokens || 0;
         const totalOut = d.context_window?.total_output_tokens || 0;
         const ctxSize = d.context_window?.context_window_size || 200000;
+        const pct = Math.floor(d.context_window?.used_percentage || 0);
+        const remPct = Math.floor(d.context_window?.remaining_percentage || 0);
         const curIn = d.context_window?.current_usage?.input_tokens || 0;
         const curOut = d.context_window?.current_usage?.output_tokens || 0;
         const cacheCreate = d.context_window?.current_usage?.cache_creation_input_tokens || 0;
         const cacheRead = d.context_window?.current_usage?.cache_read_input_tokens || 0;
+        const exceeds200k = d.exceeds_200k_tokens || false;
 
+        // -- Vim --
+        const vimMode = d.vim?.mode || '';
+
+        // -- Agent --
+        const agentName = d.agent?.name || '';
+
+        // -- Worktree --
+        const wt = d.worktree;
+        const wtName = wt?.name || '';
+        const wtPath = wt?.path || '';
+        const wtBranch = wt?.branch || '';
+        const wtOriginalCwd = wt?.original_cwd || '';
+        const wtOriginalBranch = wt?.original_branch || '';
+
+        // -- Git branch (from local git) --
         let branch = '';
         try {
             branch = execSync('git branch --show-current', { encoding: 'utf8', timeout: 2000 }).trim();
         } catch {}
 
+        // -- Derived values --
         const cc = ctxC(pct);
         const ctxTokens = curIn + cacheCreate + cacheRead;
         const cachedTokens = cacheCreate + cacheRead;
         const remaining = Math.floor(ctxSize * remPct / 100);
-
-        // Worktree / agent / branch info
-        const wt = d.worktree;
-        const agentName = d.agent?.name;
+        // -- Git display parts --
         let gitPart = '';
-        if (wt?.name) {
-            const wtBr = wt.branch || '';
-            const origBr = wt.original_branch || '';
-            const brInfo = wtBr ? C.magenta + wtBr + C.reset + (origBr ? ' ' + C.dim + '<-' + C.reset + ' ' + C.white + origBr + C.reset : '') : '';
-            gitPart = C.bold + C.brightBlue + 'WT:' + wt.name + C.reset + (brInfo ? ' ' + C.dim + '(' + C.reset + brInfo + C.dim + ')' + C.reset : '');
+        if (wtName) {
+            const brInfo = wtBranch ? C.magenta + wtBranch + C.reset + (wtOriginalBranch ? ' ' + C.dim + '<-' + C.reset + ' ' + C.white + wtOriginalBranch + C.reset : '') : '';
+            gitPart = C.bold + C.brightBlue + 'WT:' + wtName + C.reset + (brInfo ? ' ' + C.dim + '(' + C.reset + brInfo + C.dim + ')' + C.reset : '');
         } else if (branch) {
             gitPart = C.magenta + branch + C.reset;
         }
