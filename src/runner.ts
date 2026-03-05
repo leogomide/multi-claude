@@ -3,7 +3,7 @@ import { loadConfig } from "./config.ts";
 import { debugLog } from "./debug.ts";
 import { buildClaudeEnv } from "./providers.ts";
 import type { ConfiguredProvider } from "./schema.ts";
-import { buildStatusLineSettingsJson, ensureStatusLineScript, getStatusLineEnvVars } from "./statusline.ts";
+import { STATUSLINE_TEMPLATE_IDS, buildStatusLineSettingsJson, ensureStatusLineScript, getStatusLineEnvVars } from "./statusline.ts";
 
 export async function runClaude(
 	provider: ConfiguredProvider,
@@ -56,7 +56,11 @@ export async function runClaude(
 
 	// Status line injection
 	const config = await loadConfig();
-	const slTemplate = config.statusLine?.template ?? "none";
+	let slTemplate = config.statusLine?.template ?? "none";
+	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
+		debugLog("runner.ts: unknown template '" + slTemplate + "', falling back to 'compact'");
+		slTemplate = "compact";
+	}
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
 		Object.assign(env, getStatusLineEnvVars(provider, model, slTemplate));

@@ -16,26 +16,10 @@ function useTemplateStrings() {
 	const { t } = useTranslation();
 	return {
 		name: (id: StatusLineTemplateId): string => {
-			switch (id) {
-				case "none": return t("statusLine.none") as string;
-				case "minimal": return t("statusLine.minimal") as string;
-				case "basic": return t("statusLine.basic") as string;
-				case "detailed": return t("statusLine.detailed") as string;
-				case "compact": return t("statusLine.compact") as string;
-				case "dashboard": return t("statusLine.dashboard") as string;
-				case "tokens": return t("statusLine.tokens") as string;
-			}
+			return t(`statusLine.${id}`) as string;
 		},
 		desc: (id: StatusLineTemplateId): string => {
-			switch (id) {
-				case "none": return t("statusLine.noneDesc") as string;
-				case "minimal": return t("statusLine.minimalDesc") as string;
-				case "basic": return t("statusLine.basicDesc") as string;
-				case "detailed": return t("statusLine.detailedDesc") as string;
-				case "compact": return t("statusLine.compactDesc") as string;
-				case "dashboard": return t("statusLine.dashboardDesc") as string;
-				case "tokens": return t("statusLine.tokensDesc") as string;
-			}
+			return t(`statusLine.${id}Desc`) as string;
 		},
 	};
 }
