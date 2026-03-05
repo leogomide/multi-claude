@@ -112,12 +112,10 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "mini") {
 		return (
 			<Text>
-				<Text color="cyan">Provider</Text>/Model<Sep />
+				<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text><Sep />
 				<Text color="yellow">Ctx 77%</Text><Sep />
-				<Text bold color="green">$11.15</Text><Sep />
-				<Text color="white">3h31m</Text><Sep />
-				<Text color="magenta">master</Text><Sep />
-				<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+				<Text color="green">$11.15</Text><Sep />
+				<Text color="cyan">3h31m</Text>
 			</Text>
 		);
 	}

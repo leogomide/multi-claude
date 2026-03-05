@@ -269,11 +269,11 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'mini': {
-                // No grid — simple uniform padding
-                const cCol = costC(cost);
+                // Single line — follows default color scheme
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
                 console.log(fmtLine(
-                    [provModel, cc + 'Ctx ' + pct + '%' + C.reset, C.bold + cCol + fmtCost(cost) + C.reset, C.white + fmtDurShort(durMs) + C.reset],
-                    [gitPart, linesPart]
+                    [provModelLine, cc + 'Ctx ' + pct + '%' + C.reset, C.green + fmtCost(cost) + C.reset, C.cyan + fmtDurShort(durMs) + C.reset],
                 ));
                 break;
             }

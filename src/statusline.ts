@@ -40,7 +40,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "mini",
 		nameKey: "statusLine.mini",
 		descKey: "statusLine.miniDesc",
-		preview: "Provider/Opus | Ctx 77% | $11.15 | 3h31m | master | (+45,-7)",
+		preview: "Provider/Opus (master +45 -7) | Ctx 77% | $11.15 | 3h31m",
 	},
 	{
 		id: "cost",
