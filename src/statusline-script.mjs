@@ -170,32 +170,37 @@ process.stdin.on('end', () => {
 
         switch (TEMPLATE) {
             case 'default': {
-                // Grid: 4 columns
-                const COLS = 4;
-                const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\u221e';
+                // Grid: 3 columns
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
+
+                // Line 1: Provider/Model + git info
+                const provModelLine = provModel + (gitPart ? ' ' + C.dim + '(' + C.reset + gitPart + C.dim + ')' + C.reset : '');
 
                 const coreLines = [
                     [
-                        C.cyan + 'In:' + fmtK(totalIn) + C.reset,
-                        C.yellow + 'Out:' + fmtK(totalOut) + C.reset,
+                        C.cyan + 'Input:' + fmtK(totalIn) + C.reset,
+                        C.yellow + 'Output:' + fmtK(totalOut) + C.reset,
                         C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
-                        C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
                     ],
                     [
                         C.white + L.session + ':' + fmtDur(durMs) + C.reset,
                         C.white + L.api + ':' + fmtDur(apiMs) + C.reset,
                         C.cyan + L.cost + ':' + fmtCost(cost) + C.reset,
-                        C.cyan + fmtCost(cpm) + '/min' + C.reset,
                     ],
                 ];
-                const tailPerLine = [[], [gitPart, linesPart]];
+                const tailPerLine = [[], [C.cyan + fmtCost(cpm) + '/min' + C.reset, linesPart]];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines, tailPerLine);
 
-                console.log(provModel);
+                // Bar line: bar(2 cols) | used/pct + remaining/pct left(1 col)
+                const barW = 2 * W + SEP_W;
+                const bar = cc + mkBar(pct, barW) + C.reset;
+                const ctxInfo = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+                const barLine = bar + SEP + ctxInfo;
+
+                console.log(provModelLine);
                 lines.forEach(l => console.log(l));
-                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                console.log(barLine);
                 break;
             }
             case 'full': {
@@ -211,8 +216,8 @@ process.stdin.on('end', () => {
                         cc + 'Win: ' + fmtK(ctxSize) + C.reset,
                     ],
                     [
-                        C.cyan + 'In:' + fmtK(totalIn) + C.reset,
-                        C.yellow + 'Out:' + fmtK(totalOut) + C.reset,
+                        C.cyan + 'Input:' + fmtK(totalIn) + C.reset,
+                        C.yellow + 'Output:' + fmtK(totalOut) + C.reset,
                         C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
                         C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
                     ],
@@ -238,7 +243,7 @@ process.stdin.on('end', () => {
 
                 const coreLines = [
                     [
-                        C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset,
+                        C.cyan + 'Input:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Output:' + fmtK(totalOut) + C.reset,
                         C.bold + cCol + fmtCost(cost) + C.reset,
                         C.white + fmtDur(durMs) + C.reset,
                     ],
@@ -276,7 +281,7 @@ process.stdin.on('end', () => {
                         C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset,
                         C.cyan + fmtCost(cpm) + '/min' + C.reset,
                         cphCol + '~' + fmtCost(cph) + '/h' + C.reset,
-                        C.cyan + 'In:' + fmtCost(inCost) + C.reset + ' ' + C.yellow + 'Out:' + fmtCost(outCost) + C.reset,
+                        C.cyan + 'Input:' + fmtCost(inCost) + C.reset + ' ' + C.yellow + 'Output:' + fmtCost(outCost) + C.reset,
                         C.white + L.session + ':' + fmtDur(durMs) + C.reset,
                     ],
                 ];

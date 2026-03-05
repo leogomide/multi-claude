@@ -37,26 +37,27 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	const W5 = 17; // 5-col templates
 
 	if (id === "default") {
-		// Grid: 4 columns
-		const bW = 3 * W4 + 2 * 3; // bar spans 3 cols + 2 seps
+		// Grid: 3 columns
+		const W = W4;
 		return (
 			<Box flexDirection="column">
-				{provLine}
+				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text><Text dimColor>)</Text></Text>
 				<Text>
-					<Text color="cyan">{P("In:84.2k", W4)}</Text><Sep />
-					<Text color="yellow">{P("Out:62.8k", W4)}</Text><Sep />
-					<Text color="green">{P("Cache:20.6M", W4)}</Text><Sep />
-					<Text color="blueBright">{P("I/O 1.3:1", W4)}</Text>
+					<Text color="cyan">{P("In:84.2k", W)}</Text><Sep />
+					<Text color="yellow">{P("Out:62.8k", W)}</Text><Sep />
+					<Text color="green">{P("Cache:20.6M", W)}</Text>
 				</Text>
 				<Text>
-					<Text color="white">{P("Session:3h31m", W4)}</Text><Sep />
-					<Text color="white">{P("API:1h38m", W4)}</Text><Sep />
-					<Text color="cyan">{P("Cost:$11.15", W4)}</Text><Sep />
-					<Text color="cyan">{P("$0.19/min", W4)}</Text><Sep />
-					<Text color="magenta">master</Text><Sep />
+					<Text color="white">{P("Session:3h31m", W)}</Text><Sep />
+					<Text color="white">{P("API:1h38m", W)}</Text><Sep />
+					<Text color="cyan">{P("Cost:$11.15", W)}</Text><Sep />
+					<Text color="cyan">$0.19/min</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
 				</Text>
-				{gridBar(bW, W4)}
+				<Text>
+					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />
+					<Text color="yellow">153.9k/77%</Text><Sep /><Text color="yellow">46.1k/23% left</Text>
+				</Text>
 			</Box>
 		);
 	}
