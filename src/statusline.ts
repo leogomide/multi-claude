@@ -84,7 +84,7 @@ const fmtDur = (ms) => { const s = Math.floor(ms / 1000); const h = Math.floor(s
 const fmtDurShort = (ms) => Math.floor(ms / 60000) + 'm';
 const fmtCost = (usd) => '$' + usd.toFixed(2);
 const mkBar = (pct, w) => '\\u2593'.repeat(Math.floor(pct * w / 100)) + '\\u2591'.repeat(w - Math.floor(pct * w / 100));
-const ctxC = (pct) => pct > 90 ? C.red : pct > 70 ? C.yellow : C.green;
+const ctxC = (pct) => pct > 90 ? C.red : pct > 70 ? C.yellow : C.white;
 const costC = (usd) => usd >= 5 ? C.red : usd >= 1 ? C.yellow : C.green;
 const cphC = (usd) => usd >= 20 ? C.red : usd >= 5 ? C.yellow : C.green;
 const SEP = C.dim + ' | ' + C.reset;
