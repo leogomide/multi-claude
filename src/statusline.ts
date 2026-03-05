@@ -46,25 +46,25 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "cost",
 		nameKey: "statusLine.cost",
 		descKey: "statusLine.costDesc",
-		preview: "",
+		preview: "Provider/Opus (master +45 -7)\nInput:$3.40    | Output:$7.75   | Cost:$11.15\n$0.19/min      | ~$11.40/h      | Session:3h31m\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
 	},
 	{
 		id: "dev",
 		nameKey: "statusLine.dev",
 		descKey: "statusLine.devDesc",
-		preview: "",
+		preview: "Provider/Opus (master +45 -7)\nCtx 77%        | $11.15         | 3h31m",
 	},
 	{
 		id: "perf",
 		nameKey: "statusLine.perf",
 		descKey: "statusLine.perfDesc",
-		preview: "",
+		preview: "Provider/Opus (master +45 -7)\nCache:71% hit  | I/O 1.3:1      | API:47% time\nOutput:~297t/s | Session:3h31m  | $11.15\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
 	},
 	{
 		id: "context",
 		nameKey: "statusLine.context",
 		descKey: "statusLine.contextDesc",
-		preview: "",
+		preview: "Provider/Opus (master +45 -7)\nInput:84.2k    | Output:62.8k   | Total:167.6k/200k\nCacheCreate:2.1k | CacheRead:18.5k | Cache:20.6M\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
 	},
 ];
 

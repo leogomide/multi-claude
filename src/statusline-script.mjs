@@ -46,8 +46,6 @@ const fmtDurShort = (ms) => Math.floor(ms / 60000) + 'm';
 const fmtCost = (usd) => '$' + usd.toFixed(2);
 const mkBar = (pct, w) => '\u2501'.repeat(Math.floor(pct * w / 100)) + '\u254c'.repeat(w - Math.floor(pct * w / 100));
 const ctxC = (pct) => pct > 90 ? C.red : pct > 70 ? C.yellow : C.white;
-const costC = (usd) => usd >= 5 ? C.red : usd >= 1 ? C.yellow : C.green;
-const cphC = (usd) => usd >= 20 ? C.red : usd >= 5 ? C.yellow : C.green;
 const SEP = C.dim + ' | ' + C.reset;
 const SEP_W = 3; // visible width of ' | '
 
@@ -70,13 +68,6 @@ const fmtGrid = (W, coreLines, tailPerLine = []) => {
     });
 };
 
-// Build bar line that spans (cols-1) columns + 1 column for rest info
-const fmtBarLine = (pct, W, cols, cc, restText) => {
-    const barCols = cols - 1;
-    const barW = barCols * W + (barCols - 1) * SEP_W;
-    const bar = cc + mkBar(pct, barW) + C.reset;
-    return bar + SEP + padV(restText, W);
-};
 
 // Simple uniform padding for non-grid templates (mini, dev)
 const fmtLine = (core, tail = []) => {
@@ -166,8 +157,6 @@ process.stdin.on('end', () => {
 
         // Shared parts
         const provModel = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + C.white + model + C.reset : C.white + model + C.reset;
-        const ctxRestText = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
-
         switch (TEMPLATE) {
             case 'default': {
                 // Grid: 3 columns
@@ -279,96 +268,134 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'cost': {
-                // Grid: 5 columns
-                const COLS = 5;
-                const cCol = costC(cost);
+                // Grid: 3 columns — cost-focused
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
                 const cph = cpm * 60;
-                const cphCol = cphC(cph);
                 const inCost = cost > 0 && (totalIn + totalOut) > 0 ? cost * totalIn / (totalIn + totalOut) : 0;
                 const outCost = cost > 0 ? cost - inCost : 0;
 
+                // Line 1: Provider/Model + git info + lines changed
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
+
                 const coreLines = [
                     [
-                        C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset,
+                        C.cyan + 'Input:' + fmtCost(inCost) + C.reset,
+                        C.yellow + 'Output:' + fmtCost(outCost) + C.reset,
+                        C.green + L.cost + ':' + fmtCost(cost) + C.reset,
+                    ],
+                    [
                         C.cyan + fmtCost(cpm) + '/min' + C.reset,
-                        cphCol + '~' + fmtCost(cph) + '/h' + C.reset,
-                        C.cyan + 'Input:' + fmtCost(inCost) + C.reset + ' ' + C.yellow + 'Output:' + fmtCost(outCost) + C.reset,
-                        C.white + L.session + ':' + fmtDur(durMs) + C.reset,
+                        C.yellow + '~' + fmtCost(cph) + '/h' + C.reset,
+                        C.green + L.session + ':' + fmtDur(durMs) + C.reset,
                     ],
                 ];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines);
 
-                console.log(provModel);
-                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                // Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
+                const barW = 2 * W + SEP_W;
+                const bar = cc + mkBar(pct, barW) + C.reset;
+                const ctxUsed = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset;
+                const ctxLeft = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+                const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+
+                console.log(provModelLine);
                 lines.forEach(l => console.log(l));
+                console.log(barLine);
                 break;
             }
             case 'dev': {
-                // No grid — simple uniform padding
-                console.log(provModel);
-                let l2 = '';
-                if (gitPart) l2 += gitPart;
-                if (linesAdd || linesRem) l2 += (l2 ? SEP : '') + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset;
-                if (!l2) l2 = C.dim + '(no git)' + C.reset;
-                console.log(l2);
-                const cCol = costC(cost);
-                console.log(fmtLine([
-                    cc + 'Ctx ' + pct + '%' + C.reset,
-                    C.bold + cCol + fmtCost(cost) + C.reset,
-                    C.white + fmtDur(durMs) + C.reset,
-                ]));
-                break;
-            }
-            case 'perf': {
-                // Grid: 5 columns
-                const COLS = 5;
-                const totalCch = cacheCreate + cacheRead;
-                const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
-                const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
-                const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\u221e';
-                const apiPct = durMs > 0 ? Math.floor(apiMs / durMs * 100) : 0;
-                const outTokS = apiMs > 0 ? Math.floor(totalOut / (apiMs / 1000)) : 0;
-                const cCol = costC(cost);
+                // Grid: 3 columns — developer-focused
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
 
                 const coreLines = [
                     [
-                        cchC + 'Cache:' + cchHit + '% ' + L.hit + C.reset,
-                        C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
-                        C.cyan + L.api + ':' + apiPct + '% ' + L.time + C.reset,
-                        C.yellow + 'Out:~' + outTokS + 'tok/s' + C.reset,
-                        C.bold + cCol + fmtCost(cost) + C.reset,
+                        cc + 'Ctx ' + pct + '%' + C.reset,
+                        C.green + fmtCost(cost) + C.reset,
+                        C.cyan + fmtDur(durMs) + C.reset,
                     ],
                 ];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines);
 
-                console.log(provModel);
-                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                console.log(provModelLine);
                 lines.forEach(l => console.log(l));
                 break;
             }
+            case 'perf': {
+                // Grid: 3 columns — performance-focused
+                const totalCch = cacheCreate + cacheRead;
+                const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
+                const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\u221e';
+                const apiPct = durMs > 0 ? Math.floor(apiMs / durMs * 100) : 0;
+                const outTokS = apiMs > 0 ? Math.floor(totalOut / (apiMs / 1000)) : 0;
+
+                // Line 1: Provider/Model + git info + lines changed
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
+
+                const coreLines = [
+                    [
+                        C.cyan + 'Cache:' + cchHit + '% ' + L.hit + C.reset,
+                        C.yellow + 'I/O ' + ioR + ':1' + C.reset,
+                        C.green + L.api + ':' + apiPct + '% ' + L.time + C.reset,
+                    ],
+                    [
+                        C.cyan + 'Output:~' + outTokS + 'tok/s' + C.reset,
+                        C.yellow + L.session + ':' + fmtDur(durMs) + C.reset,
+                        C.green + fmtCost(cost) + C.reset,
+                    ],
+                ];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines);
+
+                // Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
+                const barW = 2 * W + SEP_W;
+                const bar = cc + mkBar(pct, barW) + C.reset;
+                const ctxUsed = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset;
+                const ctxLeft = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+                const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+
+                console.log(provModelLine);
+                lines.forEach(l => console.log(l));
+                console.log(barLine);
+                break;
+            }
             case 'context': {
-                // Grid: 5 columns
-                const COLS = 5;
+                // Grid: 3 columns — context window detail
                 const totalUsed = ctxTokens + curOut;
+
+                // Line 1: Provider/Model + git info + lines changed
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
 
                 const coreLines = [
                     [
                         C.cyan + 'Input:' + fmtK(curIn) + C.reset,
-                        C.green + 'CacheCreate:' + fmtK(cacheCreate) + C.reset,
-                        C.green + 'CacheRead:' + fmtK(cacheRead) + C.reset,
                         C.yellow + 'Output:' + fmtK(curOut) + C.reset,
-                        C.bold + C.white + 'Total:' + fmtK(totalUsed) + '/' + fmtK(ctxSize) + C.reset,
+                        C.green + 'Total:' + fmtK(totalUsed) + '/' + fmtK(ctxSize) + C.reset,
+                    ],
+                    [
+                        C.cyan + 'CacheCreate:' + fmtK(cacheCreate) + C.reset,
+                        C.yellow + 'CacheRead:' + fmtK(cacheRead) + C.reset,
+                        C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
                     ],
                 ];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines);
 
-                console.log(provModel);
-                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                // Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
+                const barW = 2 * W + SEP_W;
+                const bar = cc + mkBar(pct, barW) + C.reset;
+                const ctxUsed = cc + fmtK(ctxTokens) + '/' + pct + '%' + C.reset;
+                const ctxLeft = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
+                const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+
+                console.log(provModelLine);
                 lines.forEach(l => console.log(l));
+                console.log(barLine);
                 break;
             }
             default:
