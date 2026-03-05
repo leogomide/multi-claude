@@ -114,7 +114,7 @@ export const ptBR: TranslationDictionary = {
 		default: "Padr\u00e3o",
 		defaultDesc: "Quatro linhas: modelo, tokens + I/O + cache, sess\u00e3o + git, barra de contexto no final",
 		full: "Completa",
-		fullDesc: "Quatro linhas: modelo, tokens + I/O + cache, sess\u00e3o + git, info de contexto textual (sem barra)",
+		fullDesc: "Quatro linhas: modelo, info de contexto textual, tokens + I/O + cache, sess\u00e3o + git (sem barra)",
 		slim: "Slim",
 		slimDesc: "Tr\u00eas linhas: modelo, barra de contexto, tokens + custo + sess\u00e3o + git",
 		mini: "Mini",

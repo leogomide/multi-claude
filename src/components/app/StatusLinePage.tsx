@@ -66,6 +66,10 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 			<Box flexDirection="column">
 				{provLine}
 				<Text>
+					<Text color="yellow">Ctx: 153.9k/77%</Text><Sep />
+					<Text color="yellow">46.1k/23% left</Text>
+				</Text>
+				<Text>
 					<Text color="cyan">In:84.2k</Text>/
 					<Text color="yellow">Out:62.8k</Text>{" "}
 					<Text dimColor>{"("}</Text><Text color="blueBright">I/O 1.3:1</Text><Text dimColor>{")"}</Text><Sep />
@@ -79,10 +83,6 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text color="cyan">$0.19/min</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
-				</Text>
-				<Text>
-					<Text color="yellow">Ctx: 153.9k/77%</Text><Sep />
-					<Text color="yellow">46.1k/23% left</Text>
 				</Text>
 			</Box>
 		);

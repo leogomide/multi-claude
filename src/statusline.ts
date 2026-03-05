@@ -25,7 +25,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "full",
 		nameKey: "statusLine.full",
 		descKey: "statusLine.fullDesc",
-		preview: "Provider/Opus\nIn:84.2k/Out:62.8k (I/O 1.3:1) | Cache:20.6M (71% hit)\nSession:3h31m | API:1h38m | Cost:$11.15 | $0.19/min | master | (+45,-7)\nCtx: 153.9k/77% | 46.1k/23% left",
+		preview: "Provider/Opus\nCtx: 153.9k/77% | 46.1k/23% left\nIn:84.2k/Out:62.8k (I/O 1.3:1) | Cache:20.6M (71% hit)\nSession:3h31m | API:1h38m | Cost:$11.15 | $0.19/min | master | (+45,-7)",
 	},
 	{
 		id: "slim",
@@ -169,6 +169,7 @@ process.stdin.on('end', () => {
             }
             case 'full': {
                 console.log(provModel);
+                console.log(cc + 'Ctx: ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset);
 
                 const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\\u221e';
                 const totalCch = cacheCreate + cacheRead;
@@ -183,13 +184,12 @@ process.stdin.on('end', () => {
                     (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
                 );
 
-                let l3 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
+                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
                     C.cyan + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
                     C.cyan + fmtCost(cpm) + '/min' + C.reset;
-                if (gitPart) l3 += SEP + gitPart;
-                l3 += linesPart;
-                console.log(l3);
-                console.log(cc + 'Ctx: ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset);
+                if (gitPart) l4 += SEP + gitPart;
+                l4 += linesPart;
+                console.log(l4);
                 break;
             }
             case 'slim': {

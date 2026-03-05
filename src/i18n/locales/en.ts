@@ -114,7 +114,7 @@ export const en: TranslationDictionary = {
 		default: "Default",
 		defaultDesc: "Four lines: model, tokens + I/O + cache, session + git, context bar at the bottom",
 		full: "Full",
-		fullDesc: "Four lines: model, tokens + I/O + cache, session + git, textual context info (no bar)",
+		fullDesc: "Four lines: model, textual context info, tokens + I/O + cache, session + git (no bar)",
 		slim: "Slim",
 		slimDesc: "Three lines: model, context bar, tokens + cost + session + git",
 		mini: "Mini",

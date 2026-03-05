@@ -114,7 +114,7 @@ export const es: TranslationDictionary = {
 		default: "Predeterminada",
 		defaultDesc: "Cuatro l\u00edneas: modelo, tokens + I/O + cache, sesi\u00f3n + git, barra de contexto al final",
 		full: "Completa",
-		fullDesc: "Cuatro l\u00edneas: modelo, tokens + I/O + cache, sesi\u00f3n + git, info de contexto textual (sin barra)",
+		fullDesc: "Cuatro l\u00edneas: modelo, info de contexto textual, tokens + I/O + cache, sesi\u00f3n + git (sin barra)",
 		slim: "Slim",
 		slimDesc: "Tres l\u00edneas: modelo, barra de contexto, tokens + costo + sesi\u00f3n + git",
 		mini: "Mini",
