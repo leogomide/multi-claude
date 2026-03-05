@@ -134,6 +134,8 @@ export const ptBR: TranslationDictionary = {
 		settings: "Configurações",
 		addProvider: "Adicionar Provedor",
 		noProviders: "Nenhum provedor configurado",
+		defaultLaunch: "Claude Code (padr\u00e3o)",
+		defaultLaunchDesc: "Iniciar com sua conta Anthropic padr\u00e3o (sem overrides de provedor)",
 	},
 	providerSubmenu: {
 		title: "Gerenciar provedores",

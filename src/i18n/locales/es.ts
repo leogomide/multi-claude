@@ -134,6 +134,8 @@ export const es: TranslationDictionary = {
 		settings: "Configuración",
 		addProvider: "Agregar Proveedor",
 		noProviders: "No hay proveedores configurados",
+		defaultLaunch: "Claude Code (predeterminado)",
+		defaultLaunchDesc: "Iniciar con su cuenta Anthropic predeterminada (sin overrides de proveedor)",
 	},
 	providerSubmenu: {
 		title: "Gestionar proveedores",

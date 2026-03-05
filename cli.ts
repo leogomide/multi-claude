@@ -6,6 +6,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { debugLog } from "./src/debug.ts";
 import type { ConfiguredProvider } from "./src/schema.ts";
+import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
 
 interface TuiSelection {
 	providerId: string;
@@ -256,8 +257,9 @@ try {
 }
 
 const isOAuth = selection.type === "oauth";
+const isDefault = selection.templateId === DEFAULT_LAUNCH_TEMPLATE_ID;
 
-if (!selection.model && !isOAuth) {
+if (!selection.model && !isOAuth && !isDefault) {
 	debugLog("cli.ts: no model selected, aborting");
 	console.error("No model selected. Add models to this provider in 'Manage models'.");
 	process.exit(1);
@@ -281,16 +283,26 @@ const provider: ConfiguredProvider = {
 // Merge TUI-selected flags with original CLI args
 const mergedArgs = mergeFlags(cliArgs, selection.selectedFlags ?? []);
 
-const { runClaude } = await import("./src/runner.ts");
-debugLog("cli.ts: calling runClaude()");
-const exitCode = await runClaude(provider, selection.model ?? "", mergedArgs, selection.installationId);
-debugLog("cli.ts: runClaude() returned exitCode=" + exitCode);
+let exitCode: number;
+if (isDefault) {
+	const { runClaudeDefault } = await import("./src/runner.ts");
+	debugLog("cli.ts: calling runClaudeDefault()");
+	exitCode = await runClaudeDefault(mergedArgs, selection.installationId);
+	debugLog("cli.ts: runClaudeDefault() returned exitCode=" + exitCode);
+} else {
+	const { runClaude } = await import("./src/runner.ts");
+	debugLog("cli.ts: calling runClaude()");
+	exitCode = await runClaude(provider, selection.model ?? "", mergedArgs, selection.installationId);
+	debugLog("cli.ts: runClaude() returned exitCode=" + exitCode);
+}
 
 resetTerminal();
 
-const providerInfo = isOAuth
-	? selection.providerName
-	: `${selection.providerName} (${selection.model})`;
+const providerInfo = isDefault
+	? "Claude Code (default)"
+	: isOAuth
+		? selection.providerName
+		: `${selection.providerName} (${selection.model})`;
 
 if (exitCode !== 0) {
 	console.log(`\n[mclaude] ${providerInfo} \u2014 exited with code ${exitCode}`);

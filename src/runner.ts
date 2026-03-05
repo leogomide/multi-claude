@@ -1,7 +1,8 @@
 import { spawn, execSync } from "node:child_process";
-import { loadConfig } from "./config.ts";
+import { getInstallationPath, loadConfig } from "./config.ts";
 import { debugLog } from "./debug.ts";
 import { buildClaudeEnv } from "./providers.ts";
+import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 import { STATUSLINE_TEMPLATE_IDS, buildStatusLineSettingsJson, ensureStatusLineScript, getStatusLineEnvVars } from "./statusline.ts";
 
@@ -95,6 +96,110 @@ export async function runClaude(
 
 		child.on("close", (code, signal) => {
 			debugLog("runner.ts: child closed, code=" + code + ", signal=" + signal);
+			resolve(code ?? 1);
+		});
+	});
+}
+
+export async function runClaudeDefault(
+	extraArgs: string[] = [],
+	installationId?: string,
+): Promise<number> {
+	const env: Record<string, string> = {};
+	for (const [key, value] of Object.entries(process.env)) {
+		if (value !== undefined) {
+			env[key] = value;
+		}
+	}
+
+	// Clean provider-related env vars that might interfere
+	// Keep ANTHROPIC_API_KEY (user's native authentication)
+	delete env["ANTHROPIC_BASE_URL"];
+	delete env["ANTHROPIC_AUTH_TOKEN"];
+	delete env["OPENROUTER_API_KEY"];
+	delete env["ANTHROPIC_MODEL"];
+	delete env["ANTHROPIC_SMALL_FAST_MODEL"];
+	delete env["ANTHROPIC_DEFAULT_SONNET_MODEL"];
+	delete env["ANTHROPIC_DEFAULT_OPUS_MODEL"];
+	delete env["ANTHROPIC_DEFAULT_HAIKU_MODEL"];
+	delete env["API_TIMEOUT_MS"];
+	delete env["CLAUDE_CONFIG_DIR"];
+	for (const key of Object.keys(env)) {
+		if (key.startsWith("CLAUDECODE") || key.startsWith("CLAUDE_CODE")) {
+			delete env[key];
+		}
+	}
+
+	// Set installation dir for custom installations
+	if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
+		env["CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
+	}
+
+	// Build args (no --model flag)
+	const args: string[] = [];
+	let skipNext = false;
+	for (let i = 0; i < extraArgs.length; i++) {
+		if (skipNext) { skipNext = false; continue; }
+		const arg = extraArgs[i]!;
+		if (arg === "--model" || arg === "-m") { skipNext = true; continue; }
+		if (arg.startsWith("--model=")) { continue; }
+		args.push(arg);
+	}
+
+	// Resolve full claude path
+	let claudePath = "claude";
+	try {
+		if (process.platform === "win32") {
+			claudePath = execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
+		} else {
+			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
+		}
+	} catch {
+		debugLog("runner.ts: could not resolve claude path, using 'claude'");
+	}
+
+	// Status line injection
+	const config = await loadConfig();
+	let slTemplate = config.statusLine?.template ?? "none";
+	if (slTemplate !== "none" && !(STATUSLINE_TEMPLATE_IDS as readonly string[]).includes(slTemplate)) {
+		slTemplate = "full";
+	}
+	if (slTemplate !== "none") {
+		const scriptPath = await ensureStatusLineScript();
+		const language = config.language ?? "en";
+		env["MCLAUDE_PROVIDER_NAME"] = "";
+		env["MCLAUDE_MODEL"] = "";
+		env["MCLAUDE_STATUSLINE_TEMPLATE"] = slTemplate;
+		env["MCLAUDE_LANG"] = language;
+		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
+		debugLog("runner.ts: statusline template=" + slTemplate + " (default launch)");
+	}
+
+	debugLog("runner.ts: spawning claude (default), args=" + JSON.stringify(args));
+
+	return new Promise<number>((resolve, reject) => {
+		const child = spawn(claudePath, args, {
+			stdio: "inherit",
+			env,
+		});
+
+		child.on("error", (err) => {
+			debugLog("runner.ts: spawn error: " + (err.stack ?? err.message));
+			const msg = err.message;
+			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
+				console.error('Error: "claude" not found in PATH.\n');
+				console.error("Install Claude Code:");
+				console.error("  macOS/Linux/WSL:  curl -fsSL https://claude.ai/install.sh | bash");
+				console.error("  Windows:          irm https://claude.ai/install.ps1 | iex");
+				console.error("  Homebrew:         brew install --cask claude-code");
+				resolve(1);
+			} else {
+				reject(err);
+			}
+		});
+
+		child.on("close", (code, signal) => {
+			debugLog("runner.ts: child closed (default), code=" + code + ", signal=" + signal);
 			resolve(code ?? 1);
 		});
 	});

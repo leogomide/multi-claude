@@ -31,6 +31,7 @@ export const installationSchema = z.object({
 export type Installation = z.infer<typeof installationSchema>;
 
 export const DEFAULT_INSTALLATION_ID = "default";
+export const DEFAULT_LAUNCH_TEMPLATE_ID = "__default__";
 
 export const statusLineConfigSchema = z.object({
 	template: z.string().default("none"),

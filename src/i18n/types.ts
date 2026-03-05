@@ -132,6 +132,8 @@ export interface TranslationDictionary {
 		settings: string;
 		addProvider: string;
 		noProviders: string;
+		defaultLaunch: string;
+		defaultLaunchDesc: string;
 	};
 	providerSubmenu: {
 		title: string;

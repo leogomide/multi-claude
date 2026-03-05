@@ -111,6 +111,10 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 					setSelectedProviderId(result.providerId);
 					goTo("select-model", [result.providerName]);
 					break;
+				case "launch-default":
+					setSelectedProviderId(null);
+					goTo("select-model", [t("mainMenu.defaultLaunch")]);
+					break;
 				case "manage-providers":
 					goTo("manage-providers", [t("manageProviders.title")]);
 					break;
@@ -230,7 +234,7 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 				<MainMenu key={flowKey} onSelect={handleMainMenuSelect} onEscape={() => exit()} lastMessage={lastMessage} />
 			)}
 
-			{view === "select-model" && selectedProviderId && (
+			{view === "select-model" && (
 				<StartClaudeFlow
 					key={flowKey}
 					providerId={selectedProviderId}

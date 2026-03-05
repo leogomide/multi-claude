@@ -18,6 +18,7 @@ import type { FlowMessage } from "../types.ts";
 
 export type MainMenuResult =
 	| { type: "launch-provider"; providerId: string; providerName: string }
+	| { type: "launch-default" }
 	| { type: "manage-providers" }
 	| { type: "manage-installations" }
 	| { type: "settings" }
@@ -43,16 +44,22 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 	}, []);
 
 	const groups = useMemo(() => {
-		const providerItems: GroupedSelectItem[] = providers.map((p) => ({
-			label: p.name,
-			value: `provider:${p.id}`,
-			icon: p.type === "oauth" ? "🔐" : "🚀",
-		}));
+		const defaultItem: GroupedSelectItem = {
+			label: t("mainMenu.defaultLaunch"),
+			value: "__launch-default__",
+			icon: "🏠",
+		};
 
-		const launchGroup =
-			providerItems.length > 0
-				? { label: t("mainMenu.startClaude"), items: providerItems }
-				: { label: t("mainMenu.startClaude"), items: [{ label: t("mainMenu.noProviders"), value: "__no-providers__", icon: "💤" }] };
+		const providerItems: GroupedSelectItem[] = [
+			defaultItem,
+			...providers.map((p) => ({
+				label: p.name,
+				value: `provider:${p.id}`,
+				icon: p.type === "oauth" ? "🔐" : "🚀",
+			})),
+		];
+
+		const launchGroup = { label: t("mainMenu.startClaude"), items: providerItems };
 
 		const actionsGroup = {
 			label: t("mainMenu.options"),
@@ -82,7 +89,10 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 	}, [providers, t, latestVersion]);
 
 	const handleSelect = (item: GroupedSelectItem) => {
-		if (item.value === "__no-providers__") return;
+		if (item.value === "__launch-default__") {
+			onSelect({ type: "launch-default" });
+			return;
+		}
 		if (item.value === "update") {
 			onSelect({ type: "update" });
 		} else if (item.value.startsWith("provider:")) {
@@ -106,6 +116,10 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 
 	const sidebarContent = useMemo(() => {
 		if (!highlightedValue) return null;
+
+		if (highlightedValue === "__launch-default__") {
+			return <Sidebar items={[{ label: "", value: t("mainMenu.defaultLaunchDesc") }]} />;
+		}
 
 		if (highlightedValue.startsWith("provider:")) {
 			const providerId = highlightedValue.replace("provider:", "");

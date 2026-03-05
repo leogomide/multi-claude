@@ -6,7 +6,7 @@ import { getInstallationPath, isAccountAuthenticated, isOAuthTokenValid, loadCon
 import { useTranslation } from "../../i18n/context.tsx";
 import { getEffectiveModelsWithSource, getProviderBaseUrl, getTemplate } from "../../providers.ts";
 import type { ModelWithSource } from "../../providers.ts";
-import { DEFAULT_INSTALLATION_ID } from "../../schema.ts";
+import { DEFAULT_INSTALLATION_ID, DEFAULT_LAUNCH_TEMPLATE_ID } from "../../schema.ts";
 import type { ConfiguredProvider, Installation } from "../../schema.ts";
 import { fetchApiModels, hasApiModelFetching } from "../../services/api-models.ts";
 import type { ApiModelError } from "../../services/api-models.ts";
@@ -39,7 +39,7 @@ function parsePreCheckedFlags(args: string[]): Set<string> {
 type Step = "loading-models" | "select-model" | "select-installation" | "select-flags" | "no-models" | "error" | "auth-expired";
 
 interface StartClaudeFlowProps {
-	providerId: string;
+	providerId: string | null;
 	cliArgs?: string[];
 	onComplete: (result: { provider: ConfiguredProvider; model: string; installationId: string; selectedFlags: string[] }) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
@@ -99,16 +99,40 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 
 	useEffect(() => {
 		loadConfig().then((config) => {
+			setInstallations(config.installations);
+			if (config.lastFlags) {
+				setSavedFlags(config.lastFlags);
+			}
+
+			if (providerId === null) {
+				// Default launch: create virtual provider, skip model selection
+				const virtualProvider: ConfiguredProvider = {
+					id: "__default__",
+					name: t("mainMenu.defaultLaunch"),
+					templateId: DEFAULT_LAUNCH_TEMPLATE_ID,
+					type: "api",
+					apiKey: "",
+					models: [],
+				};
+				setSelectedProvider(virtualProvider);
+				setSelectedModel("");
+
+				if (config.installations.length === 0) {
+					goToFlagsStep(virtualProvider, "", DEFAULT_INSTALLATION_ID);
+				} else if (config.installations.length === 1) {
+					goToFlagsStep(virtualProvider, "", config.installations[0]!.dirName);
+				} else {
+					setStep("select-installation");
+				}
+				return;
+			}
+
 			const provider = config.providers.find((p) => p.id === providerId);
 			if (!provider) {
 				onCancel();
 				return;
 			}
 			setSelectedProvider(provider);
-			setInstallations(config.installations);
-			if (config.lastFlags) {
-				setSavedFlags(config.lastFlags);
-			}
 
 			if (provider.type === "oauth") {
 				if (!isAccountAuthenticated(provider.id)) {
@@ -308,8 +332,8 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 
 		if (key.escape) {
 			if (step === "select-installation") {
-				// Go back: for OAuth cancel, for API go back to model selection
-				if (selectedProvider?.type === "oauth") {
+				// Go back: for OAuth/default cancel, for API go back to model selection
+				if (selectedProvider?.type === "oauth" || selectedProvider?.templateId === DEFAULT_LAUNCH_TEMPLATE_ID) {
 					onCancel();
 				} else {
 					setStep("select-model");
@@ -505,10 +529,10 @@ export function StartClaudeFlow({ providerId, cliArgs = [], onComplete, onOAuthL
 					onHighlight={setHighlightedFlag}
 					onEscape={() => {
 						// Go back to installation selection if there are installations to choose from,
-						// otherwise go back to model selection (or cancel for OAuth)
+						// otherwise go back to model selection (or cancel for OAuth/default)
 						if (installationListItems.length > 1) {
 							setStep("select-installation");
-						} else if (selectedProvider.type === "oauth") {
+						} else if (selectedProvider.type === "oauth" || selectedProvider.templateId === DEFAULT_LAUNCH_TEMPLATE_ID) {
 							onCancel();
 						} else {
 							setStep("select-model");
