@@ -37,11 +37,10 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		</Text>
 	);
 
-	if (id === "full") {
+	if (id === "default") {
 		return (
 			<Box flexDirection="column">
 				{provLine}
-				{ctxBar}
 				<Text>
 					<Text color="cyan">In:84.2k</Text>/
 					<Text color="yellow">Out:62.8k</Text>{" "}
@@ -56,6 +55,34 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text color="cyan">$0.19/min</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+				</Text>
+				{ctxBar}
+			</Box>
+		);
+	}
+
+	if (id === "full") {
+		return (
+			<Box flexDirection="column">
+				{provLine}
+				<Text>
+					<Text color="cyan">In:84.2k</Text>/
+					<Text color="yellow">Out:62.8k</Text>{" "}
+					<Text dimColor>{"("}</Text><Text color="blueBright">I/O 1.3:1</Text><Text dimColor>{")"}</Text><Sep />
+					<Text color="green">Cache:20.6M</Text>
+					<Text dimColor>{" ("}</Text><Text color="green">71% hit</Text><Text dimColor>{")"}</Text>
+				</Text>
+				<Text>
+					<Text color="white">Session:3h31m</Text><Sep />
+					<Text color="white">API:1h38m</Text><Sep />
+					<Text color="cyan">Cost:$11.15</Text><Sep />
+					<Text color="cyan">$0.19/min</Text><Sep />
+					<Text color="magenta">master</Text><Sep />
+					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+				</Text>
+				<Text>
+					<Text color="yellow">Ctx: 153.9k/77%</Text><Sep />
+					<Text color="yellow">46.1k/23% left</Text>
 				</Text>
 			</Box>
 		);
@@ -185,7 +212,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 
 	useEffect(() => {
 		loadConfig().then((config) => {
-			const tmpl = (config.statusLine?.template ?? "full") as StatusLineTemplateId;
+			const tmpl = (config.statusLine?.template ?? "default") as StatusLineTemplateId;
 			setCurrentTemplate(tmpl);
 			setHighlightedId(tmpl);
 		});

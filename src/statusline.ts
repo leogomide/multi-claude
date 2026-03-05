@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
-export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
+export const STATUSLINE_TEMPLATE_IDS = ["none", "default", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
 
 export interface StatusLineTemplate {
@@ -16,10 +16,16 @@ export interface StatusLineTemplate {
 export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 	{ id: "none", nameKey: "statusLine.none", descKey: "statusLine.noneDesc", preview: "" },
 	{
+		id: "default",
+		nameKey: "statusLine.default",
+		descKey: "statusLine.defaultDesc",
+		preview: "Provider/Opus\nIn:84.2k/Out:62.8k (I/O 1.3:1) | Cache:20.6M (71% hit)\nSession:3h31m | API:1h38m | Cost:$11.15 | $0.19/min | master | (+45,-7)\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left",
+	},
+	{
 		id: "full",
 		nameKey: "statusLine.full",
 		descKey: "statusLine.fullDesc",
-		preview: "Provider/Opus\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left\nIn:84.2k | Out:62.8k | I/O 1.3:1 | Cache:20.6M (71% hit) | $0.19/min | Cost:$11.15\nSession:3h31m | API:1h38m | master | (+45,-7)",
+		preview: "Provider/Opus\nIn:84.2k/Out:62.8k (I/O 1.3:1) | Cache:20.6M (71% hit)\nSession:3h31m | API:1h38m | Cost:$11.15 | $0.19/min | master | (+45,-7)\nCtx: 153.9k/77% | 46.1k/23% left",
 	},
 	{
 		id: "slim",
@@ -64,7 +70,7 @@ function getStatusLineScript(): string {
 // mclaude status line script - auto-managed by mclaude
 const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || '';
 const MODEL_HINT = process.env.MCLAUDE_MODEL || '';
-const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || 'full';
+const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || 'default';
 const LANG = process.env.MCLAUDE_LANG || 'en';
 
 const C = { cyan: '\\x1b[36m', green: '\\x1b[32m', yellow: '\\x1b[33m', red: '\\x1b[91m', dim: '\\x1b[2m', bold: '\\x1b[1m', reset: '\\x1b[0m', white: '\\x1b[37m', magenta: '\\x1b[35m', blue: '\\x1b[34m', brightBlue: '\\x1b[94m' };
@@ -136,9 +142,8 @@ process.stdin.on('end', () => {
 
         // All templates start with provider/model on line 1
         switch (TEMPLATE) {
-            case 'full': {
+            case 'default': {
                 console.log(provModel);
-                console.log(ctxBar);
 
                 const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\\u221e';
                 const totalCch = cacheCreate + cacheRead;
@@ -153,12 +158,38 @@ process.stdin.on('end', () => {
                     (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
                 );
 
-                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
+                let l3 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
                     C.cyan + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
                     C.cyan + fmtCost(cpm) + '/min' + C.reset;
-                if (gitPart) l4 += SEP + gitPart;
-                l4 += linesPart;
-                console.log(l4);
+                if (gitPart) l3 += SEP + gitPart;
+                l3 += linesPart;
+                console.log(l3);
+                console.log(ctxBar);
+                break;
+            }
+            case 'full': {
+                console.log(provModel);
+
+                const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\\u221e';
+                const totalCch = cacheCreate + cacheRead;
+                const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
+                const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
+                const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
+                const cCol = costC(cost);
+                console.log(
+                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + '/' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset +
+                    ' ' + C.dim + '(' + C.reset + C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + C.dim + ')' + C.reset + SEP +
+                    C.green + 'Cache:' + fmtK(cachedTokens) + C.reset +
+                    (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
+                );
+
+                let l3 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
+                    C.cyan + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
+                    C.cyan + fmtCost(cpm) + '/min' + C.reset;
+                if (gitPart) l3 += SEP + gitPart;
+                l3 += linesPart;
+                console.log(l3);
+                console.log(cc + 'Ctx: ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset);
                 break;
             }
             case 'slim': {

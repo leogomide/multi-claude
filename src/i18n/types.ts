@@ -109,6 +109,8 @@ export interface TranslationDictionary {
 		selectTemplate: string;
 		none: string;
 		noneDesc: string;
+		default: string;
+		defaultDesc: string;
 		full: string;
 		fullDesc: string;
 		slim: string;
