@@ -22,19 +22,19 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "default",
 		nameKey: "statusLine.default",
 		descKey: "statusLine.defaultDesc",
-		preview: "Provider/Opus\nIn:84.2k/Out:62.8k (I/O 1.3:1) | Cache:20.6M (71% hit)\nSession:3h31m | API:1h38m | Cost:$11.15 | $0.19/min | master | (+45,-7)\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left",
+		preview: "Provider/Opus\nIn:84.2k       | Out:62.8k      | Cache:20.6M    | I/O 1.3:1\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min      | master | +45 -7\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591 | 46.1k/23% left",
 	},
 	{
 		id: "full",
 		nameKey: "statusLine.full",
 		descKey: "statusLine.fullDesc",
-		preview: "Provider/Opus\nCtx: 153.9k/77% | 46.1k/23% left\nIn:84.2k/Out:62.8k (I/O 1.3:1) | Cache:20.6M (71% hit)\nSession:3h31m | API:1h38m | Cost:$11.15 | $0.19/min | master | (+45,-7)",
+		preview: "Provider/Opus\nCtx: 77%       | Used: 153.9k   | Left: 46.1k    | Win: 200k\nIn:84.2k       | Out:62.8k      | Cache:20.6M    | I/O 1.3:1\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min      | master | +45 -7",
 	},
 	{
 		id: "slim",
 		nameKey: "statusLine.slim",
 		descKey: "statusLine.slimDesc",
-		preview: "Provider/Opus\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591 153.9k/77% | 46.1k/23% left\nIn:84.2k Out:62.8k | $11.15 | 3h31m | master | (+45,-7)",
+		preview: "Provider/Opus\n\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2591\u2591 | 46.1k/23% left\nIn:84.2k Out:62.8k  | $11.15             | 3h31m              | master | +45 -7",
 	},
 	{
 		id: "mini",

@@ -9,10 +9,7 @@ import { AppShell } from "../layout/AppShell.tsx";
 import type { FlowMessage } from "../types.ts";
 
 const Sep = () => <Text dimColor>{" | "}</Text>;
-const BAR_USED = "\u2593".repeat(23);
-const BAR_FREE = "\u2591".repeat(7);
-const BAR_USED_L = "\u2593".repeat(38);
-const BAR_FREE_L = "\u2591".repeat(12);
+const P = (s: string, w: number) => s + " ".repeat(Math.max(0, w - s.length));
 
 function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "none") return null;
@@ -21,66 +18,71 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		<Text><Text color="cyan">Provider</Text>/Model</Text>
 	);
 
-	const ctxBar = (
-		<Text>
-			<Text color="yellow">{BAR_USED + BAR_FREE} 153.9k/77%</Text>
-			<Sep />
-			<Text color="yellow">46.1k/23% left</Text>
-		</Text>
-	);
+	// Grid bar: spans (cols-1) columns fused + 1 column for rest
+	const gridBar = (barW: number, colW: number) => {
+		const usedW = Math.floor(barW * 0.77);
+		const freeW = barW - usedW;
+		return (
+			<Text>
+				<Text color="yellow">{"\u2593".repeat(usedW) + "\u2591".repeat(freeW)}</Text>
+				<Sep />
+				<Text color="yellow">{P("46.1k/23% left", colW)}</Text>
+			</Text>
+		);
+	};
 
-	const ctxBarWide = (
-		<Text>
-			<Text color="yellow">{BAR_USED_L + BAR_FREE_L} 153.9k/77%</Text>
-			<Sep />
-			<Text color="yellow">46.1k left</Text>
-		</Text>
-	);
+	// Column width for previews (approximate)
+	const W4 = 14; // 4-col templates
+	const W3 = 18; // 3-col templates
+	const W5 = 17; // 5-col templates
 
 	if (id === "default") {
+		// Grid: 4 columns
+		const bW = 3 * W4 + 2 * 3; // bar spans 3 cols + 2 seps
 		return (
 			<Box flexDirection="column">
 				{provLine}
 				<Text>
-					<Text color="cyan">In:84.2k</Text>/
-					<Text color="yellow">Out:62.8k</Text>{" "}
-					<Text dimColor>{"("}</Text><Text color="blueBright">I/O 1.3:1</Text><Text dimColor>{")"}</Text><Sep />
-					<Text color="green">Cache:20.6M</Text>
-					<Text dimColor>{" ("}</Text><Text color="green">71% hit</Text><Text dimColor>{")"}</Text>
+					<Text color="cyan">{P("In:84.2k", W4)}</Text><Sep />
+					<Text color="yellow">{P("Out:62.8k", W4)}</Text><Sep />
+					<Text color="green">{P("Cache:20.6M", W4)}</Text><Sep />
+					<Text color="blueBright">{P("I/O 1.3:1", W4)}</Text>
 				</Text>
 				<Text>
-					<Text color="white">Session:3h31m</Text><Sep />
-					<Text color="white">API:1h38m</Text><Sep />
-					<Text color="cyan">Cost:$11.15</Text><Sep />
-					<Text color="cyan">$0.19/min</Text><Sep />
+					<Text color="white">{P("Session:3h31m", W4)}</Text><Sep />
+					<Text color="white">{P("API:1h38m", W4)}</Text><Sep />
+					<Text color="cyan">{P("Cost:$11.15", W4)}</Text><Sep />
+					<Text color="cyan">{P("$0.19/min", W4)}</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
 				</Text>
-				{ctxBar}
+				{gridBar(bW, W4)}
 			</Box>
 		);
 	}
 
 	if (id === "full") {
+		// Grid: 4 columns, no bar
 		return (
 			<Box flexDirection="column">
 				{provLine}
 				<Text>
-					<Text color="yellow">Ctx: 153.9k/77%</Text><Sep />
-					<Text color="yellow">46.1k/23% left</Text>
+					<Text color="yellow">{P("Ctx: 77%", W4)}</Text><Sep />
+					<Text color="yellow">{P("Used: 153.9k", W4)}</Text><Sep />
+					<Text color="yellow">{P("Left: 46.1k", W4)}</Text><Sep />
+					<Text color="yellow">{P("Win: 200k", W4)}</Text>
 				</Text>
 				<Text>
-					<Text color="cyan">In:84.2k</Text>/
-					<Text color="yellow">Out:62.8k</Text>{" "}
-					<Text dimColor>{"("}</Text><Text color="blueBright">I/O 1.3:1</Text><Text dimColor>{")"}</Text><Sep />
-					<Text color="green">Cache:20.6M</Text>
-					<Text dimColor>{" ("}</Text><Text color="green">71% hit</Text><Text dimColor>{")"}</Text>
+					<Text color="cyan">{P("In:84.2k", W4)}</Text><Sep />
+					<Text color="yellow">{P("Out:62.8k", W4)}</Text><Sep />
+					<Text color="green">{P("Cache:20.6M", W4)}</Text><Sep />
+					<Text color="blueBright">{P("I/O 1.3:1", W4)}</Text>
 				</Text>
 				<Text>
-					<Text color="white">Session:3h31m</Text><Sep />
-					<Text color="white">API:1h38m</Text><Sep />
-					<Text color="cyan">Cost:$11.15</Text><Sep />
-					<Text color="cyan">$0.19/min</Text><Sep />
+					<Text color="white">{P("Session:3h31m", W4)}</Text><Sep />
+					<Text color="white">{P("API:1h38m", W4)}</Text><Sep />
+					<Text color="cyan">{P("Cost:$11.15", W4)}</Text><Sep />
+					<Text color="cyan">{P("$0.19/min", W4)}</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
 				</Text>
@@ -89,15 +91,16 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	}
 
 	if (id === "slim") {
+		// Grid: 3 columns
+		const bW = 2 * W3 + 1 * 3;
 		return (
 			<Box flexDirection="column">
 				{provLine}
-				{ctxBar}
+				{gridBar(bW, W3)}
 				<Text>
-					<Text color="cyan">In:84.2k</Text>{" "}
-					<Text color="yellow">Out:62.8k</Text><Sep />
-					<Text bold color="green">$11.15</Text><Sep />
-					<Text color="white">3h31m</Text><Sep />
+					<Text><Text color="cyan">In:84.2k</Text>{" "}<Text color="yellow">{P("Out:62.8k", W3 - 9)}</Text></Text><Sep />
+					<Text bold color="green">{P("$11.15", W3)}</Text><Sep />
+					<Text color="white">{P("3h31m", W3)}</Text><Sep />
 					<Text color="magenta">master</Text><Sep />
 					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
 				</Text>
@@ -119,16 +122,18 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	}
 
 	if (id === "cost") {
+		// Grid: 5 columns
+		const bW = 4 * W5 + 3 * 3;
 		return (
 			<Box flexDirection="column">
 				{provLine}
-				{ctxBar}
+				{gridBar(bW, W5)}
 				<Text>
-					<Text bold color="green">Cost:$11.15</Text><Sep />
-					<Text color="cyan">$0.19/min</Text><Sep />
-					<Text color="yellow">~$11.40/h</Text><Sep />
-					<Text color="cyan">In:$3.40</Text>{" "}<Text color="yellow">Out:$7.75</Text><Sep />
-					<Text color="white">Session:3h31m</Text>
+					<Text bold color="green">{P("Cost:$11.15", W5)}</Text><Sep />
+					<Text color="cyan">{P("$0.19/min", W5)}</Text><Sep />
+					<Text color="yellow">{P("~$11.40/h", W5)}</Text><Sep />
+					<Text><Text color="cyan">In:$3.40</Text>{" "}<Text color="yellow">{P("Out:$7.75", W5 - 8)}</Text></Text><Sep />
+					<Text color="white">{P("Session:3h31m", W5)}</Text>
 				</Text>
 			</Box>
 		);
@@ -155,32 +160,35 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	}
 
 	if (id === "perf") {
+		// Grid: 5 columns
+		const bW = 4 * W5 + 3 * 3;
 		return (
 			<Box flexDirection="column">
 				{provLine}
-				{ctxBar}
+				{gridBar(bW, W5)}
 				<Text>
-					<Text color="green">Cache:71% hit</Text><Sep />
-					<Text color="blueBright">I/O 1.3:1</Text><Sep />
-					<Text color="cyan">API:47% time</Text><Sep />
-					<Text color="yellow">Out:~297tok/s</Text><Sep />
-					<Text bold color="green">$11.15</Text>
+					<Text color="green">{P("Cache:71% hit", W5)}</Text><Sep />
+					<Text color="blueBright">{P("I/O 1.3:1", W5)}</Text><Sep />
+					<Text color="cyan">{P("API:47% time", W5)}</Text><Sep />
+					<Text color="yellow">{P("Out:~297tok/s", W5)}</Text><Sep />
+					<Text bold color="green">{P("$11.15", W5)}</Text>
 				</Text>
 			</Box>
 		);
 	}
 
-	// context
+	// context: Grid 5 columns
+	const bW5 = 4 * W5 + 3 * 3;
 	return (
 		<Box flexDirection="column">
 			{provLine}
-			{ctxBarWide}
+			{gridBar(bW5, W5)}
 			<Text>
-				{" "}<Text color="cyan">Input:84.2k</Text><Sep />
-				<Text color="green">CacheCreate:2.1k</Text><Sep />
-				<Text color="green">CacheRead:18.5k</Text><Sep />
-				<Text color="yellow">Output:62.8k</Text><Sep />
-				<Text bold color="white">Total:167.6k/200k</Text>
+				<Text color="cyan">{P("Input:84.2k", W5)}</Text><Sep />
+				<Text color="green">{P("CacheCreate:2.1k", W5)}</Text><Sep />
+				<Text color="green">{P("CacheRead:18.5k", W5)}</Text><Sep />
+				<Text color="yellow">{P("Output:62.8k", W5)}</Text><Sep />
+				<Text bold color="white">{P("Total:167.6k/200k", W5)}</Text>
 			</Text>
 		</Box>
 	);

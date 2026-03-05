@@ -49,6 +49,42 @@ const ctxC = (pct) => pct > 90 ? C.red : pct > 70 ? C.yellow : C.white;
 const costC = (usd) => usd >= 5 ? C.red : usd >= 1 ? C.yellow : C.green;
 const cphC = (usd) => usd >= 20 ? C.red : usd >= 5 ? C.yellow : C.green;
 const SEP = C.dim + ' | ' + C.reset;
+const SEP_W = 3; // visible width of ' | '
+
+// Grid layout helpers
+const visibleLen = (s) => s.replace(/\x1b\[[0-9;]*m/g, '').length;
+const padV = (s, w) => {
+    const vl = visibleLen(s);
+    return vl >= w ? s : s + ' '.repeat(w - vl);
+};
+
+// Compute column width W from all core segments across all lines
+const calcW = (coreLines) => Math.max(...coreLines.flat().filter(Boolean).map(visibleLen));
+
+// Render grid lines: all core segments padded to W, tail appended as-is
+const fmtGrid = (W, coreLines, tailPerLine = []) => {
+    return coreLines.map((core, i) => {
+        const padded = core.map(s => padV(s, W));
+        const tail = (tailPerLine[i] || []).filter(Boolean);
+        return [...padded, ...tail].join(SEP);
+    });
+};
+
+// Build bar line that spans (cols-1) columns + 1 column for rest info
+const fmtBarLine = (pct, W, cols, cc, restText) => {
+    const barCols = cols - 1;
+    const barW = barCols * W + (barCols - 1) * SEP_W;
+    const bar = cc + mkBar(pct, barW) + C.reset;
+    return bar + SEP + padV(restText, W);
+};
+
+// Simple uniform padding for non-grid templates (mini, dev)
+const fmtLine = (core, tail = []) => {
+    const fc = core.filter(Boolean);
+    if (!fc.length) return tail.filter(Boolean).join(SEP);
+    const W = Math.max(...fc.map(visibleLen));
+    return [...fc.map(s => padV(s, W)), ...tail.filter(Boolean)].join(SEP);
+};
 
 let input = '';
 process.stdin.on('data', chunk => input += chunk);
@@ -126,102 +162,134 @@ process.stdin.on('end', () => {
             gitPart = C.magenta + branch + C.reset;
         }
         if (agentName) gitPart += (gitPart ? SEP : '') + C.yellow + 'Agent:' + agentName + C.reset;
-        const linesPart = (linesAdd || linesRem) ? SEP + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset : '';
+        const linesPart = (linesAdd || linesRem) ? C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset : '';
 
         // Shared parts
         const provModel = PROVIDER ? C.cyan + PROVIDER + C.reset + '/' + C.white + model + C.reset : C.white + model + C.reset;
-        const ctxBar = cc + mkBar(pct, 30) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
-        const ctxBarWide = cc + mkBar(pct, 50) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + ' ' + L.left + C.reset;
+        const ctxRestText = cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset;
 
         switch (TEMPLATE) {
             case 'default': {
-                console.log(provModel);
-
+                // Grid: 4 columns
+                const COLS = 4;
                 const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\u221e';
-                const totalCch = cacheCreate + cacheRead;
-                const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
-                const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
-                console.log(
-                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + '/' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset +
-                    ' ' + C.dim + '(' + C.reset + C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + C.dim + ')' + C.reset + SEP +
-                    C.green + 'Cache:' + fmtK(cachedTokens) + C.reset +
-                    (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
-                );
 
-                let l3 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
-                    C.cyan + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
-                    C.cyan + fmtCost(cpm) + '/min' + C.reset;
-                if (gitPart) l3 += SEP + gitPart;
-                l3 += linesPart;
-                console.log(l3);
-                console.log(ctxBar);
+                const coreLines = [
+                    [
+                        C.cyan + 'In:' + fmtK(totalIn) + C.reset,
+                        C.yellow + 'Out:' + fmtK(totalOut) + C.reset,
+                        C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
+                        C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
+                    ],
+                    [
+                        C.white + L.session + ':' + fmtDur(durMs) + C.reset,
+                        C.white + L.api + ':' + fmtDur(apiMs) + C.reset,
+                        C.cyan + L.cost + ':' + fmtCost(cost) + C.reset,
+                        C.cyan + fmtCost(cpm) + '/min' + C.reset,
+                    ],
+                ];
+                const tailPerLine = [[], [gitPart, linesPart]];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines, tailPerLine);
+
+                console.log(provModel);
+                lines.forEach(l => console.log(l));
+                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
                 break;
             }
             case 'full': {
-                console.log(provModel);
-                console.log(cc + 'Ctx: ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + '/' + remPct + '% ' + L.left + C.reset);
-
+                // Grid: 4 columns, no bar
                 const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\u221e';
-                const totalCch = cacheCreate + cacheRead;
-                const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
-                const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
-                console.log(
-                    C.cyan + 'In:' + fmtK(totalIn) + C.reset + '/' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset +
-                    ' ' + C.dim + '(' + C.reset + C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + C.dim + ')' + C.reset + SEP +
-                    C.green + 'Cache:' + fmtK(cachedTokens) + C.reset +
-                    (totalCch > 0 ? C.dim + ' (' + C.reset + cchC + cchHit + '% ' + L.hit + C.reset + C.dim + ')' + C.reset : '')
-                );
 
-                let l4 = C.white + L.session + ':' + fmtDur(durMs) + C.reset + SEP + C.white + L.api + ':' + fmtDur(apiMs) + C.reset + SEP +
-                    C.cyan + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
-                    C.cyan + fmtCost(cpm) + '/min' + C.reset;
-                if (gitPart) l4 += SEP + gitPart;
-                l4 += linesPart;
-                console.log(l4);
+                const coreLines = [
+                    [
+                        cc + 'Ctx: ' + pct + '%' + C.reset,
+                        cc + 'Used: ' + fmtK(ctxTokens) + C.reset,
+                        cc + 'Left: ' + fmtK(remaining) + C.reset,
+                        cc + 'Win: ' + fmtK(ctxSize) + C.reset,
+                    ],
+                    [
+                        C.cyan + 'In:' + fmtK(totalIn) + C.reset,
+                        C.yellow + 'Out:' + fmtK(totalOut) + C.reset,
+                        C.green + 'Cache:' + fmtK(cachedTokens) + C.reset,
+                        C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
+                    ],
+                    [
+                        C.white + L.session + ':' + fmtDur(durMs) + C.reset,
+                        C.white + L.api + ':' + fmtDur(apiMs) + C.reset,
+                        C.cyan + L.cost + ':' + fmtCost(cost) + C.reset,
+                        C.cyan + fmtCost(cpm) + '/min' + C.reset,
+                    ],
+                ];
+                const tailPerLine = [[], [], [gitPart, linesPart]];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines, tailPerLine);
+
+                console.log(provModel);
+                lines.forEach(l => console.log(l));
                 break;
             }
             case 'slim': {
-                console.log(provModel);
-                console.log(ctxBar);
-
+                // Grid: 3 columns
+                const COLS = 3;
                 const cCol = costC(cost);
-                let l3 = C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset + SEP +
-                    C.bold + cCol + fmtCost(cost) + C.reset + SEP +
-                    C.white + fmtDur(durMs) + C.reset;
-                if (gitPart) l3 += SEP + gitPart;
-                l3 += linesPart;
-                console.log(l3);
+
+                const coreLines = [
+                    [
+                        C.cyan + 'In:' + fmtK(totalIn) + C.reset + ' ' + C.yellow + 'Out:' + fmtK(totalOut) + C.reset,
+                        C.bold + cCol + fmtCost(cost) + C.reset,
+                        C.white + fmtDur(durMs) + C.reset,
+                    ],
+                ];
+                const tailPerLine = [[gitPart, linesPart]];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines, tailPerLine);
+
+                console.log(provModel);
+                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                lines.forEach(l => console.log(l));
                 break;
             }
             case 'mini': {
+                // No grid — simple uniform padding
                 const cCol = costC(cost);
-                let line = provModel + SEP + cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDurShort(durMs) + C.reset;
-                if (gitPart) line += SEP + gitPart;
-                line += linesPart;
-                console.log(line);
+                console.log(fmtLine(
+                    [provModel, cc + 'Ctx ' + pct + '%' + C.reset, C.bold + cCol + fmtCost(cost) + C.reset, C.white + fmtDurShort(durMs) + C.reset],
+                    [gitPart, linesPart]
+                ));
                 break;
             }
             case 'cost': {
-                console.log(provModel);
-                console.log(ctxBar);
+                // Grid: 5 columns
+                const COLS = 5;
                 const cCol = costC(cost);
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
                 const cph = cpm * 60;
                 const cphCol = cphC(cph);
                 const inCost = cost > 0 && (totalIn + totalOut) > 0 ? cost * totalIn / (totalIn + totalOut) : 0;
                 const outCost = cost > 0 ? cost - inCost : 0;
-                console.log(
-                    C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
-                    C.cyan + fmtCost(cpm) + '/min' + C.reset + SEP +
-                    cphCol + '~' + fmtCost(cph) + '/h' + C.reset + SEP +
-                    C.cyan + 'In:' + fmtCost(inCost) + C.reset + ' ' + C.yellow + 'Out:' + fmtCost(outCost) + C.reset + SEP +
-                    C.white + L.session + ':' + fmtDur(durMs) + C.reset
-                );
+
+                const coreLines = [
+                    [
+                        C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset,
+                        C.cyan + fmtCost(cpm) + '/min' + C.reset,
+                        cphCol + '~' + fmtCost(cph) + '/h' + C.reset,
+                        C.cyan + 'In:' + fmtCost(inCost) + C.reset + ' ' + C.yellow + 'Out:' + fmtCost(outCost) + C.reset,
+                        C.white + L.session + ':' + fmtDur(durMs) + C.reset,
+                    ],
+                ];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines);
+
+                console.log(provModel);
+                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                lines.forEach(l => console.log(l));
                 break;
             }
             case 'dev': {
+                // No grid — simple uniform padding
                 console.log(provModel);
                 let l2 = '';
                 if (gitPart) l2 += gitPart;
@@ -229,12 +297,16 @@ process.stdin.on('end', () => {
                 if (!l2) l2 = C.dim + '(no git)' + C.reset;
                 console.log(l2);
                 const cCol = costC(cost);
-                console.log(cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDur(durMs) + C.reset);
+                console.log(fmtLine([
+                    cc + 'Ctx ' + pct + '%' + C.reset,
+                    C.bold + cCol + fmtCost(cost) + C.reset,
+                    C.white + fmtDur(durMs) + C.reset,
+                ]));
                 break;
             }
             case 'perf': {
-                console.log(provModel);
-                console.log(ctxBar);
+                // Grid: 5 columns
+                const COLS = 5;
                 const totalCch = cacheCreate + cacheRead;
                 const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
                 const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
@@ -242,26 +314,44 @@ process.stdin.on('end', () => {
                 const apiPct = durMs > 0 ? Math.floor(apiMs / durMs * 100) : 0;
                 const outTokS = apiMs > 0 ? Math.floor(totalOut / (apiMs / 1000)) : 0;
                 const cCol = costC(cost);
-                console.log(
-                    cchC + 'Cache:' + cchHit + '% ' + L.hit + C.reset + SEP +
-                    C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + SEP +
-                    C.cyan + L.api + ':' + apiPct + '% ' + L.time + C.reset + SEP +
-                    C.yellow + 'Out:~' + outTokS + 'tok/s' + C.reset + SEP +
-                    C.bold + cCol + fmtCost(cost) + C.reset
-                );
+
+                const coreLines = [
+                    [
+                        cchC + 'Cache:' + cchHit + '% ' + L.hit + C.reset,
+                        C.brightBlue + 'I/O ' + ioR + ':1' + C.reset,
+                        C.cyan + L.api + ':' + apiPct + '% ' + L.time + C.reset,
+                        C.yellow + 'Out:~' + outTokS + 'tok/s' + C.reset,
+                        C.bold + cCol + fmtCost(cost) + C.reset,
+                    ],
+                ];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines);
+
+                console.log(provModel);
+                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                lines.forEach(l => console.log(l));
                 break;
             }
             case 'context': {
-                console.log(provModel);
-                console.log(ctxBarWide);
+                // Grid: 5 columns
+                const COLS = 5;
                 const totalUsed = ctxTokens + curOut;
-                console.log(
-                    ' ' + C.cyan + 'Input:' + fmtK(curIn) + C.reset + SEP +
-                    C.green + 'CacheCreate:' + fmtK(cacheCreate) + C.reset + SEP +
-                    C.green + 'CacheRead:' + fmtK(cacheRead) + C.reset + SEP +
-                    C.yellow + 'Output:' + fmtK(curOut) + C.reset + SEP +
-                    C.bold + C.white + 'Total:' + fmtK(totalUsed) + '/' + fmtK(ctxSize) + C.reset
-                );
+
+                const coreLines = [
+                    [
+                        C.cyan + 'Input:' + fmtK(curIn) + C.reset,
+                        C.green + 'CacheCreate:' + fmtK(cacheCreate) + C.reset,
+                        C.green + 'CacheRead:' + fmtK(cacheRead) + C.reset,
+                        C.yellow + 'Output:' + fmtK(curOut) + C.reset,
+                        C.bold + C.white + 'Total:' + fmtK(totalUsed) + '/' + fmtK(ctxSize) + C.reset,
+                    ],
+                ];
+                const W = calcW(coreLines);
+                const lines = fmtGrid(W, coreLines);
+
+                console.log(provModel);
+                console.log(fmtBarLine(pct, W, COLS, cc, ctxRestText));
+                lines.forEach(l => console.log(l));
                 break;
             }
             default:
