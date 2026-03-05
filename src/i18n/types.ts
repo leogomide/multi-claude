@@ -115,6 +115,14 @@ export interface TranslationDictionary {
 		slimDesc: string;
 		mini: string;
 		miniDesc: string;
+		cost: string;
+		costDesc: string;
+		dev: string;
+		devDesc: string;
+		perf: string;
+		perfDesc: string;
+		context: string;
+		contextDesc: string;
 		changed: string;
 	};
 	languageSelect: {

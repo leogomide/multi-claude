@@ -11,6 +11,8 @@ import type { FlowMessage } from "../types.ts";
 const Sep = () => <Text dimColor>{" | "}</Text>;
 const BAR_USED = "\u2593".repeat(23);
 const BAR_FREE = "\u2591".repeat(7);
+const BAR_USED_L = "\u2593".repeat(38);
+const BAR_FREE_L = "\u2591".repeat(12);
 
 function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 	if (id === "none") return null;
@@ -63,16 +65,86 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		);
 	}
 
-	// mini
+	if (id === "mini") {
+		return (
+			<Text>
+				<Text color="cyan">Provider</Text>/Model<Sep />
+				<Text color="yellow">Ctx 77%</Text><Sep />
+				<Text bold color="green">$11.15</Text><Sep />
+				<Text color="white">3h31m</Text><Sep />
+				<Text color="magenta">master</Text><Sep />
+				<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+			</Text>
+		);
+	}
+
+	if (id === "cost") {
+		return (
+			<Box flexDirection="column">
+				{line1}
+				<Text>
+					<Text bold color="green">Cost:$11.15</Text><Sep />
+					<Text color="cyan">$0.19/min</Text><Sep />
+					<Text color="yellow">~$11.40/h</Text><Sep />
+					<Text color="cyan">In:$3.40</Text>{" "}<Text color="yellow">Out:$7.75</Text><Sep />
+					<Text color="white">Session:3h31m</Text>
+				</Text>
+			</Box>
+		);
+	}
+
+	if (id === "dev") {
+		return (
+			<Box flexDirection="column">
+				<Text>
+					<Text color="magenta">master</Text><Sep />
+					<Text color="green">+145</Text>{" "}<Text color="red">-32</Text><Sep />
+					<Text color="yellow">Agent:explorer</Text><Sep />
+					<Text bold color="blueBright">WT:feature</Text>{" "}
+					<Text dimColor>{"("}</Text><Text color="magenta">feat</Text>{" "}<Text dimColor>{"<-"}</Text>{" "}<Text color="white">main</Text><Text dimColor>{")"}</Text>
+				</Text>
+				<Text>
+					<Text color="cyan">Provider</Text>/Model<Sep />
+					<Text color="yellow">Ctx 77%</Text><Sep />
+					<Text bold color="green">$11.15</Text><Sep />
+					<Text color="white">3h31m</Text>
+				</Text>
+			</Box>
+		);
+	}
+
+	if (id === "perf") {
+		return (
+			<Box flexDirection="column">
+				{line1}
+				<Text>
+					<Text color="green">Cache:71% hit</Text><Sep />
+					<Text color="blueBright">I/O 1.3:1</Text><Sep />
+					<Text color="cyan">API:47% time</Text><Sep />
+					<Text color="yellow">Out:~297tok/s</Text><Sep />
+					<Text bold color="green">$11.15</Text>
+				</Text>
+			</Box>
+		);
+	}
+
+	// context
 	return (
-		<Text>
-			<Text color="cyan">Provider</Text>/Model<Sep />
-			<Text color="yellow">Ctx 77%</Text><Sep />
-			<Text bold color="green">$11.15</Text><Sep />
-			<Text color="white">3h31m</Text><Sep />
-			<Text color="magenta">master</Text><Sep />
-			<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
-		</Text>
+		<Box flexDirection="column">
+			<Text>
+				<Text color="cyan">Provider</Text>/Model{"  "}
+				<Text color="yellow">{BAR_USED_L + BAR_FREE_L} 153.9k/77%</Text>
+				<Sep />
+				<Text color="yellow">46.1k left</Text>
+			</Text>
+			<Text>
+				{" "}<Text color="cyan">Input:84.2k</Text><Sep />
+				<Text color="green">CacheCreate:2.1k</Text><Sep />
+				<Text color="green">CacheRead:18.5k</Text><Sep />
+				<Text color="yellow">Output:62.8k</Text><Sep />
+				<Text bold color="white">Total:167.6k/200k</Text>
+			</Text>
+		</Box>
 	);
 }
 

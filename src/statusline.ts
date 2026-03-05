@@ -4,9 +4,9 @@ import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
-const SCRIPT_VERSION = "5";
+const SCRIPT_VERSION = "6";
 
-export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini"] as const;
+export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
 
 export interface StatusLineTemplate {
@@ -36,6 +36,30 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		descKey: "statusLine.miniDesc",
 		preview: "Provider/Opus | Ctx 77% | $11.15 | 3h31m | master | (+45,-7)",
 	},
+	{
+		id: "cost",
+		nameKey: "statusLine.cost",
+		descKey: "statusLine.costDesc",
+		preview: "",
+	},
+	{
+		id: "dev",
+		nameKey: "statusLine.dev",
+		descKey: "statusLine.devDesc",
+		preview: "",
+	},
+	{
+		id: "perf",
+		nameKey: "statusLine.perf",
+		descKey: "statusLine.perfDesc",
+		preview: "",
+	},
+	{
+		id: "context",
+		nameKey: "statusLine.context",
+		descKey: "statusLine.contextDesc",
+		preview: "",
+	},
 ];
 
 function getStatusLineScript(): string {
@@ -50,10 +74,10 @@ const LANG = process.env.MCLAUDE_LANG || 'en';
 const C = { cyan: '\\x1b[36m', green: '\\x1b[32m', yellow: '\\x1b[33m', red: '\\x1b[31m', dim: '\\x1b[2m', bold: '\\x1b[1m', reset: '\\x1b[0m', white: '\\x1b[37m', magenta: '\\x1b[35m', blue: '\\x1b[34m', brightBlue: '\\x1b[94m' };
 
 const L = ({
-    en:      { left: 'left',  hit: 'hit', session: 'Session', api: 'API', cost: 'Cost' },
-    'pt-BR': { left: 'rest.', hit: 'hit', session: 'Sessao',  api: 'API', cost: 'Custo' },
-    es:      { left: 'rest.', hit: 'hit', session: 'Sesion',  api: 'API', cost: 'Costo' },
-})[LANG] || { left: 'left', hit: 'hit', session: 'Session', api: 'API', cost: 'Cost' };
+    en:      { left: 'left',  hit: 'hit', session: 'Session', api: 'API', cost: 'Cost', time: 'time' },
+    'pt-BR': { left: 'rest.', hit: 'hit', session: 'Sessao',  api: 'API', cost: 'Custo', time: 'tempo' },
+    es:      { left: 'rest.', hit: 'hit', session: 'Sesion',  api: 'API', cost: 'Costo', time: 'tiempo' },
+})[LANG] || { left: 'left', hit: 'hit', session: 'Session', api: 'API', cost: 'Cost', time: 'time' };
 
 const fmtK = (n) => { if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'; if (n >= 1000) return (n / 1000).toFixed(1) + 'k'; return String(n); };
 const fmtDur = (ms) => { const s = Math.floor(ms / 1000); const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const sec = s % 60; if (h > 0) return h + 'h' + String(m).padStart(2, '0') + 'm'; return m + 'm ' + sec + 's'; };
@@ -62,6 +86,7 @@ const fmtCost = (usd) => '$' + usd.toFixed(2);
 const mkBar = (pct, w) => '\\u2593'.repeat(Math.floor(pct * w / 100)) + '\\u2591'.repeat(w - Math.floor(pct * w / 100));
 const ctxC = (pct) => pct > 90 ? C.red : pct > 70 ? C.yellow : C.green;
 const costC = (usd) => usd >= 5 ? C.red : usd >= 1 ? C.yellow : C.green;
+const cphC = (usd) => usd >= 20 ? C.red : usd >= 5 ? C.yellow : C.green;
 const SEP = C.dim + ' | ' + C.reset;
 
 let input = '';
@@ -158,6 +183,64 @@ process.stdin.on('end', () => {
                 if (gitPart) line += SEP + gitPart;
                 line += linesPart;
                 console.log(line);
+                break;
+            }
+            case 'cost': {
+                console.log(line1);
+                const cCol = costC(cost);
+                const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
+                const cph = cpm * 60;
+                const cphCol = cphC(cph);
+                const inCost = cost > 0 && (totalIn + totalOut) > 0 ? cost * totalIn / (totalIn + totalOut) : 0;
+                const outCost = cost > 0 ? cost - inCost : 0;
+                console.log(
+                    C.bold + cCol + L.cost + ':' + fmtCost(cost) + C.reset + SEP +
+                    C.cyan + fmtCost(cpm) + '/min' + C.reset + SEP +
+                    cphCol + '~' + fmtCost(cph) + '/h' + C.reset + SEP +
+                    C.cyan + 'In:' + fmtCost(inCost) + C.reset + ' ' + C.yellow + 'Out:' + fmtCost(outCost) + C.reset + SEP +
+                    C.white + L.session + ':' + fmtDur(durMs) + C.reset
+                );
+                break;
+            }
+            case 'dev': {
+                let l1 = '';
+                if (gitPart) l1 += gitPart;
+                if (linesAdd || linesRem) l1 += (l1 ? SEP : '') + C.green + '+' + linesAdd + C.reset + ' ' + C.red + '-' + linesRem + C.reset;
+                if (!l1) l1 = C.dim + '(no git)' + C.reset;
+                console.log(l1);
+                const cCol = costC(cost);
+                console.log(provModel + SEP + cc + 'Ctx ' + pct + '%' + C.reset + SEP + C.bold + cCol + fmtCost(cost) + C.reset + SEP + C.white + fmtDur(durMs) + C.reset);
+                break;
+            }
+            case 'perf': {
+                console.log(line1);
+                const totalCch = cacheCreate + cacheRead;
+                const cchHit = totalCch > 0 ? Math.floor(cacheRead / totalCch * 100) : 0;
+                const cchC = cchHit >= 60 ? C.green : cchHit >= 30 ? C.yellow : C.red;
+                const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : '\\u221e';
+                const apiPct = durMs > 0 ? Math.floor(apiMs / durMs * 100) : 0;
+                const outTokS = apiMs > 0 ? Math.floor(totalOut / (apiMs / 1000)) : 0;
+                const cCol = costC(cost);
+                console.log(
+                    cchC + 'Cache:' + cchHit + '% ' + L.hit + C.reset + SEP +
+                    C.brightBlue + 'I/O ' + ioR + ':1' + C.reset + SEP +
+                    C.cyan + L.api + ':' + apiPct + '% ' + L.time + C.reset + SEP +
+                    C.yellow + 'Out:~' + outTokS + 'tok/s' + C.reset + SEP +
+                    C.bold + cCol + fmtCost(cost) + C.reset
+                );
+                break;
+            }
+            case 'context': {
+                const ctxLine = provModel + '  ' + cc + mkBar(pct, 50) + ' ' + fmtK(ctxTokens) + '/' + pct + '%' + C.reset + SEP + cc + fmtK(remaining) + ' ' + L.left + C.reset;
+                console.log(ctxLine);
+                const totalUsed = ctxTokens + curOut;
+                console.log(
+                    ' ' + C.cyan + 'Input:' + fmtK(curIn) + C.reset + SEP +
+                    C.green + 'CacheCreate:' + fmtK(cacheCreate) + C.reset + SEP +
+                    C.green + 'CacheRead:' + fmtK(cacheRead) + C.reset + SEP +
+                    C.yellow + 'Output:' + fmtK(curOut) + C.reset + SEP +
+                    C.bold + C.white + 'Total:' + fmtK(totalUsed) + '/' + fmtK(ctxSize) + C.reset
+                );
                 break;
             }
             default:
