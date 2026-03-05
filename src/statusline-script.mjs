@@ -173,8 +173,9 @@ process.stdin.on('end', () => {
                 // Grid: 3 columns
                 const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
 
-                // Line 1: Provider/Model + git info
-                const provModelLine = provModel + (gitPart ? ' ' + C.dim + '(' + C.reset + gitPart + C.dim + ')' + C.reset : '');
+                // Line 1: Provider/Model + git info + lines changed
+                const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
+                const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
 
                 const coreLines = [
                     [
@@ -188,7 +189,7 @@ process.stdin.on('end', () => {
                         C.cyan + L.cost + ':' + fmtCost(cost) + C.reset,
                     ],
                 ];
-                const tailPerLine = [[], [C.cyan + fmtCost(cpm) + '/min' + C.reset, linesPart]];
+                const tailPerLine = [[], [C.cyan + fmtCost(cpm) + '/min' + C.reset]];
                 const W = calcW(coreLines);
                 const lines = fmtGrid(W, coreLines, tailPerLine);
 

@@ -41,7 +41,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		const W = W4;
 		return (
 			<Box flexDirection="column">
-				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text><Text dimColor>)</Text></Text>
+				<Text><Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text><Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}<Text color="red">-7</Text><Text dimColor>)</Text></Text>
 				<Text>
 					<Text color="cyan">{P("Input:84.2k", W)}</Text><Sep />
 					<Text color="yellow">{P("Output:62.8k", W)}</Text><Sep />
@@ -51,8 +51,7 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text color="white">{P("Session:3h31m", W)}</Text><Sep />
 					<Text color="white">{P("API:1h38m", W)}</Text><Sep />
 					<Text color="cyan">{P("Cost:$11.15", W)}</Text><Sep />
-					<Text color="cyan">$0.19/min</Text><Sep />
-					<Text color="green">+45</Text>{" "}<Text color="red">-7</Text>
+					<Text color="cyan">$0.19/min</Text>
 				</Text>
 				<Text>
 					<Text color="yellow">{(() => { const bW = 2 * W + 3; return "\u2501".repeat(Math.floor(bW * 0.77)) + "\u254c".repeat(bW - Math.floor(bW * 0.77)); })()}</Text><Sep />

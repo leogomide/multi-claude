@@ -22,7 +22,7 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 		id: "default",
 		nameKey: "statusLine.default",
 		descKey: "statusLine.defaultDesc",
-		preview: "Provider/Opus (master)\nInput:84.2k    | Output:62.8k   | Cache:20.6M\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min | +45 -7\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
+		preview: "Provider/Opus (master +45 -7)\nInput:84.2k    | Output:62.8k   | Cache:20.6M\nSession:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u254c\u254c\u254c\u254c\u254c\u254c\u254c | 153.9k/77%     | 46.1k/23% left",
 	},
 	{
 		id: "full",
