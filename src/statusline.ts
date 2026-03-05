@@ -1,10 +1,7 @@
-import { existsSync, readFileSync } from "node:fs";
 import { chmod, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
-
-const SCRIPT_VERSION = "10";
 
 export const STATUSLINE_TEMPLATE_IDS = ["none", "full", "slim", "mini", "cost", "dev", "perf", "context"] as const;
 export type StatusLineTemplateId = (typeof STATUSLINE_TEMPLATE_IDS)[number];
@@ -65,7 +62,6 @@ export const STATUSLINE_TEMPLATES: StatusLineTemplate[] = [
 function getStatusLineScript(): string {
 	return `#!/usr/bin/env node
 // mclaude status line script - auto-managed by mclaude
-// mclaude-script-version: ${SCRIPT_VERSION}
 const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || '';
 const MODEL_HINT = process.env.MCLAUDE_MODEL || '';
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || 'full';
@@ -259,13 +255,6 @@ process.stdin.on('end', () => {
 
 export async function ensureStatusLineScript(): Promise<string> {
 	const scriptPath = join(CONFIG_DIR, "statusline.mjs");
-
-	if (existsSync(scriptPath)) {
-		const content = readFileSync(scriptPath, "utf-8");
-		if (content.includes(`// mclaude-script-version: ${SCRIPT_VERSION}`)) {
-			return scriptPath;
-		}
-	}
 
 	await writeFile(scriptPath, getStatusLineScript(), "utf-8");
 
