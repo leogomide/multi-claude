@@ -269,11 +269,12 @@ process.stdin.on('end', () => {
                 break;
             }
             case 'mini': {
-                // Single line — follows default color scheme
+                // Two lines — follows default color scheme
                 const gitAndLines = [gitPart, linesPart].filter(Boolean).join(' ');
                 const provModelLine = provModel + (gitAndLines ? ' ' + C.dim + '(' + C.reset + gitAndLines + C.dim + ')' + C.reset : '');
+                console.log(provModelLine);
                 console.log(fmtLine(
-                    [provModelLine, cc + 'Ctx ' + pct + '%' + C.reset, C.green + fmtCost(cost) + C.reset, C.cyan + fmtDurShort(durMs) + C.reset],
+                    [cc + 'Ctx ' + pct + '%' + C.reset, C.green + fmtCost(cost) + C.reset, C.cyan + fmtDurShort(durMs) + C.reset],
                 ));
                 break;
             }
