@@ -1,4 +1,3 @@
-import { useStdout } from "ink";
 import { useEffect, useState } from "react";
 
 interface TerminalSize {
@@ -7,24 +6,21 @@ interface TerminalSize {
 }
 
 export function useTerminalSize(): TerminalSize {
-	const { stdout } = useStdout();
 	const [size, setSize] = useState<TerminalSize>({
-		columns: stdout?.columns ?? 80,
-		rows: stdout?.rows ?? 24,
+		columns: process.stdout.columns ?? 80,
+		rows: process.stdout.rows ?? 24,
 	});
 
 	useEffect(() => {
-		if (!stdout) return;
-
 		const onResize = () => {
-			setSize({ columns: stdout.columns, rows: stdout.rows });
+			setSize({ columns: process.stdout.columns, rows: process.stdout.rows });
 		};
 
-		stdout.on("resize", onResize);
+		process.stdout.on("resize", onResize);
 		return () => {
-			stdout.off("resize", onResize);
+			process.stdout.off("resize", onResize);
 		};
-	}, [stdout]);
+	}, []);
 
 	return size;
 }
