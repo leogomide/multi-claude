@@ -5,3 +5,7 @@ pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correçõe
 -----------------------------------------------------
 
 # correções
+
+https://code.claude.com/docs/en/headless
+
+https://platform.claude.com/docs/en/agent-sdk/typescript
