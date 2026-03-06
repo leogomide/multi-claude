@@ -31,8 +31,26 @@ Run `mclaude` to open a terminal UI where you can select a provider and model, m
 
 ## Installation
 
+### Global install (recommended)
+
 ```bash
 bun install -g @leogomide/multi-claude
+```
+
+### Run without installing (using bunx)
+
+```bash
+bunx @leogomide/multi-claude
+```
+
+You can also create an alias for convenience:
+
+```bash
+# Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
+alias mclaude='bunx @leogomide/multi-claude'
+
+# Then run normally
+mclaude
 ```
 
 ## Update
