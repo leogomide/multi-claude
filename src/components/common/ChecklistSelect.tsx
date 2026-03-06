@@ -9,6 +9,8 @@ export interface ChecklistItem {
 	checked: boolean;
 	acceptsValue?: boolean;
 	valuePlaceholder?: string;
+	isEnvVar?: boolean;
+	envVarValue?: string;
 }
 
 export interface ChecklistGroup {
@@ -19,6 +21,8 @@ export interface ChecklistGroup {
 export interface ChecklistResult {
 	flag: string;
 	value?: string;
+	isEnvVar?: boolean;
+	envVarValue?: string;
 }
 
 interface ChecklistSelectProps {
@@ -103,7 +107,12 @@ export function ChecklistSelect({
 			for (const item of allItems) {
 				if (checkedValues.has(item.value)) {
 					const val = itemValues.get(item.value);
-					selected.push({ flag: item.value, value: val || undefined });
+					selected.push({
+						flag: item.value,
+						value: val || undefined,
+						isEnvVar: item.isEnvVar,
+						envVarValue: item.envVarValue,
+					});
 				}
 			}
 			onConfirm(selected);

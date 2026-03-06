@@ -19,6 +19,7 @@ export async function runClaude(
 	model: string,
 	extraArgs: string[] = [],
 	installationId?: string,
+	selectedEnvVars?: Record<string, string>,
 ): Promise<number> {
 	const env = buildClaudeEnv(provider, model, installationId);
 	if (!env) {
@@ -82,6 +83,13 @@ export async function runClaude(
 		log.info("statusline template=" + slTemplate);
 	}
 
+	// Apply user-selected env vars LAST (after buildClaudeEnv cleanup of CLAUDE_CODE_* vars)
+	if (selectedEnvVars) {
+		for (const [key, value] of Object.entries(selectedEnvVars)) {
+			env[key] = value;
+		}
+	}
+
 	log.info("spawning claude, args=" + JSON.stringify(args));
 	log.debug(
 		"env keys=" +
@@ -121,6 +129,7 @@ export async function runClaude(
 export async function runClaudeDefault(
 	extraArgs: string[] = [],
 	installationId?: string,
+	selectedEnvVars?: Record<string, string>,
 ): Promise<number> {
 	// Track env vars we set so we can clean them up after spawn
 	const addedEnvKeys: string[] = [];
@@ -187,6 +196,14 @@ export async function runClaudeDefault(
 		);
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
 		log.info("statusline template=" + slTemplate + " (default launch)");
+	}
+
+	// Apply user-selected env vars
+	if (selectedEnvVars) {
+		for (const [key, value] of Object.entries(selectedEnvVars)) {
+			process.env[key] = value;
+			addedEnvKeys.push(key);
+		}
 	}
 
 	log.info("spawning claude (default), args=" + JSON.stringify(args));

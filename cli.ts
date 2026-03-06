@@ -18,6 +18,7 @@ interface TuiSelection {
 	model: string;
 	installationId?: string;
 	selectedFlags?: string[];
+	selectedEnvVars?: Record<string, string>;
 }
 
 interface OAuthSelection {
@@ -318,7 +319,7 @@ while (true) {
 	if (isDefault) {
 		const { runClaudeDefault } = await import("./src/runner.ts");
 		log.info("calling runClaudeDefault()");
-		exitCode = await runClaudeDefault(mergedArgs, selection.installationId);
+		exitCode = await runClaudeDefault(mergedArgs, selection.installationId, selection.selectedEnvVars);
 		log.info("runClaudeDefault() returned exitCode=" + exitCode);
 	} else {
 		const { runClaude } = await import("./src/runner.ts");
@@ -328,6 +329,7 @@ while (true) {
 			selection.model ?? "",
 			mergedArgs,
 			selection.installationId,
+			selection.selectedEnvVars,
 		);
 		log.info("runClaude() returned exitCode=" + exitCode);
 	}

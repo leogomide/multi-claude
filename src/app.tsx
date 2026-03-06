@@ -15,6 +15,7 @@ export type AppResult =
 			model: string;
 			installationId: string;
 			selectedFlags: string[];
+			selectedEnvVars?: Record<string, string>;
 	  }
 	| { type: "oauth-login"; providerId: string; providerName: string; isNew: boolean }
 	| { type: "run-update" };
@@ -62,6 +63,7 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 								model: result.model,
 								installationId: result.installationId,
 								selectedFlags: result.selectedFlags,
+								selectedEnvVars: result.selectedEnvVars,
 							});
 						}}
 						onOAuthLogin={(result) => {

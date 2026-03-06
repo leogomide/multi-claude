@@ -45,6 +45,7 @@ interface UnifiedAppProps {
 		model: string;
 		installationId: string;
 		selectedFlags: string[];
+		selectedEnvVars?: Record<string, string>;
 	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onRunUpdate: () => void;

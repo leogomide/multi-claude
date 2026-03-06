@@ -48,7 +48,7 @@ type Step =
 	| "loading-models"
 	| "select-model"
 	| "select-installation"
-	| "select-flags"
+	| "select-options"
 	| "no-models"
 	| "error"
 	| "auth-expired";
@@ -61,6 +61,7 @@ interface StartClaudeFlowProps {
 		model: string;
 		installationId: string;
 		selectedFlags: string[];
+		selectedEnvVars?: Record<string, string>;
 	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onCancel: () => void;
@@ -107,6 +108,7 @@ export function StartClaudeFlow({
 	const [selectedInstallationIdForFlags, setSelectedInstallationIdForFlags] = useState<string>("");
 	const [highlightedFlag, setHighlightedFlag] = useState<ChecklistItem | null>(null);
 	const [savedFlags, setSavedFlags] = useState<string[]>([]);
+	const [savedEnvVars, setSavedEnvVars] = useState<string[]>([]);
 	const preCheckedFlags = useMemo(() => {
 		const fromCli = parsePreCheckedFlags(cliArgs);
 		// Merge with saved flags from config (CLI args take priority)
@@ -115,12 +117,13 @@ export function StartClaudeFlow({
 		}
 		return fromCli;
 	}, [cliArgs, savedFlags]);
+	const preCheckedEnvVars = useMemo(() => new Set(savedEnvVars), [savedEnvVars]);
 
 	const goToFlagsStep = (provider: ConfiguredProvider, model: string, installationId: string) => {
 		setSelectedProvider(provider);
 		setSelectedModel(model);
 		setSelectedInstallationIdForFlags(installationId);
-		setStep("select-flags");
+		setStep("select-options");
 	};
 
 	useEffect(() => {
@@ -128,6 +131,9 @@ export function StartClaudeFlow({
 			setInstallations(config.installations);
 			if (config.lastFlags) {
 				setSavedFlags(config.lastFlags);
+			}
+			if (config.lastEnvVars) {
+				setSavedEnvVars(config.lastEnvVars);
 			}
 
 			if (providerId === null) {
@@ -289,70 +295,88 @@ export function StartClaudeFlow({
 		return items;
 	}, [selectedProvider, installations, t]);
 
-	const flagGroups = useMemo(() => {
+	const optionGroups = useMemo(() => {
 		return [
 			{
-				label: t("cliFlags.groupPermissions"),
+				label: t("launchOptions.groupPermissions"),
 				items: [
 					{
-						label: t("cliFlags.skipPermissions"),
+						label: t("launchOptions.skipPermissions"),
 						value: "--dangerously-skip-permissions",
-						description: t("cliFlags.descSkipPermissions"),
+						description: t("launchOptions.descSkipPermissions"),
 						checked: preCheckedFlags.has("--dangerously-skip-permissions"),
 					},
 				],
 			},
 			{
-				label: t("cliFlags.groupSession"),
+				label: t("launchOptions.groupSession"),
 				items: [
 					{
-						label: t("cliFlags.resume"),
+						label: t("launchOptions.resume"),
 						value: "--resume",
-						description: t("cliFlags.descResume"),
+						description: t("launchOptions.descResume"),
 						checked: preCheckedFlags.has("--resume"),
 					},
 				],
 			},
 			{
-				label: t("cliFlags.groupDevelopment"),
+				label: t("launchOptions.groupDevelopment"),
 				items: [
 					{
-						label: t("cliFlags.verbose"),
+						label: t("launchOptions.verbose"),
 						value: "--verbose",
-						description: t("cliFlags.descVerbose"),
+						description: t("launchOptions.descVerbose"),
 						checked: preCheckedFlags.has("--verbose"),
 					},
 					{
-						label: t("cliFlags.worktree"),
+						label: t("launchOptions.worktree"),
 						value: "--worktree",
-						description: t("cliFlags.descWorktree"),
+						description: t("launchOptions.descWorktree"),
 						checked: preCheckedFlags.has("--worktree"),
 						acceptsValue: true,
-						valuePlaceholder: t("cliFlags.worktreePlaceholder"),
+						valuePlaceholder: t("launchOptions.worktreePlaceholder"),
 					},
 				],
 			},
 			{
-				label: t("cliFlags.groupIntegration"),
+				label: t("launchOptions.groupIntegration"),
 				items: [
 					{
-						label: t("cliFlags.chrome"),
+						label: t("launchOptions.chrome"),
 						value: "--chrome",
-						description: t("cliFlags.descChrome"),
+						description: t("launchOptions.descChrome"),
 						checked: preCheckedFlags.has("--chrome"),
 					},
 				],
 			},
+			{
+				label: t("launchOptions.groupExperimental"),
+				items: [
+					{
+						label: t("launchOptions.agentTeams"),
+						value: "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS",
+						description: t("launchOptions.descAgentTeams"),
+						checked: preCheckedEnvVars.has("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"),
+						isEnvVar: true,
+						envVarValue: "1",
+					},
+				],
+			},
 		];
-	}, [t, preCheckedFlags]);
+	}, [t, preCheckedFlags, preCheckedEnvVars]);
 
-	const handleFlagsConfirm = (selected: ChecklistResult[]) => {
+	const handleOptionsConfirm = (selected: ChecklistResult[]) => {
 		if (!selectedProvider) return;
 		const flags: string[] = [];
+		const envVars: Record<string, string> = {};
 		for (const s of selected) {
-			flags.push(s.flag);
-			if (s.value) {
-				flags.push(s.value);
+			if (s.isEnvVar) {
+				envVars[s.flag] = s.envVarValue ?? "1";
+			} else {
+				flags.push(s.flag);
+				if (s.value) {
+					flags.push(s.value);
+				}
 			}
 		}
 		onComplete({
@@ -360,11 +384,12 @@ export function StartClaudeFlow({
 			model: selectedModel,
 			installationId: selectedInstallationIdForFlags,
 			selectedFlags: flags,
+			selectedEnvVars: Object.keys(envVars).length > 0 ? envVars : undefined,
 		});
 	};
 
 	useInput((input, key) => {
-		if (step === "select-flags") return; // ChecklistSelect handles its own input
+		if (step === "select-options") return; // ChecklistSelect handles its own input
 
 		if (key.escape) {
 			if (step === "select-installation") {
@@ -516,13 +541,14 @@ export function StartClaudeFlow({
 		return <Sidebar title={t("sidebar.modelInfo")} items={items} />;
 	}, [highlightedItem, t]);
 
-	const flagSidebar = useMemo(() => {
+	const optionSidebar = useMemo(() => {
 		if (!highlightedFlag) return null;
+		const isEnv = highlightedFlag.isEnvVar;
 		const items: SidebarItem[] = [
-			{ label: "Flag", value: highlightedFlag.value },
+			{ label: isEnv ? "Env Var" : "Flag", value: highlightedFlag.value },
 			{ label: t("sidebar.name"), value: highlightedFlag.description },
 		];
-		return <Sidebar title="Flag Info" items={items} />;
+		return <Sidebar title={isEnv ? "Env Var Info" : "Flag Info"} items={items} />;
 	}, [highlightedFlag, t]);
 
 	const footerItems = [
@@ -578,8 +604,8 @@ export function StartClaudeFlow({
 		);
 	}
 
-	if (step === "select-flags" && selectedProvider) {
-		const flagsFooter = [
+	if (step === "select-options" && selectedProvider) {
+		const optionsFooter = [
 			{ key: "\u2191\u2193", label: t("footer.navigate") },
 			{ key: "space", label: t("footer.toggle") },
 			{ key: "\u23CE", label: t("footer.launch") },
@@ -587,17 +613,17 @@ export function StartClaudeFlow({
 		];
 
 		return (
-			<AppShell sidebar={flagSidebar} footerItems={flagsFooter}>
+			<AppShell sidebar={optionSidebar} footerItems={optionsFooter}>
 				<StatusMessage variant="info">
 					{t("selector.providerLabel")}: {selectedProvider.name}
 					{selectedModel ? ` | ${selectedModel}` : ""}
 				</StatusMessage>
 				<Text bold color="cyan">
-					{t("cliFlags.title")}
+					{t("launchOptions.title")}
 				</Text>
 				<ChecklistSelect
-					groups={flagGroups}
-					onConfirm={handleFlagsConfirm}
+					groups={optionGroups}
+					onConfirm={handleOptionsConfirm}
 					onHighlight={setHighlightedFlag}
 					onEscape={() => {
 						// Go back to installation selection if there are installations to choose from,

@@ -254,22 +254,25 @@ export interface TranslationDictionary {
 		failed: string;
 		sidebarDesc: string;
 	};
-	cliFlags: {
+	launchOptions: {
 		title: string;
 		groupSession: string;
 		groupPermissions: string;
 		groupDevelopment: string;
 		groupIntegration: string;
+		groupExperimental: string;
 		resume: string;
 		skipPermissions: string;
 		verbose: string;
 		worktree: string;
 		chrome: string;
+		agentTeams: string;
 		descResume: string;
 		descSkipPermissions: string;
 		descVerbose: string;
 		descWorktree: string;
 		descChrome: string;
+		descAgentTeams: string;
 		worktreePlaceholder: string;
 	};
 }

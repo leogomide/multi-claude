@@ -42,6 +42,7 @@ export const configSchema = z.object({
 	installations: z.array(installationSchema).default([]),
 	language: z.string().optional(),
 	lastFlags: z.array(z.string()).optional(),
+	lastEnvVars: z.array(z.string()).optional(),
 	statusLine: statusLineConfigSchema.optional(),
 });
 
