@@ -307,7 +307,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 	const { t } = useTranslation();
 	const { rows } = useTerminalSize();
 	const ts = useTemplateStrings();
-	const [currentTemplate, setCurrentTemplate] = useState<string>("none");
+	const [currentTemplate, setCurrentTemplate] = useState<string | null>(null);
 	const [highlightedId, setHighlightedId] = useState<StatusLineTemplateId>("none");
 
 	useEffect(() => {
@@ -324,6 +324,14 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 		}
 	});
 
+	if (currentTemplate === null) {
+		return (
+			<AppShell footerItems={[]}>
+				<Text dimColor>...</Text>
+			</AppShell>
+		);
+	}
+
 	const items = STATUSLINE_TEMPLATES.map((tmpl) => {
 		const current = tmpl.id === currentTemplate ? " *" : "";
 		return {
@@ -331,6 +339,11 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 			value: tmpl.id as string,
 		};
 	});
+
+	const initialIndex = Math.max(
+		0,
+		STATUSLINE_TEMPLATES.findIndex((tmpl) => tmpl.id === currentTemplate),
+	);
 
 	const highlighted = STATUSLINE_TEMPLATES.find((tmpl) => tmpl.id === highlightedId);
 
@@ -373,6 +386,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 			</Text>
 			<CyanSelectInput
 				items={items}
+				initialIndex={initialIndex}
 				onSelect={handleSelect}
 				onHighlight={(item) => setHighlightedId(item.value as StatusLineTemplateId)}
 				limit={Math.max(3, rows - 9)}
