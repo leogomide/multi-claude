@@ -121,20 +121,9 @@ export async function migrateInstallations(config: Config): Promise<void> {
 }
 
 export async function resetAllConfig(): Promise<void> {
-	// Remove accounts (OAuth credentials)
-	if (existsSync(ACCOUNTS_DIR)) {
-		await rm(ACCOUNTS_DIR, { recursive: true, force: true });
+	if (existsSync(CONFIG_DIR)) {
+		await rm(CONFIG_DIR, { recursive: true, force: true });
 	}
-	// Remove custom installations
-	if (existsSync(INSTALLATIONS_DIR)) {
-		await rm(INSTALLATIONS_DIR, { recursive: true, force: true });
-	}
-	// Remove debug logs
-	if (existsSync(LOGS_DIR)) {
-		await rm(LOGS_DIR, { recursive: true, force: true });
-	}
-	// Reset config to defaults (including language)
-	await saveConfig({ providers: [], installations: [] });
 }
 
 export function isAccountAuthenticated(providerId: string): boolean {
