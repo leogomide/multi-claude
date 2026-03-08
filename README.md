@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.10-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.13-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -90,7 +90,7 @@ mclaude -p "explain this codebase"
 mclaude --allowedTools "Bash(git *)" -p "show recent commits"
 ```
 
-The `--model` / `-m` flag is intercepted and replaced by the model you select in the TUI.
+In TUI mode, the model is selected interactively. In headless mode, use `--model` / `-m` to specify it directly.
 
 ### TUI Flag Selection
 
@@ -208,7 +208,7 @@ Uses the native Claude Code OAuth login flow — no API key required. You can ad
 
 This is ideal if you already have a Claude Pro/Team/Enterprise subscription and want to manage multiple accounts.
 
-### Alibaba Cloud Model Studio
+### Alibaba Cloud
 
 - **Docs:** [Alibaba Cloud Coding Plan](https://www.alibabacloud.com/help/en/model-studio/coding-plan#79cb18916c1fl)
 - **Base URL:** `https://coding-intl.dashscope.aliyuncs.com/apps/anthropic`
@@ -349,34 +349,67 @@ mclaude injects a customizable status line into Claude Code that shows real-time
 | Template | Lines | Focus |
 |----------|-------|-------|
 | **none** | — | Disabled |
-| **full** (default) | 4 | Model, context bar, tokens + I/O ratio + cache + burn rate, session + API time + git |
-| **slim** | 3 | Model, context bar, tokens + cost + session + git |
-| **mini** | 1 | Model, context %, cost, duration, git branch, lines changed |
-| **cost** | 3 | Total cost highlighted, cost/min, hourly projection, in/out cost breakdown |
-| **dev** | 3 | Branch, worktree, agent, lines changed. Context + cost compact |
-| **perf** | 3 | Cache hit rate, I/O ratio, API time %, output token throughput |
-| **context** | 3 | Wider context bar, detailed token breakdown by type, total vs window limit |
+| **default** (default) | 4 | Model + git, tokens I/O + cache, session + API time + cost + burn rate, context bar |
+| **full** | 4 | Model + git, context detail (ctx/left/win), tokens I/O + cache, session + API time + cost |
+| **slim** | 3 | Model + git, tokens I/O + cost + session, context bar |
+| **mini** | 2 | Model + git, context % + cost + duration |
+| **cost** | 4 | Model + git, in/out cost breakdown, burn rate + hourly projection + session, context bar |
+| **perf** | 4 | Model + git, cache hit + I/O ratio + API time %, output throughput + session + cost, context bar |
+| **context** | 4 | Model + git, input/output/total token breakdown, cache create/read detail, context bar |
 
 ### Preview
 
+**default:**
+```
+Provider/Opus (master +45 -7)
+Input:84.2k    | Output:62.8k   | Cache:20.6M
+Session:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+```
+
 **full:**
 ```
-Provider/Opus
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░ 153.9k/77% | 46.1k/23% left
-In:84.2k | Out:62.8k | I/O 1.3:1 | Cache:20.6M (71% hit) | $0.19/min | Cost:$11.15
-Session:3h31m | API:1h38m | master | (+45,-7)
+Provider/Opus (master +45 -7)
+Ctx:153.9k/77% | Left:46.1k/23% | Win:200k
+Input:84.2k    | Output:62.8k   | Cache:20.6M
+Session:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min
 ```
 
 **slim:**
 ```
-Provider/Opus
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░ 153.9k/77% | 46.1k/23% left
-In:84.2k Out:62.8k | $11.15 | 3h31m | master | (+45,-7)
+Provider/Opus (master +45 -7)
+Input:84.2k    | Output:62.8k   | Cost:$11.15    | Session:3h31m
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
 ```
 
 **mini:**
 ```
-Provider/Opus | Ctx 77% | $11.15 | 3h31m | master | (+45,-7)
+Provider/Opus (master +45 -7)
+Ctx 77% | $11.15 | 3h31m
+```
+
+**cost:**
+```
+Provider/Opus (master +45 -7)
+Input:$3.40    | Output:$7.75   | Cost:$11.15
+$0.19/min      | ~$11.40/h      | Session:3h31m
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+```
+
+**perf:**
+```
+Provider/Opus (master +45 -7)
+Cache:71% hit  | I/O 1.3:1      | API:47% time
+Output:~297t/s | Session:3h31m  | $11.15
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+```
+
+**context:**
+```
+Provider/Opus (master +45 -7)
+Input:84.2k    | Output:62.8k   | Total:167.6k/200k
+CacheCreate:2.1k | CacheRead:18.5k | Cache:20.6M
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
 ```
 
 Color-coded indicators change from green to yellow to red based on context usage, cost, and cache hit rates.
