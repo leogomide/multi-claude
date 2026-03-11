@@ -109,7 +109,6 @@ export function StartClaudeFlow({
 	const [highlightedFlag, setHighlightedFlag] = useState<ChecklistItem | null>(null);
 	const [savedFlags, setSavedFlags] = useState<string[]>([]);
 	const [savedEnvVars, setSavedEnvVars] = useState<string[]>([]);
-	const [autoCompactEnabled, setAutoCompactEnabled] = useState(true);
 	const preCheckedFlags = useMemo(() => {
 		const fromCli = parsePreCheckedFlags(cliArgs);
 		// Merge with saved flags from config (CLI args take priority)
@@ -136,7 +135,6 @@ export function StartClaudeFlow({
 			if (config.lastEnvVars) {
 				setSavedEnvVars(config.lastEnvVars);
 			}
-			setAutoCompactEnabled(config.statusLine?.autoCompact ?? true);
 
 			if (providerId === null) {
 				// Default launch: create virtual provider, skip model selection
@@ -353,30 +351,14 @@ export function StartClaudeFlow({
 					},
 				],
 			},
-			{
-				label: t("launchOptions.groupContext"),
-				items: [
-					{
-						label: t("launchOptions.autoCompact"),
-						value: "__auto_compact__",
-						description: t("launchOptions.descAutoCompact"),
-						checked: autoCompactEnabled,
-					},
-				],
-			},
 		];
-	}, [t, preCheckedFlags, preCheckedEnvVars, autoCompactEnabled]);
+	}, [t, preCheckedFlags, preCheckedEnvVars]);
 
 	const handleOptionsConfirm = (selected: ChecklistResult[]) => {
 		if (!selectedProvider) return;
 		const flags: string[] = [];
 		const envVars: Record<string, string> = {};
-		let newAutoCompact = false;
 		for (const s of selected) {
-			if (s.flag === "__auto_compact__") {
-				newAutoCompact = true;
-				continue;
-			}
 			if (s.isEnvVar) {
 				envVars[s.flag] = s.envVarValue ?? "1";
 			} else {
@@ -386,12 +368,6 @@ export function StartClaudeFlow({
 				}
 			}
 		}
-		// Persist auto compact setting
-		loadConfig().then((config) => {
-			if (!config.statusLine) config.statusLine = { template: "default", autoCompact: true };
-			config.statusLine!.autoCompact = newAutoCompact;
-			saveConfig(config);
-		});
 		onComplete({
 			provider: selectedProvider,
 			model: selectedModel,

@@ -6,8 +6,6 @@ const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || "";
 const MODEL_HINT = process.env.MCLAUDE_MODEL || "";
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || "default";
 const LANG = process.env.MCLAUDE_LANG || "en";
-const AUTO_COMPACT = process.env.MCLAUDE_AUTO_COMPACT !== "false";
-
 const C = {
 	cyan: "\x1b[36m",
 	green: "\x1b[32m",
@@ -25,7 +23,7 @@ const C = {
 };
 
 const L = {
-	en: { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time" },
+	en: { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time", compactWarn: "/compact recommended" },
 	"pt-BR": {
 		left: "rest.",
 		hit: "hit",
@@ -33,9 +31,10 @@ const L = {
 		api: "API",
 		cost: "Custo",
 		time: "tempo",
+		compactWarn: "/compact recomendado",
 	},
-	es: { left: "rest.", hit: "hit", session: "Sesion", api: "API", cost: "Costo", time: "tiempo" },
-}[LANG] || { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time" };
+	es: { left: "rest.", hit: "hit", session: "Sesion", api: "API", cost: "Costo", time: "tiempo", compactWarn: "/compact recomendado" },
+}[LANG] || { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time", compactWarn: "/compact recommended" };
 
 const fmtK = (n) => {
 	if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
@@ -57,14 +56,8 @@ const fmtCost = (usd) => "$" + usd.toFixed(2);
 const mkBar = (pct, w) =>
 	"\u2501".repeat(Math.floor((pct * w) / 100)) + "\u254c".repeat(w - Math.floor((pct * w) / 100));
 const ctxC = (pct) => {
-	if (!AUTO_COMPACT) {
-		if (pct >= 85) return C.bold + C.blink + C.red;
-		if (pct >= 76) return C.orange;
-		if (pct >= 61) return C.yellow;
-		return C.white;
-	}
-	if (pct >= 79) return C.bold + C.blink + C.red;
-	if (pct >= 71) return C.orange;
+	if (pct >= 80) return C.bold + C.blink + C.red;
+	if (pct >= 70) return C.orange;
 	if (pct >= 61) return C.yellow;
 	return C.white;
 };
@@ -162,6 +155,7 @@ process.stdin.on("end", () => {
 
 		// -- Derived values --
 		const cc = ctxC(pct);
+		const warnLine = pct >= 80 ? C.bold + C.red + "\u26A0 " + L.compactWarn + C.reset : null;
 		const ctxTokens = curIn + cacheCreate + cacheRead;
 		const cachedTokens = cacheCreate + cacheRead;
 		const remaining = Math.floor((ctxSize * remPct) / 100);
@@ -233,6 +227,7 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "full": {
@@ -268,6 +263,7 @@ process.stdin.on("end", () => {
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "slim": {
@@ -300,6 +296,7 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "mini": {
@@ -316,6 +313,7 @@ process.stdin.on("end", () => {
 						C.cyan + fmtDurShort(durMs) + C.reset,
 					]),
 				);
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "cost": {
@@ -357,6 +355,7 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "perf": {
@@ -398,6 +397,7 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "context": {
@@ -435,6 +435,7 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (warnLine) console.log(warnLine);
 				break;
 			}
 			default:

@@ -349,7 +349,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 
 	const handleSelect = (item: { value: string }) => {
 		loadConfig().then((config) => {
-			config.statusLine = { template: item.value, autoCompact: config.statusLine?.autoCompact ?? true };
+			config.statusLine = { template: item.value };
 			saveConfig(config).then(() => {
 				const name = ts.name(item.value as StatusLineTemplateId);
 				onDone({ text: t("statusLine.changed", { template: name }), variant: "success" });

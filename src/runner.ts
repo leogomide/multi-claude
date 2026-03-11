@@ -78,8 +78,7 @@ export async function runClaude(
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
-		const autoCompact = config.statusLine?.autoCompact ?? true;
-		const slEnvVars = getStatusLineEnvVars(provider, model, slTemplate, language, autoCompact);
+		const slEnvVars = getStatusLineEnvVars(provider, model, slTemplate, language);
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate);
 	}
@@ -193,13 +192,11 @@ export async function runClaudeDefault(
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
-		const autoCompact = config.statusLine?.autoCompact ?? true;
 		const slEnvVars: Record<string, string> = {
 			MCLAUDE_PROVIDER_NAME: "",
 			MCLAUDE_MODEL: "",
 			MCLAUDE_STATUSLINE_TEMPLATE: slTemplate,
 			MCLAUDE_LANG: language,
-			MCLAUDE_AUTO_COMPACT: String(autoCompact),
 		};
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate + " (default launch)");

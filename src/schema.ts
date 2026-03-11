@@ -35,7 +35,6 @@ export const DEFAULT_LAUNCH_TEMPLATE_ID = "__default__";
 
 export const statusLineConfigSchema = z.object({
 	template: z.string().default("default"),
-	autoCompact: z.boolean().default(true),
 });
 
 export const configSchema = z.object({

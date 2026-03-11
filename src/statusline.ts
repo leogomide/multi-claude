@@ -114,13 +114,11 @@ export function getStatusLineEnvVars(
 	model: string,
 	template: string,
 	language: string,
-	autoCompact: boolean,
 ): Record<string, string> {
 	return {
 		MCLAUDE_PROVIDER_NAME: provider.name,
 		MCLAUDE_MODEL: model,
 		MCLAUDE_STATUSLINE_TEMPLATE: template,
 		MCLAUDE_LANG: language,
-		MCLAUDE_AUTO_COMPACT: String(autoCompact),
 	};
 }
