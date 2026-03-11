@@ -10,7 +10,7 @@ const C = {
 	cyan: "\x1b[36m",
 	green: "\x1b[32m",
 	yellow: "\x1b[33m",
-	red: "\x1b[38;5;196m",
+	red: "\x1b[91m",
 	dim: "\x1b[2m",
 	bold: "\x1b[1m",
 	reset: "\x1b[0m",
@@ -18,8 +18,7 @@ const C = {
 	magenta: "\x1b[35m",
 	blue: "\x1b[34m",
 	brightBlue: "\x1b[94m",
-	orange: "\x1b[38;5;208m",
-	blink: "\x1b[5m",
+	orange: "\x1b[38;5;208m"
 };
 
 const L = {
@@ -58,7 +57,7 @@ const fmtCost = (usd) => "$" + usd.toFixed(2);
 const mkBar = (pct, w) =>
 	"\u2501".repeat(Math.floor((pct * w) / 100)) + "\u254c".repeat(w - Math.floor((pct * w) / 100));
 const ctxC = (pct) => {
-	if (pct >= 80) return C.bold + C.blink + C.red;
+	if (pct >= 80) return C.bold + C.red;
 	if (pct >= 70) return C.orange;
 	if (pct >= 61) return C.yellow;
 	return C.white;
@@ -83,6 +82,12 @@ const fmtGrid = (W, coreLines, tailPerLine = []) => {
 		const tail = (tailPerLine[i] || []).filter(Boolean);
 		return [...padded, ...tail].join(SEP);
 	});
+};
+
+// Build unified bar line: entire line in one color block (no mid-line resets)
+const mkBarLine = (cc, pct, barW, W, ctxTokens, remaining, remPct, leftLabel, statusTxt) => {
+	const padPlain = (s, w) => (s.length >= w ? s : s + " ".repeat(w - s.length));
+	return cc + mkBar(pct, barW) + " | " + padPlain(fmtK(ctxTokens) + "/" + pct + "%", W) + " | " + padPlain(fmtK(remaining) + "/" + remPct + "% " + leftLabel, W) + statusTxt + C.reset;
 };
 
 // Simple uniform padding for non-grid templates (mini)
@@ -161,6 +166,10 @@ process.stdin.on("end", () => {
 			: pct >= 70 ? " " + cc + "(" + L.ctxImminent + ")" + C.reset
 			: pct >= 61 ? " " + cc + "(" + L.ctxApproaching + ")" + C.reset
 			: "";
+		const ctxStatusTxt = pct >= 80 ? " (" + L.ctxCompact + ")"
+			: pct >= 70 ? " (" + L.ctxImminent + ")"
+			: pct >= 61 ? " (" + L.ctxApproaching + ")"
+			: "";
 		const ctxTokens = curIn + cacheCreate + cacheRead;
 		const cachedTokens = cacheCreate + cacheRead;
 		const remaining = Math.floor((ctxSize * remPct) / 100);
@@ -224,10 +233,7 @@ process.stdin.on("end", () => {
 
 				// Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
 				const barW = 2 * W + SEP_W;
-				const bar = cc + mkBar(pct, barW) + C.reset;
-				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
-				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
+				const barLine = mkBarLine(cc, pct, barW, W, ctxTokens, remaining, remPct, L.left, ctxStatusTxt);
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
@@ -291,10 +297,7 @@ process.stdin.on("end", () => {
 
 				// Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
 				const barW = 2 * W + SEP_W;
-				const bar = cc + mkBar(pct, barW) + C.reset;
-				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
-				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
+				const barLine = mkBarLine(cc, pct, barW, W, ctxTokens, remaining, remPct, L.left, ctxStatusTxt);
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
@@ -348,10 +351,7 @@ process.stdin.on("end", () => {
 
 				// Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
 				const barW = 2 * W + SEP_W;
-				const bar = cc + mkBar(pct, barW) + C.reset;
-				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
-				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
+				const barLine = mkBarLine(cc, pct, barW, W, ctxTokens, remaining, remPct, L.left, ctxStatusTxt);
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
@@ -389,10 +389,7 @@ process.stdin.on("end", () => {
 
 				// Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
 				const barW = 2 * W + SEP_W;
-				const bar = cc + mkBar(pct, barW) + C.reset;
-				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
-				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
+				const barLine = mkBarLine(cc, pct, barW, W, ctxTokens, remaining, remPct, L.left, ctxStatusTxt);
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
@@ -426,10 +423,7 @@ process.stdin.on("end", () => {
 
 				// Bar line: bar(2 cols) | used/pct(1 col) | remaining/pct left(1 col)
 				const barW = 2 * W + SEP_W;
-				const bar = cc + mkBar(pct, barW) + C.reset;
-				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
-				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
+				const barLine = mkBarLine(cc, pct, barW, W, ctxTokens, remaining, remPct, L.left, ctxStatusTxt);
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));

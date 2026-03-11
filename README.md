@@ -108,7 +108,6 @@ Before launching Claude Code, the TUI presents a flag selection step where you c
 | Permissions | `--dangerously-skip-permissions` | Skip all permission prompts (use with caution) |
 | Development | `--verbose` | Enable verbose logging, shows full turn-by-turn output |
 | Development | `--worktree [name]` | Run in an isolated git worktree |
-| Integration | `--chrome` | Enable Chrome browser integration for web automation |
 
 ### Headless Mode (non-interactive)
 

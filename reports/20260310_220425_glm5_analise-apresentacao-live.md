@@ -857,7 +857,6 @@ const sidebarContent = useMemo(() => {
 - Session: --resume
 - Permissions: --dangerously-skip-permissions
 - Development: --verbose, --worktree
-- Integration: --chrome
 - Experimental: Agent Teams
 
 **Por que impressiona:** Em vez de decorar flags, o usuário vê todas as opções organizadas com descrições claras na sidebar.

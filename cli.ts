@@ -42,8 +42,7 @@ const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
 	"--dangerously-skip-permissions",
 	"--verbose",
 	"--worktree",
-	"-w",
-	"--chrome",
+	"-w"
 ]);
 
 function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[] {

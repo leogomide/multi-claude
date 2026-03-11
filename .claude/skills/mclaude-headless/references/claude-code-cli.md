@@ -107,7 +107,6 @@ Agents JSON format:
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `--chrome` | Enable Chrome browser integration | `claude --chrome` |
 | `--no-chrome` | Disable Chrome integration | `claude --no-chrome` |
 | `--mcp-config` | Load MCP servers from JSON | `claude --mcp-config ./mcp.json` |
 | `--strict-mcp-config` | Only use servers from --mcp-config | `claude --strict-mcp-config --mcp-config ./mcp.json` |
