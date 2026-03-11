@@ -23,7 +23,7 @@ const C = {
 };
 
 const L = {
-	en: { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time", compactWarn: "/compact recommended" },
+	en: { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time", ctxApproaching: "approaching", ctxImminent: "imminent", ctxCompact: "/compact" },
 	"pt-BR": {
 		left: "rest.",
 		hit: "hit",
@@ -31,10 +31,12 @@ const L = {
 		api: "API",
 		cost: "Custo",
 		time: "tempo",
-		compactWarn: "/compact recomendado",
+		ctxApproaching: "aproximando",
+		ctxImminent: "iminente",
+		ctxCompact: "/compact",
 	},
-	es: { left: "rest.", hit: "hit", session: "Sesion", api: "API", cost: "Costo", time: "tiempo", compactWarn: "/compact recomendado" },
-}[LANG] || { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time", compactWarn: "/compact recommended" };
+	es: { left: "rest.", hit: "hit", session: "Sesion", api: "API", cost: "Costo", time: "tiempo", ctxApproaching: "aproximando", ctxImminent: "inminente", ctxCompact: "/compact" },
+}[LANG] || { left: "left", hit: "hit", session: "Session", api: "API", cost: "Cost", time: "time", ctxApproaching: "approaching", ctxImminent: "imminent", ctxCompact: "/compact" };
 
 const fmtK = (n) => {
 	if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
@@ -155,7 +157,10 @@ process.stdin.on("end", () => {
 
 		// -- Derived values --
 		const cc = ctxC(pct);
-		const warnLine = pct >= 80 ? C.bold + C.red + "\u26A0 " + L.compactWarn + C.reset : null;
+		const ctxStatus = pct >= 80 ? " " + cc + "(" + L.ctxCompact + ")" + C.reset
+			: pct >= 70 ? " " + cc + "(" + L.ctxImminent + ")" + C.reset
+			: pct >= 61 ? " " + cc + "(" + L.ctxApproaching + ")" + C.reset
+			: "";
 		const ctxTokens = curIn + cacheCreate + cacheRead;
 		const cachedTokens = cacheCreate + cacheRead;
 		const remaining = Math.floor((ctxSize * remPct) / 100);
@@ -222,16 +227,15 @@ process.stdin.on("end", () => {
 				const bar = cc + mkBar(pct, barW) + C.reset;
 				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
 				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "full": {
-				// Grid: 3 columns — same as default + context detail line
+				// Grid: 3 columns — context line moved to last position
 				const cpm = durMs > 0 ? cost / (durMs / 60000) : 0;
 
 				// Line 1: Provider/Model + git info + lines changed
@@ -242,11 +246,6 @@ process.stdin.on("end", () => {
 
 				const coreLines = [
 					[
-						C.cyan + "Ctx:" + fmtK(ctxTokens) + "/" + pct + "%" + C.reset,
-						C.yellow + L.left + ":" + fmtK(remaining) + "/" + remPct + "%" + C.reset,
-						C.green + "Win:" + fmtK(ctxSize) + C.reset,
-					],
-					[
 						C.cyan + "Input:" + fmtK(totalIn) + C.reset,
 						C.yellow + "Output:" + fmtK(totalOut) + C.reset,
 						C.green + "Cache:" + fmtK(cachedTokens) + C.reset,
@@ -256,14 +255,18 @@ process.stdin.on("end", () => {
 						C.yellow + L.api + ":" + fmtDur(apiMs) + C.reset,
 						C.green + L.cost + ":" + fmtCost(cost) + C.reset,
 					],
+					[
+						cc + "Ctx:" + fmtK(ctxTokens) + "/" + pct + "%" + C.reset,
+						cc + L.left + ":" + fmtK(remaining) + "/" + remPct + "%" + C.reset,
+						cc + "Win:" + fmtK(ctxSize) + C.reset,
+					],
 				];
-				const tailPerLine = [[], [], [C.green + fmtCost(cpm) + "/min" + C.reset]];
+				const tailPerLine = [[], [C.green + fmtCost(cpm) + "/min" + C.reset], [ctxStatus ? ctxStatus.trim() : ""]];
 				const W = calcW(coreLines);
 				const lines = fmtGrid(W, coreLines, tailPerLine);
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "slim": {
@@ -291,12 +294,11 @@ process.stdin.on("end", () => {
 				const bar = cc + mkBar(pct, barW) + C.reset;
 				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
 				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "mini": {
@@ -311,9 +313,8 @@ process.stdin.on("end", () => {
 						cc + "Ctx " + pct + "%" + C.reset,
 						C.green + fmtCost(cost) + C.reset,
 						C.cyan + fmtDurShort(durMs) + C.reset,
-					]),
+					]) + ctxStatus,
 				);
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "cost": {
@@ -350,12 +351,11 @@ process.stdin.on("end", () => {
 				const bar = cc + mkBar(pct, barW) + C.reset;
 				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
 				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "perf": {
@@ -392,12 +392,11 @@ process.stdin.on("end", () => {
 				const bar = cc + mkBar(pct, barW) + C.reset;
 				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
 				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			case "context": {
@@ -430,12 +429,11 @@ process.stdin.on("end", () => {
 				const bar = cc + mkBar(pct, barW) + C.reset;
 				const ctxUsed = cc + fmtK(ctxTokens) + "/" + pct + "%" + C.reset;
 				const ctxLeft = cc + fmtK(remaining) + "/" + remPct + "% " + L.left + C.reset;
-				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W);
+				const barLine = bar + SEP + padV(ctxUsed, W) + SEP + padV(ctxLeft, W) + ctxStatus;
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
-				if (warnLine) console.log(warnLine);
 				break;
 			}
 			default:

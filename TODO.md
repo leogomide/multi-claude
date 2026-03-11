@@ -6,6 +6,29 @@ https://platform.claude.com/docs/en/agent-sdk/typescript
 
 # templates
 
+vamos fazer correçoes e edicoes nos padroes de statusline
+
+vamos criar um status simples e conciso, conforme a cor do contexto
+
+no template padrao:
+━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (status)
+
+no template completo:
+mover a linha do status do contexto para a ulotima posicao
+Ctx:153.9k/77% | Left:46.1k/23% | (status)
+
+no template slim:
+━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (status)
+
+no template custos:
+━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (status)
+
+no template Performance:
+━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (status)
+
+no template Janela de Contexto:
+━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (status)
+
 pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
 
 -----------------------------------------------------
@@ -42,6 +65,12 @@ Auto Compact OFF (checkbox desmarcado):
 
 - Observação: File-based IPC é simples mas tem race conditions se TUI for killado entre write e read. 
 Melhoria futura: pipes ou Unix sockets.
+
+- gerar video com remotion sobre o uso do mclaude
+  - terminal abrindo
+  - selecao de provedores
+  - selecao de flags
+  - inicio do claude code
 
 # apresnetação comunidade
 
