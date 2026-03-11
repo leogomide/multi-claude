@@ -197,6 +197,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 		if (mpStep === "new-password") {
 			return (
 				<TextPrompt
+					key="new-password"
 					label={t("settings.masterPasswordLabel")}
 					mask="*"
 					onSubmit={handleNewPassword}
@@ -207,6 +208,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 		if (mpStep === "confirm-password") {
 			return (
 				<TextPrompt
+					key="confirm-password"
 					label={t("settings.masterPasswordConfirmLabel")}
 					mask="*"
 					onSubmit={handleConfirmPassword}
