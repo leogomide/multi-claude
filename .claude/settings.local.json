@@ -1,0 +1,20 @@
+{
+	"hooks": {
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node .claude/lint-hook.mjs",
+						"timeout": 30
+					},
+					{
+						"type": "command",
+						"command": "node .claude/play-sound.mjs",
+						"timeout": 10
+					}
+				]
+			}
+		]
+	}
+}

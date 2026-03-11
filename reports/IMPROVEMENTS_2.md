@@ -24,9 +24,6 @@ CRITICOS (afetam diretamente a percepcao do usuario)
     6. Onboarding inexistente                                   
        Primeiro launch vai direto pro menu com "No providers configured". Sem tela de boas-vindas, sem guia de setup rapido. Para uma apresentacao, isso e a primeira impressao.
 
-7. Master password sem instrucoes de recuperacao                                                                                                                                                                                                
-   tui-process.ts:80 — "Invalid master password." e saida. Nao diz o que fazer (ex: deletar .key para resetar).
-
 8. Erros de config silenciosos                                                                                                                                                                                                                  
    config.ts:45 — se o config.json estiver corrompido, retorna config vazia sem avisar. Usuario perde todos os providers sem saber porquê.
     9. Validacao de inputs incompleta
@@ -43,9 +40,6 @@ CRITICOS (afetam diretamente a percepcao do usuario)
     runner.ts:111-115 e runner.ts:227-231 — mesmas 4 linhas de instrucao de instalacao copiadas. Deveria ser uma constante/funcao.
     12. Statusline depende do Bun sem verificar                                                                                                                                                                                                     
         statusline.ts:99 — hardcoded command: 'bun ...'. Se o Bun nao estiver no PATH, statusline quebra silenciosamente.
-
-13. Logs nao rotacionam por tamanho                                                                                                                                                                                                             
-    Apenas por quantidade (max 20 arquivos). Uma sessao longa pode gerar um log gigante.
 
 14. Timeout de update check agressivo                                                                                                                                                                                                           
     useUpdateCheck.ts:13 — 3 segundos pode ser pouco em redes lentas. Update simplesmente nao aparece sem explicacao.

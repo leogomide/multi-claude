@@ -73,7 +73,8 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 
 	const handleMpCurrentPassword = async (password: string) => {
 		const config = await loadConfig();
-		if (!verifyMasterPassword(password, config)) {
+		const result = verifyMasterPassword(password, config);
+		if (!result.valid) {
 			setMessage({ variant: "error", text: t("settings.masterPasswordInvalid") });
 			setMpStep(null);
 			setMpPassword("");
@@ -93,7 +94,7 @@ export function SettingsPage({ onSelect, lastMessage }: SettingsPageProps) {
 				// Unwrap the key file
 				await unwrapKey(mpPassword);
 				clearCachedKey();
-				setSessionMasterPassword("");
+				setSessionMasterPassword(undefined);
 
 				// Remove hash from config and re-save (saveConfig encrypts with unwrapped key)
 				const config = await loadConfig();

@@ -2,10 +2,10 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { isEncryptedPayload } from "./crypto.ts";
 import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig, setSessionMasterPassword } from "./config.ts";
-import { encryptCredential, hasMasterPassword, needsEncryptionMigration, verifyMasterPassword } from "./credential-store.ts";
+import { encryptCredential, generateMasterPasswordHash, hasMasterPassword, needsEncryptionMigration, verifyMasterPassword } from "./credential-store.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { i18n, initLocale } from "./i18n/index.ts";
-import { clearCachedKey, initKeystore, resetKeyFile } from "./keystore.ts";
+import { clearCachedKey, initKeystore, migrateKeyWrapping, resetKeyFile } from "./keystore.ts";
 import { configSchema, DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
 
 export const SELECTION_FILE = join(CONFIG_DIR, "last-selection.json");
@@ -137,8 +137,25 @@ if (hasMasterPassword(preConfig)) {
 	while (!authenticated) {
 		const password = await promptPassword(i18n.t("settings.masterPassword") + ": ");
 
-		if (verifyMasterPassword(password, preConfig)) {
+		const mpResult = verifyMasterPassword(password, preConfig);
+		if (mpResult.valid) {
 			setSessionMasterPassword(password);
+			if (mpResult.isLegacy) {
+				// Silent migration: re-wrap key and re-hash with domain-separated salts
+				try {
+					await migrateKeyWrapping(password);
+					const newHash = generateMasterPasswordHash(password);
+					// Raw config update to avoid decrypt/encrypt cycle
+					const configFile = join(CONFIG_DIR, "config.json");
+					const raw = await readFile(configFile, "utf-8");
+					const parsed = JSON.parse(raw);
+					parsed.masterPasswordHash = newHash;
+					await writeFile(configFile, JSON.stringify(parsed, null, 2) + "\n", "utf-8");
+					log.info("legacy master password migrated to domain-separated format");
+				} catch (err) {
+					log.error("master password migration failed (non-fatal)", err);
+				}
+			}
 			authenticated = true;
 		} else {
 			process.stdout.write("\n");

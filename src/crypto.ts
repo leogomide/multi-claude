@@ -53,9 +53,20 @@ export function isEncryptedPayload(value: string): boolean {
 }
 
 export function deriveKey(secret: string, salt: Buffer): Buffer {
-	return pbkdf2Sync(secret, salt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512");
+	const domainSalt = Buffer.concat([Buffer.from("mclaude-wrap:"), salt]);
+	return pbkdf2Sync(secret, domainSalt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512");
 }
 
 export function hashPassword(password: string, salt: Buffer): string {
+	const domainSalt = Buffer.concat([Buffer.from("mclaude-hash:"), salt]);
+	return pbkdf2Sync(password, domainSalt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512").toString("base64");
+}
+
+// Legacy functions (without domain separation) — used only for migration
+export function legacyDeriveKey(secret: string, salt: Buffer): Buffer {
+	return pbkdf2Sync(secret, salt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512");
+}
+
+export function legacyHashPassword(password: string, salt: Buffer): string {
 	return pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512").toString("base64");
 }

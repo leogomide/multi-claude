@@ -1,8 +1,11 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { createLogger, initLogger } from "./debug.ts";
 
 const log = createLogger("headless");
 
 import {
+	CONFIG_DIR,
 	isAccountAuthenticated,
 	isOAuthTokenValid,
 	loadConfig,
@@ -13,8 +16,8 @@ import {
 	TEMPLATE_ID_RENAMES,
 	slugify,
 } from "./config.ts";
-import { hasMasterPassword, verifyMasterPassword } from "./credential-store.ts";
-import { initKeystore } from "./keystore.ts";
+import { generateMasterPasswordHash, hasMasterPassword, verifyMasterPassword } from "./credential-store.ts";
+import { initKeystore, migrateKeyWrapping } from "./keystore.ts";
 import { getEffectiveModels } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
@@ -271,11 +274,26 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 			console.error("Use --master-password <password> or set MCLAUDE_MASTER_PASSWORD env var.");
 			return 1;
 		}
-		if (!verifyMasterPassword(mp, preConfig)) {
+		const mpResult = verifyMasterPassword(mp, preConfig);
+		if (!mpResult.valid) {
 			console.error("Error: Invalid master password.");
 			return 1;
 		}
 		setSessionMasterPassword(mp);
+		if (mpResult.isLegacy) {
+			try {
+				await migrateKeyWrapping(mp);
+				const newHash = generateMasterPasswordHash(mp);
+				const configFile = join(CONFIG_DIR, "config.json");
+				const raw = await readFile(configFile, "utf-8");
+				const parsed = JSON.parse(raw);
+				parsed.masterPasswordHash = newHash;
+				await writeFile(configFile, JSON.stringify(parsed, null, 2) + "\n", "utf-8");
+				log.info("legacy master password migrated to domain-separated format");
+			} catch (err) {
+				log.error("master password migration failed (non-fatal)", err);
+			}
+		}
 	}
 
 	const config = await loadConfig();

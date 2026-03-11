@@ -20,7 +20,7 @@ function defaultConfig(): Config {
 // Master password for current session (set by TUI or headless mode)
 let sessionMasterPassword: string | undefined;
 
-export function setSessionMasterPassword(password: string): void {
+export function setSessionMasterPassword(password: string | undefined): void {
 	sessionMasterPassword = password;
 }
 
