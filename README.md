@@ -221,12 +221,32 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **API key:** Get a coding plan key (`sk-sp-xxxxx`) at [Alibaba Cloud Model Studio](https://bailian.console.alibabacloud.com/)
 - **Default models:** `glm-4.7`, `glm-5`, `kimi-k2.5`, `MiniMax-M2.5`, `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3-max-2026-01-23`, `qwen3.5-plus`
 
+**Coding Plan:** Subscription-based pricing with multi-model access. One subscription covers Qwen, GLM, Kimi, and MiniMax models. Usage is restricted to coding tools (Claude Code, Cursor, etc.).
+
+| Tier | Price | Requests / 5h | Requests / month |
+|------|-------|---------------|-----------------|
+| Lite | $10/mo | 1,200 | 18,000 |
+| Pro | $50/mo | 6,000 | 90,000 |
+
+First month promotional pricing starting at ~$3. [Subscribe here](https://common-buy-intl.alibabacloud.com/coding-plan).
+
 ### BytePlus ModelArk
 
 - **Docs:** [BytePlus ModelArk Claude Code integration](https://docs.byteplus.com/en/docs/ModelArk/1928262)
 - **Base URL:** `https://ark.ap-southeast.bytepluses.com/api/coding`
 - **API key:** Get one at [BytePlus ModelArk Console](https://console.byteplus.com/ark/region:ark+ap-southeast-1/apiKey)
 - **Default models:** `ark-code-latest`, `bytedance-seed-code`, `glm-4.7`, `gpt-oss-120b`, `kimi-k2-thinking`, `kimi-k2.5`
+
+**Coding Plan:** Subscription with Auto mode that intelligently selects the best model per task. New users get 50% off.
+
+| Tier | Price | New user price |
+|------|-------|---------------|
+| Lite | $10/mo | $5/mo |
+| Pro | $50/mo | $25/mo |
+| Lite (3 months) | $30 | $15 |
+| Pro (3 months) | $120 | $60 |
+
+[Subscribe here](https://www.byteplus.com/en/activity/codingplan).
 
 ### DeepSeek
 
@@ -241,6 +261,19 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **Base URL:** `https://api.minimax.io/anthropic`
 - **API key:** Get one at [platform.minimax.io](https://platform.minimax.io)
 - **Default models:** `MiniMax-M2`, `MiniMax-M2.1`, `MiniMax-M2.5`, `MiniMax-M2.5-highspeed`
+
+**Coding Plan:** Subscription tiers with a rolling 5-hour window for rate limiting. Annual plans save ~17%.
+
+| Tier | Price | Prompts / 5h | Model |
+|------|-------|-------------|-------|
+| Starter | $10/mo | 100 | M2.5 (~50 TPS) |
+| Plus | $20/mo | 300 | M2.5 (~50 TPS) |
+| Max | $50/mo | 1,000 | M2.5 (~50 TPS) |
+| Plus HS | $40/mo | 300 | M2.5-highspeed (~100 TPS) |
+| Max HS | $80/mo | 1,000 | M2.5-highspeed (~100 TPS) |
+| Ultra HS | $150/mo | 2,000 | M2.5-highspeed (~100 TPS) |
+
+[Subscribe here](https://platform.minimax.io/subscribe/coding-plan).
 
 ### Moonshot AI
 
