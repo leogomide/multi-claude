@@ -9,9 +9,12 @@ import {
 	migrateInstallations,
 	migrateProviderTemplateIds,
 	readOAuthCredentials,
+	setSessionMasterPassword,
 	TEMPLATE_ID_RENAMES,
 	slugify,
 } from "./config.ts";
+import { hasMasterPassword, verifyMasterPassword } from "./credential-store.ts";
+import { initKeystore } from "./keystore.ts";
 import { getEffectiveModels } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
@@ -239,6 +242,23 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 	initLogger("headless");
 	log.info("started, provider=" + args.provider);
 
+	await initKeystore();
+
+	// Handle master password in headless mode via env var
+	const preConfig = await loadConfig();
+	if (hasMasterPassword(preConfig)) {
+		const mp = process.env["MCLAUDE_MASTER_PASSWORD"];
+		if (!mp) {
+			console.error("Error: Master password is configured. Set MCLAUDE_MASTER_PASSWORD env var.");
+			return 1;
+		}
+		if (!verifyMasterPassword(mp, preConfig)) {
+			console.error("Error: Invalid master password.");
+			return 1;
+		}
+		setSessionMasterPassword(mp);
+	}
+
 	const config = await loadConfig();
 	await migrateProviderTemplateIds(config);
 	await migrateInstallations(config);
@@ -309,6 +329,7 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 // --- List command ---
 
 export async function printHeadlessInfo(): Promise<void> {
+	await initKeystore();
 	const config = await loadConfig();
 	await migrateProviderTemplateIds(config);
 	await migrateInstallations(config);

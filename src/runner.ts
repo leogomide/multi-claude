@@ -91,12 +91,20 @@ export async function runClaude(
 	}
 
 	log.info("spawning claude, args=" + JSON.stringify(args));
-	log.debug(
-		"env keys=" +
-			JSON.stringify(
-				Object.keys(env).filter((k) => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE")),
-			),
-	);
+
+	// Log env keys without sensitive values
+	const sensitiveKeys = new Set([
+		"ANTHROPIC_AUTH_TOKEN",
+		"ANTHROPIC_API_KEY",
+		"OPENROUTER_API_KEY",
+		"CLAUDE_CODE_OAUTH_TOKEN",
+	]);
+	const sanitizedEnv: Record<string, string> = {};
+	for (const k of Object.keys(env).filter((k) => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE") || k.startsWith("OPENROUTER"))) {
+		const v = env[k];
+		sanitizedEnv[k] = sensitiveKeys.has(k) && v ? v.slice(0, 4) + "***" : (v ?? "");
+	}
+	log.debug("env=" + JSON.stringify(sanitizedEnv));
 
 	return new Promise<number>((resolve, reject) => {
 		const child = spawn(claudePath, args, {

@@ -1,8 +1,10 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig } from "./config.ts";
+import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig, setSessionMasterPassword } from "./config.ts";
+import { encryptCredential, hasMasterPassword, needsEncryptionMigration, verifyMasterPassword } from "./credential-store.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { initLocale } from "./i18n/index.ts";
+import { initKeystore } from "./keystore.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
 
 export const SELECTION_FILE = join(CONFIG_DIR, "last-selection.json");
@@ -30,9 +32,66 @@ log.info("started");
 const cliArgs = process.argv.slice(2);
 log.debug("cliArgs=" + JSON.stringify(cliArgs));
 
+await initKeystore();
+
+// Pre-load config to check master password BEFORE decryption
+const preConfig = await loadConfig();
+
+if (hasMasterPassword(preConfig)) {
+	// Master password required — prompt via stdin
+	const password = await new Promise<string>((resolve) => {
+		process.stdout.write("Master password: ");
+		let input = "";
+		process.stdin.setEncoding("utf-8");
+		if (process.stdin.isTTY && process.stdin.setRawMode) {
+			process.stdin.setRawMode(true);
+		}
+		const onData = (data: string) => {
+			for (const ch of data) {
+				if (ch === "\r" || ch === "\n") {
+					process.stdout.write("\n");
+					process.stdin.removeListener("data", onData);
+					if (process.stdin.isTTY && process.stdin.setRawMode) {
+						process.stdin.setRawMode(false);
+					}
+					resolve(input);
+					return;
+				}
+				if (ch === "\x03") {
+					// Ctrl+C
+					process.exit(1);
+				}
+				if (ch === "\x7f" || ch === "\b") {
+					if (input.length > 0) {
+						input = input.slice(0, -1);
+						process.stdout.write("\b \b");
+					}
+					continue;
+				}
+				input += ch;
+				process.stdout.write("*");
+			}
+		};
+		process.stdin.on("data", onData);
+		process.stdin.resume();
+	});
+
+	if (!verifyMasterPassword(password, preConfig)) {
+		console.error("Invalid master password.");
+		process.exit(1);
+	}
+	setSessionMasterPassword(password);
+}
+
 const config = await loadConfig();
 await migrateProviderTemplateIds(config);
 await migrateInstallations(config);
+
+// Migrate plaintext credentials to encrypted (saveConfig handles the actual encryption)
+if (needsEncryptionMigration(config)) {
+	await saveConfig(config);
+	log.info("credentials migrated to encrypted");
+}
 
 if (!config.language) {
 	try {
@@ -104,12 +163,13 @@ if (result) {
 			log.warn("failed to save lastFlags: " + String(err));
 		}
 
+		const encryptedApiKey = await encryptCredential(result.provider.apiKey);
 		const selection = {
 			providerId: result.provider.id,
 			providerName: result.provider.name,
 			templateId: result.provider.templateId,
 			type: result.provider.type ?? "api",
-			apiKey: result.provider.apiKey,
+			apiKey: encryptedApiKey,
 			models: result.provider.models,
 			model: result.model,
 			installationId: result.installationId,

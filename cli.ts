@@ -4,7 +4,9 @@ import { execSync, spawnSync } from "node:child_process";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { decryptCredential } from "./src/credential-store.ts";
 import { createLogger, formatError, initLogger } from "./src/debug.ts";
+import { initKeystore } from "./src/keystore.ts";
 import type { ConfiguredProvider } from "./src/schema.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
 
@@ -104,6 +106,9 @@ process.on("exit", (code) => {
 });
 
 log.info("started, argv=" + JSON.stringify(process.argv));
+
+// Initialize keystore (.key and .salt files)
+await initKeystore();
 
 const cliArgs = process.argv.slice(2);
 
@@ -281,6 +286,10 @@ while (true) {
 		const raw = await readFile(SELECTION_FILE, "utf-8");
 		selection = JSON.parse(raw) as TuiSelection;
 		await unlink(SELECTION_FILE);
+		// Decrypt apiKey from IPC file
+		if (selection.apiKey) {
+			selection.apiKey = await decryptCredential(selection.apiKey);
+		}
 		log.info("selection read and deleted, provider=" + selection.providerName);
 	} catch (err) {
 		log.error("failed to read selection file", err);

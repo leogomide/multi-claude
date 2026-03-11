@@ -44,6 +44,7 @@ export const configSchema = z.object({
 	lastFlags: z.array(z.string()).optional(),
 	lastEnvVars: z.array(z.string()).optional(),
 	statusLine: statusLineConfigSchema.optional(),
+	masterPasswordHash: z.string().optional(),
 });
 
 export type ConfiguredProvider = z.infer<typeof configuredProviderSchema>;

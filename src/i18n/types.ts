@@ -99,10 +99,25 @@ export interface TranslationDictionary {
 		openConfigFolder: string;
 		changeLanguage: string;
 		statusLine: string;
+		masterPassword: string;
+		setMasterPassword: string;
+		removeMasterPassword: string;
+		masterPasswordSet: string;
+		masterPasswordRemoved: string;
+		masterPasswordLabel: string;
+		masterPasswordConfirmLabel: string;
+		masterPasswordCurrentLabel: string;
+		masterPasswordMismatch: string;
+		masterPasswordInvalid: string;
 		resetAll: string;
 		confirmResetAll: string;
 		resetAllSuccess: string;
 		back: string;
+	};
+	encryption: {
+		decryptionFailed: string;
+		reenterApiKey: string;
+		credentialsMigrated: string;
 	};
 	statusLine: {
 		title: string;

@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { isEncryptedPayload } from "./crypto.ts";
+import { decryptCredential, encryptCredential } from "./credential-store.ts";
 import type { Config } from "./schema.ts";
 import { configSchema } from "./schema.ts";
 
@@ -15,11 +17,31 @@ function defaultConfig(): Config {
 	return { providers: [], installations: [] };
 }
 
+// Master password for current session (set by TUI or headless mode)
+let sessionMasterPassword: string | undefined;
+
+export function setSessionMasterPassword(password: string): void {
+	sessionMasterPassword = password;
+}
+
+export function getSessionMasterPassword(): string | undefined {
+	return sessionMasterPassword;
+}
+
 export async function loadConfig(): Promise<Config> {
 	try {
 		const raw = await readFile(CONFIG_FILE, "utf-8");
 		const parsed = JSON.parse(raw);
-		return configSchema.parse(parsed);
+		const config = configSchema.parse(parsed);
+
+		// Decrypt API keys in memory
+		for (const provider of config.providers) {
+			if (provider.apiKey && isEncryptedPayload(provider.apiKey)) {
+				provider.apiKey = await decryptCredential(provider.apiKey, sessionMasterPassword);
+			}
+		}
+
+		return config;
 	} catch {
 		return defaultConfig();
 	}
@@ -27,7 +49,27 @@ export async function loadConfig(): Promise<Config> {
 
 export async function saveConfig(config: Config): Promise<void> {
 	await mkdir(CONFIG_DIR, { recursive: true });
-	await writeFile(CONFIG_FILE, JSON.stringify(config, null, 2) + "\n", "utf-8");
+
+	// Deep clone and encrypt API keys before writing to disk
+	const toSave = JSON.parse(JSON.stringify(config)) as Config;
+	for (const provider of toSave.providers) {
+		if (provider.apiKey && !isEncryptedPayload(provider.apiKey)) {
+			provider.apiKey = await encryptCredential(provider.apiKey, sessionMasterPassword);
+		}
+	}
+
+	await writeFile(CONFIG_FILE, JSON.stringify(toSave, null, 2) + "\n", "utf-8");
+	await setSecurePermissions(CONFIG_FILE);
+}
+
+async function setSecurePermissions(filePath: string): Promise<void> {
+	if (process.platform !== "win32") {
+		try {
+			await chmod(filePath, 0o600);
+		} catch {
+			// Ignore permission errors
+		}
+	}
 }
 
 export function getAccountDir(providerId: string): string {
