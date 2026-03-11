@@ -21,7 +21,6 @@
 		"src/",
 		"package.json"
 	],
-	"module": "index.ts",
 	"type": "module",
 	"bin": {
 		"mclaude": "./cli.ts"

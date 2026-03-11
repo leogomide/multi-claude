@@ -177,7 +177,7 @@ mclaude --provider deepseek -p "hello"
 mclaude --provider ollama --model llama3 -c
 
 # Autonomous agent with limits
-mclaude --provider openrouter --model anthropic/claude-sonnet-4 -p --max-turns 5 "fix the failing tests"
+mclaude --provider openrouter --model anthropic/claude-sonnet-4 --max-turns 5 -p "fix the failing tests"
 
 # JSON output for programmatic parsing
 mclaude --provider deepseek --model deepseek-chat -p --output-format json "list all TODOs"
@@ -417,7 +417,7 @@ Existing plain-text credentials are automatically encrypted on the first launch 
 - **Encryption salt:** `~/.multi-claude/.salt`
 - **OAuth accounts:** `~/.multi-claude/accounts/`
 - **Installations:** `~/.multi-claude/installations/`
-- **Supported languages:** English, Portugues (BR), Espanol — change in **Settings → Change language**
+- **Supported languages:** English, Português (BR), Español — change in **Settings → Change language**
 
 ## Status Line
 
@@ -428,13 +428,15 @@ mclaude injects a customizable status line into Claude Code that shows real-time
 | Template | Lines | Focus |
 |----------|-------|-------|
 | **none** | — | Disabled |
-| **default** (default) | 4 | Model + git, tokens I/O + cache, session + API time + cost + burn rate, context bar |
-| **full** | 4 | Model + git, context detail (ctx/left/win), tokens I/O + cache, session + API time + cost |
-| **slim** | 3 | Model + git, tokens I/O + cost + session, context bar |
-| **mini** | 2 | Model + git, context % + cost + duration |
-| **cost** | 4 | Model + git, in/out cost breakdown, burn rate + hourly projection + session, context bar |
-| **perf** | 4 | Model + git, cache hit + I/O ratio + API time %, output throughput + session + cost, context bar |
-| **context** | 4 | Model + git, input/output/total token breakdown, cache create/read detail, context bar |
+| **default** (default) | 4 | Model + git, tokens I/O + cache, session + API time + cost + burn rate, context bar (status) |
+| **full** | 4 | Model + git, tokens I/O + cache, session + API time + cost + burn rate, context detail (ctx/left/win) + status |
+| **slim** | 3 | Model + git, tokens I/O + cost + session, context bar (status) |
+| **mini** | 2 | Model + git, context % (status) + cost + duration |
+| **cost** | 4 | Model + git, in/out cost breakdown, burn rate + hourly projection + session, context bar (status) |
+| **perf** | 4 | Model + git, cache hit + I/O ratio + API time %, output throughput + session + cost, context bar (status) |
+| **context** | 4 | Model + git, input/output/total token breakdown, cache create/read detail, context bar (status) |
+
+Context status indicators: `(approaching)` at 61%+, `(imminent)` at 70%+, `(/compact)` at 80%+.
 
 ### Preview
 
@@ -443,28 +445,28 @@ mclaude injects a customizable status line into Claude Code that shows real-time
 Provider/Opus (master +45 -7)
 Input:84.2k    | Output:62.8k   | Cache:20.6M
 Session:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
 ```
 
 **full:**
 ```
 Provider/Opus (master +45 -7)
-Ctx:153.9k/77% | Left:46.1k/23% | Win:200k
 Input:84.2k    | Output:62.8k   | Cache:20.6M
 Session:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min
+Ctx:153.9k/77% | Left:46.1k/23% | Win:200k       | (imminent)
 ```
 
 **slim:**
 ```
 Provider/Opus (master +45 -7)
 Input:84.2k    | Output:62.8k   | Cost:$11.15    | Session:3h31m
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
 ```
 
 **mini:**
 ```
 Provider/Opus (master +45 -7)
-Ctx 77% | $11.15 | 3h31m
+Ctx 77% (imminent) | $11.15 | 3h31m
 ```
 
 **cost:**
@@ -472,15 +474,15 @@ Ctx 77% | $11.15 | 3h31m
 Provider/Opus (master +45 -7)
 Input:$3.40    | Output:$7.75   | Cost:$11.15
 $0.19/min      | ~$11.40/h      | Session:3h31m
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
 ```
 
 **perf:**
 ```
 Provider/Opus (master +45 -7)
 Cache:71% hit  | I/O 1.3:1      | API:47% time
-Output:~297t/s | Session:3h31m  | $11.15
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+Output:~297tok/s | Session:3h31m  | $11.15
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
 ```
 
 **context:**
@@ -488,7 +490,7 @@ Output:~297t/s | Session:3h31m  | $11.15
 Provider/Opus (master +45 -7)
 Input:84.2k    | Output:62.8k   | Total:167.6k/200k
 CacheCreate:2.1k | CacheRead:18.5k | Cache:20.6M
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left
+━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
 ```
 
 Color-coded indicators change from green to yellow to red based on context usage, cost, and cache hit rates.

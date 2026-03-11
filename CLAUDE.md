@@ -24,22 +24,36 @@ src/
 ├── tui-process.ts      # Processo da TUI (setup e resultado)
 ├── app.tsx             # Render do UnifiedApp com Ink
 ├── debug.ts            # Utilitarios de debug
+├── headless.ts         # Modo headless (non-interactive CLI)
+├── credential-store.ts # Gerenciamento de credenciais encriptadas
+├── crypto.ts           # Operacoes criptograficas (AES-256-GCM)
+├── keystore.ts         # Gerenciamento de chaves de encriptacao
+├── statusline.ts       # Renderizacao da status line do Claude Code
+├── logs-viewer.ts      # Visualizador de logs de debug
 ├── services/
 │   ├── api-models.ts   # Fetch de modelos de APIs externas
 │   ├── openrouter.ts   # Integracao OpenRouter
 │   ├── requesty.ts     # Integracao Requesty
 │   ├── ollama.ts       # Integracao Ollama
 │   ├── lmstudio.ts     # Integracao LM Studio
-│   └── llamacpp.ts     # Integracao llama.cpp
+│   ├── llamacpp.ts     # Integracao llama.cpp
+│   ├── litellm.ts      # Integracao LiteLLM Proxy
+│   ├── nanogpt.ts      # Integracao NanoGPT
+│   └── version-check.ts # Verificacao de atualizacoes
 ├── i18n/
 │   ├── index.ts        # Setup do i18n (rosetta)
 │   ├── types.ts        # Tipos das traducoes
+│   ├── context.tsx     # Context provider do i18n (React)
 │   └── locales/
 │       ├── en.ts       # Ingles
 │       ├── pt-BR.ts    # Portugues (BR)
 │       └── es.ts       # Espanhol
 ├── hooks/
-│   └── useTerminalSize.ts  # Hook de tamanho do terminal
+│   ├── useTerminalSize.ts  # Hook de tamanho do terminal
+│   ├── useBreadcrumb.tsx   # Hook de breadcrumbs para navegacao
+│   └── useUpdateCheck.ts   # Hook de verificacao de atualizacoes
+├── utils/
+│   └── win32-console-size.ts # Deteccao de tamanho do console no Windows
 └── components/
     ├── types.ts             # Tipos compartilhados dos componentes
     ├── common/
@@ -49,6 +63,8 @@ src/
     │   ├── TextPrompt.tsx       # Input de texto com validacao e mask
     │   ├── GroupedSelect.tsx    # Select com grupos e sidebar
     │   ├── SearchableSelect.tsx # Select com busca
+    │   ├── ChecklistSelect.tsx  # Select com checkboxes (multi-selecao)
+    │   ├── CyanSelectInput.tsx  # Select estilizado com tema cyan
     │   └── LanguageSelector.tsx # Seletor de idioma
     ├── layout/
     │   ├── AppShell.tsx    # Shell principal (header + content + footer)
@@ -61,7 +77,8 @@ src/
     │   ├── StartClaudeFlow.tsx     # Fluxo: provider -> modelo -> instalacao -> launch
     │   ├── ManageProvidersPage.tsx  # Pagina de gerenciamento de providers
     │   ├── ManageInstallationsPage.tsx # Pagina de gerenciamento de instalacoes
-    │   └── SettingsPage.tsx        # Pagina de configuracoes
+    │   ├── SettingsPage.tsx        # Pagina de configuracoes
+    │   └── StatusLinePage.tsx      # Pagina de configuracao da status line
     └── config-wizard/
         ├── AddProviderFlow.tsx     # Fluxo: template -> nome -> api key
         ├── EditProviderFlow.tsx    # Fluxo: selecionar -> editar
