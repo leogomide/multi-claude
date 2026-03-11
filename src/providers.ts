@@ -189,6 +189,16 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
 	},
+	{
+		// https://docs.litellm.ai/docs/
+		id: "litellm",
+		description: "LiteLLM Proxy",
+		baseUrl: "http://localhost:4000",
+		defaultModels: [],
+		env: {
+			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+		},
+	},
 	// --- Local providers ---
 	{
 		// https://github.com/ggml-org/llama.cpp

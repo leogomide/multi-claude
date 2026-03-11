@@ -4,6 +4,7 @@ import { fetchLMStudioModels } from "./lmstudio.ts";
 import { fetchOllamaModels } from "./ollama.ts";
 import type { OpenRouterModelMeta } from "./openrouter.ts";
 import { fetchOpenRouterModels, validateOpenRouterApiKey } from "./openrouter.ts";
+import { fetchLiteLLMModels, validateLiteLLMApiKey } from "./litellm.ts";
 import { fetchRequestyModels, validateRequestyApiKey } from "./requesty.ts";
 
 export interface ApiModelMeta {
@@ -32,13 +33,14 @@ export type ApiFetchResult =
 
 export type ApiKeyValidation = { valid: true } | { valid: false; error: ApiModelError };
 
-const API_KEY_VALIDATION_PROVIDERS = new Set(["openrouter", "requesty"]);
+const API_KEY_VALIDATION_PROVIDERS = new Set(["openrouter", "requesty", "litellm"]);
 const MODEL_FETCHING_PROVIDERS = new Set([
 	"openrouter",
 	"requesty",
 	"ollama",
 	"lmstudio",
 	"llamacpp",
+	"litellm",
 ]);
 
 export function hasApiModelFetching(templateId: string): boolean {
@@ -75,6 +77,11 @@ export async function fetchApiModels(
 		}
 		case "requesty":
 			return fetchRequestyModels(apiKey);
+		case "litellm": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { ok: false, error: "unknown" };
+			return fetchLiteLLMModels(baseUrl, apiKey);
+		}
 		case "ollama":
 		case "lmstudio":
 		case "llamacpp": {
@@ -92,12 +99,18 @@ export async function fetchApiModels(
 export async function validateApiKey(
 	templateId: string,
 	apiKey: string,
+	customBaseUrl?: string,
 ): Promise<ApiKeyValidation> {
 	switch (templateId) {
 		case "openrouter":
 			return validateOpenRouterApiKey(apiKey);
 		case "requesty":
 			return validateRequestyApiKey(apiKey);
+		case "litellm": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { valid: false, error: "unknown" };
+			return validateLiteLLMApiKey(baseUrl, apiKey);
+		}
 		default:
 			return { valid: false, error: "unknown" };
 	}
