@@ -172,6 +172,23 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 			API_TIMEOUT_MS: "3000000",
 		},
 	},
+	{
+		// https://docs.byteplus.com/en/docs/ModelArk/1928262
+		id: "byteplus",
+		description: "BytePlus ModelArk",
+		baseUrl: "https://ark.ap-southeast.bytepluses.com/api/coding",
+		defaultModels: [
+			"ark-code-latest",
+			"bytedance-seed-code",
+			"glm-4.7",
+			"kimi-k2-thinking",
+			"kimi-k2.5",
+			"gpt-oss-120b",
+		],
+		env: {
+			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+		},
+	},
 	// --- Local providers ---
 	{
 		// https://github.com/ggml-org/llama.cpp

@@ -215,6 +215,13 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **API key:** Get a coding plan key (`sk-sp-xxxxx`) at [Alibaba Cloud Model Studio](https://bailian.console.alibabacloud.com/)
 - **Default models:** `glm-4.7`, `glm-5`, `kimi-k2.5`, `MiniMax-M2.5`, `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3-max-2026-01-23`, `qwen3.5-plus`
 
+### BytePlus ModelArk
+
+- **Docs:** [BytePlus ModelArk Claude Code integration](https://docs.byteplus.com/en/docs/ModelArk/1928262)
+- **Base URL:** `https://ark.ap-southeast.bytepluses.com/api/coding`
+- **API key:** Get one at [BytePlus ModelArk Console](https://console.byteplus.com/ark/region:ark+ap-southeast-1/apiKey)
+- **Default models:** `ark-code-latest`, `bytedance-seed-code`, `glm-4.7`, `gpt-oss-120b`, `kimi-k2-thinking`, `kimi-k2.5`
+
 ### DeepSeek
 
 - **Docs:** [DeepSeek Anthropic API guide](https://api-docs.deepseek.com/guides/anthropic_api)
