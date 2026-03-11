@@ -44,6 +44,7 @@ mclaude --provider <cliId> [--model <model>] [--installation <name>] [claude-cod
 
 - `--model <model>` - Model name. Auto-selects first available if omitted.
 - `--installation <name>` - Installation name. Uses "default" if omitted.
+- `--master-password <password>` - Master password, if configured. Also accepts `MCLAUDE_MASTER_PASSWORD` env var. Flag takes priority over env var.
 
 ### Claude Code flags
 
@@ -88,6 +89,24 @@ mclaude --provider anthropic --installation work -p "review this PR"
 mclaude --provider deepseek -p "hello"
 ```
 
+## Security — Credential Encryption
+
+API keys are encrypted at rest using AES-256-GCM. Encryption is transparent — mclaude decrypts credentials automatically when loading config.
+
+### Master password
+
+If the user has configured a master password (via Settings in the TUI), headless mode requires it to be provided:
+
+```bash
+# Via flag
+mclaude --provider deepseek --master-password yourPassword -p "hello"
+
+# Via environment variable (more secure — not visible in ps)
+MCLAUDE_MASTER_PASSWORD=yourPassword mclaude --provider deepseek -p "hello"
+```
+
+If master password is required but not provided, mclaude exits with an error message indicating both options.
+
 ## Workflow for Agents
 
 When an agent needs to invoke mclaude headless:
@@ -95,4 +114,5 @@ When an agent needs to invoke mclaude headless:
 1. Run `mclaude --list` to get available providers and models
 2. Parse the JSON output to find the target provider's `cliId` and pick a model from its `models` array
 3. Construct the command with `--provider`, `--model`, and any Claude Code flags
-4. Execute and capture output (use `-p` for non-interactive + `--output-format json` for structured output)
+4. If master password is configured, include `--master-password` or set `MCLAUDE_MASTER_PASSWORD`
+5. Execute and capture output (use `-p` for non-interactive + `--output-format json` for structured output)

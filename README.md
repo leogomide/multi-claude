@@ -121,6 +121,7 @@ mclaude --provider anthropic --installation work -p "review this PR"
 | `--provider <name>` | Provider to use (template ID, name, or slug). **Required for headless mode.** |
 | `--model <model>` | Model to use. Auto-selects first available if omitted. |
 | `--installation <name>` | Installation to use. Defaults to `default`. |
+| `--master-password <pw>` | Master password, if configured. Also accepts `MCLAUDE_MASTER_PASSWORD` env var. |
 | `--list` | Print available providers, models, and installations as JSON. |
 
 All other flags are forwarded to Claude Code (`-p`, `-c`, `--resume`, `--max-turns`, `--output-format`, etc.).
@@ -358,9 +359,57 @@ multi-claude lets you manage multiple Anthropic accounts simultaneously using is
 
 If a session expires, you can re-authenticate from **Edit provider → Re-authenticate**.
 
+## Security — Credential Encryption
+
+All API keys are encrypted at rest using **AES-256-GCM**. Credentials are never stored in plain text.
+
+### How it works
+
+On first launch, mclaude generates two files in `~/.multi-claude/`:
+
+- **`.key`** — a random 256-bit encryption key (base64)
+- **`.salt`** — a random 32-byte salt (base64)
+
+Both files are created with `chmod 0600` (owner-only on Unix). API keys in `config.json` are encrypted with the `.key` file before writing to disk and decrypted transparently when loaded.
+
+### Master password (optional)
+
+For additional security, you can set a master password in **Settings → Set master password**. When enabled:
+
+1. The `.key` file itself is encrypted (wrapped) using a key derived from your password via PBKDF2-HMAC-SHA512 (600,000 iterations)
+2. You'll be prompted for the password each time you launch mclaude
+3. Disabling the master password unwraps the `.key` file back to its original state
+
+**In headless mode**, pass the master password via flag or environment variable:
+
+```bash
+# Via flag (more practical)
+mclaude --provider deepseek --master-password yourPassword -p "hello"
+
+# Via environment variable (more secure in shared environments)
+MCLAUDE_MASTER_PASSWORD=yourPassword mclaude --provider deepseek -p "hello"
+```
+
+The `--master-password` flag takes priority over the environment variable.
+
+### What is protected
+
+| Threat | Protected? |
+|--------|-----------|
+| Config file shared/copied without `.key` | Yes — credentials are encrypted |
+| Backup leaks (cloud sync of dotfiles) | Yes — if `.key` is excluded |
+| Casual browsing of `config.json` | Yes — API keys are opaque JSON blobs |
+| Attacker with full access to `~/.multi-claude/` | Without master password: No (`.key` readable). With master password: Yes |
+
+### Migration
+
+Existing plain-text credentials are automatically encrypted on the first launch after updating. No action needed.
+
 ## Configuration
 
 - **Config file:** `~/.multi-claude/config.json`
+- **Encryption key:** `~/.multi-claude/.key`
+- **Encryption salt:** `~/.multi-claude/.salt`
 - **OAuth accounts:** `~/.multi-claude/accounts/`
 - **Installations:** `~/.multi-claude/installations/`
 - **Supported languages:** English, Portugues (BR), Espanol — change in **Settings → Change language**
