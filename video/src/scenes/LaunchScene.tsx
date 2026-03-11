@@ -13,8 +13,7 @@ import { TextOverlay } from "../components/TextOverlay";
 
 // Timing
 const HEADER_START = 8;
-const TIP_START = 28;
-const PROMPT_START = 45;
+const PROMPT_START = 40;
 const STATUSLINE_START = 55;
 
 // Better contrast colors for the status line
@@ -23,7 +22,7 @@ const SL = {
   value: "#e6edf3",     // near-white for values
   accent: "#58a6ff",    // bright blue for model/branch
   cost: "#3fb950",      // bright green for costs
-  separator: "#30363d", // subtle separator
+  separator: "#565e68", // visible separator lines
   warn: "#d29922",      // amber for bypass warning
 };
 
@@ -38,7 +37,6 @@ export const LaunchScene: React.FC = () => {
   });
 
   const headerOpacity = spring({ frame: frame - HEADER_START, fps, config: { damping: 200 } });
-  const tipOpacity = spring({ frame: frame - TIP_START, fps, config: { damping: 200 } });
   const promptOpacity = spring({ frame: frame - PROMPT_START, fps, config: { damping: 200 } });
   const statusOpacity = spring({ frame: frame - STATUSLINE_START, fps, config: { damping: 200 } });
 
@@ -134,47 +132,63 @@ export const LaunchScene: React.FC = () => {
                   </span>
                   <span style={{ color: SL.label, fontSize: 26 }}>v2.1.72</span>
                 </div>
-                <div style={{ color: SL.value, fontSize: 26 }}>
-                  GLM-5 with high effort · <span style={{ color: SL.accent }}>Z.AI</span>
+                <div style={{ fontSize: 32 }}>
+                  <span style={{ color: "#ffffff", fontWeight: 700 }}>GLM-5</span>
+                  <span style={{ color: SL.label }}> with high effort · </span>
+                  <span style={{ color: "#79c0ff", fontWeight: 700 }}>Z.AI</span>
                 </div>
-                <div style={{ color: SL.label, fontSize: 24 }}>
+                <div style={{ color: "#b1bac4", fontSize: 28 }}>
                   ~/projects/my-app
                 </div>
               </div>
             </div>
 
-            {/* ── Tip line ── */}
-            <div
-              style={{
-                opacity: tipOpacity,
-                fontSize: 24,
-                color: SL.label,
-                marginBottom: 32,
-              }}
-            >
-              <span style={{ color: COLORS.cyan }}>↑</span>{" "}
-              Powered by <span style={{ color: "#ffffff", fontWeight: 600 }}>Z.AI</span>{" "}
-              · Base URL: <span style={{ color: SL.accent }}>api.z.ai/api/anthropic</span>
-            </div>
-
-            {/* ── Prompt ── */}
-            <div
-              style={{
-                opacity: promptOpacity,
-                display: "flex",
-                alignItems: "center",
-                fontSize: 34,
-                marginBottom: 0,
-              }}
-            >
-              <span style={{ color: "#ffffff", fontWeight: 700, marginRight: 12 }}>
-                ›
-              </span>
-              <TerminalCursor color="#ffffff" />
-            </div>
-
             {/* Spacer */}
             <div style={{ flex: 1 }} />
+
+            {/* ── Prompt with separator lines above and below ── */}
+            <div style={{ opacity: promptOpacity, flexShrink: 0 }}>
+              {/* Line above prompt */}
+              <div
+                style={{
+                  color: SL.separator,
+                  fontSize: 20,
+                  letterSpacing: 1,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  marginBottom: 12,
+                }}
+              >
+                {"─".repeat(120)}
+              </div>
+              {/* Prompt */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: 34,
+                  marginBottom: 12,
+                }}
+              >
+                <span style={{ color: "#ffffff", fontWeight: 700, marginRight: 12 }}>
+                  ›
+                </span>
+                <TerminalCursor color="#ffffff" />
+              </div>
+              {/* Line below prompt */}
+              <div
+                style={{
+                  color: SL.separator,
+                  fontSize: 20,
+                  letterSpacing: 1,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  marginBottom: 12,
+                }}
+              >
+                {"─".repeat(120)}
+              </div>
+            </div>
 
             {/* ── Status Line (mclaude statusline) ── */}
             <div
@@ -184,25 +198,11 @@ export const LaunchScene: React.FC = () => {
                 paddingBottom: 32,
               }}
             >
-              {/* Separator */}
-              <div
-                style={{
-                  color: SL.separator,
-                  fontSize: 20,
-                  letterSpacing: 1,
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                  marginBottom: 10,
-                }}
-              >
-                {"─".repeat(120)}
-              </div>
-
               {/* Line 1: Model + branch */}
-              <div style={{ fontSize: 26, marginBottom: 6 }}>
+              <div style={{ fontSize: 28, marginBottom: 6 }}>
                 <span style={{ color: "#ffffff", fontWeight: 700 }}>GLM-5</span>
                 {"  "}
-                <span style={{ color: SL.accent, fontWeight: 600 }}>(master)</span>
+                <span style={{ color: "#79c0ff", fontWeight: 700 }}>(master)</span>
               </div>
 
               {/* Line 2: Tokens */}

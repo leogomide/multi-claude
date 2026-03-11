@@ -80,7 +80,7 @@ export const IntroScene: React.FC = () => {
           opacity: subtitleProgress,
           fontFamily: sans,
           fontSize: 36,
-          color: COLORS.gray,
+          color: "#ffffff",
           marginBottom: 40,
           transform: `translateY(${interpolate(subtitleProgress, [0, 1], [10, 0])}px)`,
         }}

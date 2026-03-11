@@ -37,14 +37,6 @@ export const OutroScene: React.FC = () => {
     config: { damping: 200 },
   });
 
-  // GitHub link
-  const githubFrame = cmdFrame + 20;
-  const githubOpacity = spring({
-    frame: frame - githubFrame,
-    fps,
-    config: { damping: 200 },
-  });
-
   // Cursor blink
   const cursorOpacity = interpolate(
     frame % 16,
@@ -111,22 +103,6 @@ export const OutroScene: React.FC = () => {
         $ mclaude
       </div>
 
-      {/* GitHub link */}
-      <div
-        style={{
-          opacity: githubOpacity,
-          fontFamily: sans,
-          fontSize: 26,
-          color: COLORS.gray,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          transform: `translateY(${interpolate(githubOpacity, [0, 1], [10, 0])}px)`,
-        }}
-      >
-        <span style={{ fontSize: 30 }}>⭐</span>
-        github.com/leogomide/multi-claude
-      </div>
     </AbsoluteFill>
   );
 };
