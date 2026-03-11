@@ -274,20 +274,20 @@ export interface TranslationDictionary {
 		groupSession: string;
 		groupPermissions: string;
 		groupDevelopment: string;
-		groupIntegration: string;
 		groupExperimental: string;
+		groupContext: string;
 		resume: string;
 		skipPermissions: string;
 		verbose: string;
 		worktree: string;
-		chrome: string;
 		agentTeams: string;
+		autoCompact: string;
 		descResume: string;
 		descSkipPermissions: string;
 		descVerbose: string;
 		descWorktree: string;
-		descChrome: string;
 		descAgentTeams: string;
+		descAutoCompact: string;
 		worktreePlaceholder: string;
 	};
 }

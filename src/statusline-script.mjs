@@ -6,6 +6,7 @@ const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || "";
 const MODEL_HINT = process.env.MCLAUDE_MODEL || "";
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || "default";
 const LANG = process.env.MCLAUDE_LANG || "en";
+const AUTO_COMPACT = process.env.MCLAUDE_AUTO_COMPACT !== "false";
 
 const C = {
 	cyan: "\x1b[36m",
@@ -19,6 +20,8 @@ const C = {
 	magenta: "\x1b[35m",
 	blue: "\x1b[34m",
 	brightBlue: "\x1b[94m",
+	orange: "\x1b[38;5;208m",
+	blink: "\x1b[5m",
 };
 
 const L = {
@@ -53,7 +56,18 @@ const fmtDurShort = (ms) => Math.floor(ms / 60000) + "m";
 const fmtCost = (usd) => "$" + usd.toFixed(2);
 const mkBar = (pct, w) =>
 	"\u2501".repeat(Math.floor((pct * w) / 100)) + "\u254c".repeat(w - Math.floor((pct * w) / 100));
-const ctxC = (pct) => (pct > 90 ? C.red : pct > 70 ? C.yellow : C.white);
+const ctxC = (pct) => {
+	if (!AUTO_COMPACT) {
+		if (pct >= 85) return C.bold + C.blink + C.red;
+		if (pct >= 76) return C.orange;
+		if (pct >= 61) return C.yellow;
+		return C.white;
+	}
+	if (pct >= 79) return C.bold + C.blink + C.red;
+	if (pct >= 71) return C.orange;
+	if (pct >= 61) return C.yellow;
+	return C.white;
+};
 const SEP = C.dim + " | " + C.reset;
 const SEP_W = 3; // visible width of ' | '
 
