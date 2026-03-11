@@ -98,7 +98,7 @@ export const MainMenuScene: React.FC = () => {
           <div style={{ flex: 1 }}>
             <GroupedMenu groups={MENU_GROUPS} activeIndex={activeIndex} />
           </div>
-          <div style={{ width: 280 }}>
+          <div style={{ width: 380 }}>
             <Sidebar title={sidebar.title} entries={sidebar.entries} />
           </div>
         </div>

@@ -90,8 +90,8 @@ export const ModelSelectScene: React.FC = () => {
               style={{
                 color: COLORS.cyan,
                 fontWeight: 700,
-                fontSize: 20,
-                marginBottom: 12,
+                fontSize: 28,
+                marginBottom: 16,
               }}
             >
               Select a model
@@ -102,8 +102,8 @@ export const ModelSelectScene: React.FC = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                marginBottom: 16,
-                fontSize: 18,
+                marginBottom: 20,
+                fontSize: 24,
               }}
             >
               <span style={{ color: COLORS.green, marginRight: 8 }}>{">"}</span>
@@ -113,7 +113,7 @@ export const ModelSelectScene: React.FC = () => {
                 style={{
                   marginLeft: "auto",
                   color: COLORS.gray,
-                  fontSize: 14,
+                  fontSize: 20,
                 }}
               >
                 ({filteredModels.length}/{ALL_MODELS.length})
@@ -141,16 +141,16 @@ export const ModelSelectScene: React.FC = () => {
                     style={{
                       color: isActive ? COLORS.cyan : COLORS.white,
                       fontWeight: isActive ? 700 : 400,
-                      fontSize: 18,
+                      fontSize: 26,
                       display: "flex",
                       alignItems: "center",
-                      height: 28,
+                      height: 40,
                       opacity: typedSearch.length > 0 ? itemOpacity : 1,
                     }}
                   >
                     <span
                       style={{
-                        width: 28,
+                        width: 36,
                         color: COLORS.cyan,
                         flexShrink: 0,
                       }}
@@ -165,7 +165,7 @@ export const ModelSelectScene: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div style={{ width: 300 }}>
+          <div style={{ width: 380 }}>
             <Sidebar
               title="Model Info"
               entries={[

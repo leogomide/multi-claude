@@ -94,15 +94,15 @@ export const FlagsScene: React.FC = () => {
               style={{
                 color: COLORS.cyan,
                 fontWeight: 700,
-                fontSize: 20,
-                marginBottom: 12,
+                fontSize: 28,
+                marginBottom: 16,
               }}
             >
               Launch options
             </div>
             <ChecklistMenu groups={groups} activeIndex={activeIndex} />
           </div>
-          <div style={{ width: 300 }}>
+          <div style={{ width: 380 }}>
             <Sidebar title="Flag Info" entries={sidebarEntries} />
           </div>
         </div>

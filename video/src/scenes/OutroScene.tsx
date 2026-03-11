@@ -68,7 +68,7 @@ export const OutroScene: React.FC = () => {
       <div
         style={{
           fontFamily: sans,
-          fontSize: 52,
+          fontSize: 64,
           fontWeight: 700,
           color: COLORS.white,
           transform: `scale(${headingScale})`,
@@ -85,7 +85,7 @@ export const OutroScene: React.FC = () => {
           borderRadius: 12,
           padding: "20px 32px",
           fontFamily: mono,
-          fontSize: 22,
+          fontSize: 28,
         }}
       >
         <span style={{ color: COLORS.gray }}>$ </span>
@@ -102,7 +102,7 @@ export const OutroScene: React.FC = () => {
         style={{
           opacity: cmdOpacity,
           fontFamily: mono,
-          fontSize: 32,
+          fontSize: 40,
           color: COLORS.cyan,
           fontWeight: 700,
           transform: `translateY(${interpolate(cmdOpacity, [0, 1], [10, 0])}px)`,
@@ -116,7 +116,7 @@ export const OutroScene: React.FC = () => {
         style={{
           opacity: githubOpacity,
           fontFamily: sans,
-          fontSize: 20,
+          fontSize: 26,
           color: COLORS.gray,
           display: "flex",
           alignItems: "center",
@@ -124,7 +124,7 @@ export const OutroScene: React.FC = () => {
           transform: `translateY(${interpolate(githubOpacity, [0, 1], [10, 0])}px)`,
         }}
       >
-        <span style={{ fontSize: 24 }}>⭐</span>
+        <span style={{ fontSize: 30 }}>⭐</span>
         github.com/leogomide/multi-claude
       </div>
     </AbsoluteFill>

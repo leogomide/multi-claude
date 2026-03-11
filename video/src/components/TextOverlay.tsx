@@ -13,7 +13,7 @@ export const TextOverlay: React.FC<{
   durationFrames?: number;
 }> = ({ text, startFrame = 10, durationFrames = 60 }) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
   const fadeIn = spring({
     frame: frame - startFrame,
@@ -38,7 +38,7 @@ export const TextOverlay: React.FC<{
     <div
       style={{
         position: "absolute",
-        bottom: 50,
+        bottom: 20,
         left: 0,
         right: 0,
         display: "flex",
@@ -49,14 +49,13 @@ export const TextOverlay: React.FC<{
     >
       <div
         style={{
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-          padding: "12px 32px",
-          borderRadius: 12,
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          padding: "14px 40px",
+          borderRadius: 14,
           fontFamily: sans,
-          fontSize: 24,
+          fontSize: 30,
           color: COLORS.white,
           fontWeight: 600,
-          backdropFilter: "blur(8px)",
         }}
       >
         {text}

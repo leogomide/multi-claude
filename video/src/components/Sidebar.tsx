@@ -22,24 +22,24 @@ export const Sidebar: React.FC<{
         style={{
           width: 1,
           backgroundColor: COLORS.gray,
-          marginRight: 20,
+          marginRight: 24,
           flexShrink: 0,
           opacity: 0.4,
         }}
       />
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div
           style={{
             color: COLORS.cyan,
             fontWeight: 700,
-            fontSize: 18,
-            marginBottom: 8,
+            fontSize: 24,
+            marginBottom: 10,
           }}
         >
           {title}
         </div>
         {entries.map((entry, i) => (
-          <div key={i} style={{ fontSize: 16 }}>
+          <div key={i} style={{ fontSize: 21 }}>
             <span style={{ color: COLORS.gray }}>{entry.label}: </span>
             <span style={{ color: entry.color || COLORS.white }}>
               {entry.value}

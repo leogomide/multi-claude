@@ -43,24 +43,24 @@ export const TerminalWindow: React.FC<{
           >
             <div
               style={{
-                width: 14,
-                height: 14,
+                width: 16,
+                height: 16,
                 borderRadius: "50%",
                 backgroundColor: COLORS.red,
               }}
             />
             <div
               style={{
-                width: 14,
-                height: 14,
+                width: 16,
+                height: 16,
                 borderRadius: "50%",
                 backgroundColor: COLORS.yellow,
               }}
             />
             <div
               style={{
-                width: 14,
-                height: 14,
+                width: 16,
+                height: 16,
                 borderRadius: "50%",
                 backgroundColor: COLORS.green,
               }}
@@ -70,7 +70,7 @@ export const TerminalWindow: React.FC<{
                 flex: 1,
                 textAlign: "center",
                 color: COLORS.gray,
-                fontSize: 14,
+                fontSize: 18,
                 marginRight: 60,
               }}
             >

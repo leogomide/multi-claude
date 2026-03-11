@@ -34,11 +34,11 @@ export const TOTAL_DURATION =
   6 * TRANSITION_FRAMES; // 6 transitions between 7 scenes
 
 export const TERMINAL = {
-  width: 1480,
-  height: 820,
+  width: 1840,
+  height: 1020,
   borderRadius: 16,
-  titleBarHeight: 44,
-  padding: 24,
-  fontSize: 20,
-  lineHeight: 30,
+  titleBarHeight: 48,
+  padding: 32,
+  fontSize: 26,
+  lineHeight: 38,
 };

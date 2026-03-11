@@ -65,7 +65,7 @@ export const IntroScene: React.FC = () => {
           transform: `scale(${titleScale})`,
           opacity: titleOpacity,
           fontFamily: mono,
-          fontSize: 82,
+          fontSize: 96,
           fontWeight: 700,
           color: COLORS.magenta,
           marginBottom: 20,
@@ -79,7 +79,7 @@ export const IntroScene: React.FC = () => {
         style={{
           opacity: subtitleProgress,
           fontFamily: sans,
-          fontSize: 28,
+          fontSize: 36,
           color: COLORS.gray,
           marginBottom: 40,
           transform: `translateY(${interpolate(subtitleProgress, [0, 1], [10, 0])}px)`,
@@ -93,7 +93,7 @@ export const IntroScene: React.FC = () => {
         <div
           style={{
             fontFamily: mono,
-            fontSize: 36,
+            fontSize: 44,
             color: COLORS.cyan,
             fontWeight: 700,
           }}

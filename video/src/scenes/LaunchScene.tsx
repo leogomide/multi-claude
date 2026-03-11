@@ -69,15 +69,15 @@ export const LaunchScene: React.FC = () => {
               flexShrink: 0,
             }}
           >
-            <div style={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: COLORS.red }} />
-            <div style={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: COLORS.yellow }} />
-            <div style={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: COLORS.green }} />
+            <div style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: COLORS.red }} />
+            <div style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: COLORS.yellow }} />
+            <div style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: COLORS.green }} />
             <div
               style={{
                 flex: 1,
                 textAlign: "center",
                 color: COLORS.gray,
-                fontSize: 14,
+                fontSize: 18,
                 marginRight: 60,
               }}
             >
@@ -111,25 +111,25 @@ export const LaunchScene: React.FC = () => {
               <Img
                 src={staticFile("claude-code-icon.png")}
                 style={{
-                  width: 52,
-                  height: 52,
+                  width: 64,
+                  height: 64,
                   borderRadius: 8,
                   flexShrink: 0,
                   marginTop: 2,
                 }}
               />
               {/* Text block */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                  <span style={{ fontWeight: 700, fontSize: 22, color: COLORS.white }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+                  <span style={{ fontWeight: 700, fontSize: 30, color: COLORS.white }}>
                     Claude Code
                   </span>
-                  <span style={{ color: COLORS.gray, fontSize: 16 }}>v2.1.72</span>
+                  <span style={{ color: COLORS.gray, fontSize: 22 }}>v2.1.72</span>
                 </div>
-                <div style={{ color: COLORS.gray, fontSize: 15 }}>
+                <div style={{ color: COLORS.gray, fontSize: 21 }}>
                   GLM-5 with high effort · Z.AI
                 </div>
-                <div style={{ color: COLORS.gray, fontSize: 15 }}>
+                <div style={{ color: COLORS.gray, fontSize: 21 }}>
                   ~/projects/my-app
                 </div>
               </div>
@@ -139,7 +139,7 @@ export const LaunchScene: React.FC = () => {
             <div
               style={{
                 opacity: tipOpacity,
-                fontSize: 15,
+                fontSize: 21,
                 color: COLORS.gray,
                 marginBottom: 24,
               }}
@@ -155,7 +155,7 @@ export const LaunchScene: React.FC = () => {
                 opacity: promptOpacity,
                 display: "flex",
                 alignItems: "center",
-                fontSize: 20,
+                fontSize: 28,
                 marginBottom: 0,
               }}
             >
@@ -180,7 +180,7 @@ export const LaunchScene: React.FC = () => {
               <div
                 style={{
                   color: COLORS.dimGray,
-                  fontSize: 13,
+                  fontSize: 18,
                   letterSpacing: 1,
                   overflow: "hidden",
                   whiteSpace: "nowrap",
@@ -191,14 +191,14 @@ export const LaunchScene: React.FC = () => {
               </div>
 
               {/* Line 1: Model + branch */}
-              <div style={{ fontSize: 15, color: COLORS.gray, marginBottom: 3 }}>
+              <div style={{ fontSize: 21, color: COLORS.gray, marginBottom: 4 }}>
                 <span style={{ color: COLORS.white, fontWeight: 600 }}>GLM-5</span>
                 {"  "}
                 <span style={{ color: COLORS.cyan }}>(master)</span>
               </div>
 
               {/* Line 2: Tokens */}
-              <div style={{ fontSize: 14, color: COLORS.gray, marginBottom: 3 }}>
+              <div style={{ fontSize: 20, color: COLORS.gray, marginBottom: 4 }}>
                 <span>Input:0</span>
                 <span style={{ color: COLORS.dimGray, margin: "0 10px" }}>│</span>
                 <span>Output:0</span>
@@ -207,7 +207,7 @@ export const LaunchScene: React.FC = () => {
               </div>
 
               {/* Line 3: Session + Cost */}
-              <div style={{ fontSize: 14, color: COLORS.gray, marginBottom: 3 }}>
+              <div style={{ fontSize: 20, color: COLORS.gray, marginBottom: 4 }}>
                 <span>Sessao:0m 3s</span>
                 <span style={{ color: COLORS.dimGray, margin: "0 8px" }}>│</span>
                 <span>API:0m 0s</span>
@@ -218,7 +218,7 @@ export const LaunchScene: React.FC = () => {
               </div>
 
               {/* Line 4: Context bar */}
-              <div style={{ fontSize: 14, color: COLORS.gray, marginBottom: 3, display: "flex", alignItems: "center" }}>
+              <div style={{ fontSize: 20, color: COLORS.gray, marginBottom: 4, display: "flex", alignItems: "center" }}>
                 <span style={{ color: COLORS.dimGray }}>{"─".repeat(40)}</span>
                 <span style={{ color: COLORS.dimGray, margin: "0 8px" }}>│</span>
                 <span>0/0%</span>
@@ -227,7 +227,7 @@ export const LaunchScene: React.FC = () => {
               </div>
 
               {/* Line 5: Bypass permissions */}
-              <div style={{ fontSize: 14, marginTop: 2 }}>
+              <div style={{ fontSize: 20, marginTop: 4 }}>
                 <span style={{ color: COLORS.yellow }}>››</span>{" "}
                 <span style={{ color: COLORS.yellow }}>bypass permissions on</span>{" "}
                 <span style={{ color: COLORS.gray }}>(shift+tab to cycle)</span>

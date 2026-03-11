@@ -10,16 +10,16 @@ export const TerminalFooter: React.FC<{
       <div
         style={{
           color: COLORS.gray,
-          fontSize: 14,
+          fontSize: 18,
           letterSpacing: 2,
           overflow: "hidden",
           whiteSpace: "nowrap",
-          marginBottom: 6,
+          marginBottom: 8,
         }}
       >
         {"─".repeat(120)}
       </div>
-      <div style={{ display: "flex", gap: 24, fontSize: 16 }}>
+      <div style={{ display: "flex", gap: 32, fontSize: 22 }}>
         {shortcuts.map((s, i) => (
           <span key={i}>
             <span style={{ color: COLORS.cyan }}>{s.key}</span>{" "}

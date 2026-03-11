@@ -17,7 +17,7 @@ export const ChecklistMenu: React.FC<{
   let flatIndex = 0;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       {groups.map((group, gi) => {
         const groupItems = group.items.map((item) => {
           const idx = flatIndex++;
@@ -28,15 +28,15 @@ export const ChecklistMenu: React.FC<{
               style={{
                 color: isActive ? COLORS.cyan : COLORS.white,
                 fontWeight: isActive ? 700 : 400,
-                fontSize: 18,
+                fontSize: 26,
                 display: "flex",
                 alignItems: "center",
-                height: 28,
+                height: 40,
               }}
             >
               <span
                 style={{
-                  width: 28,
+                  width: 36,
                   color: COLORS.cyan,
                   flexShrink: 0,
                 }}
@@ -46,7 +46,7 @@ export const ChecklistMenu: React.FC<{
               <span
                 style={{
                   color: item.checked ? COLORS.green : COLORS.gray,
-                  marginRight: 10,
+                  marginRight: 12,
                 }}
               >
                 {item.checked ? "[x]" : "[ ]"}
@@ -62,9 +62,9 @@ export const ChecklistMenu: React.FC<{
               style={{
                 color: COLORS.gray,
                 fontWeight: 700,
-                fontSize: 16,
-                marginTop: gi > 0 ? 12 : 0,
-                marginBottom: 4,
+                fontSize: 22,
+                marginTop: gi > 0 ? 18 : 0,
+                marginBottom: 6,
               }}
             >
               ── {group.label} ──
