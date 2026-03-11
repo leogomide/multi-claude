@@ -5,6 +5,7 @@ import { fetchOllamaModels } from "./ollama.ts";
 import type { OpenRouterModelMeta } from "./openrouter.ts";
 import { fetchOpenRouterModels, validateOpenRouterApiKey } from "./openrouter.ts";
 import { fetchLiteLLMModels, validateLiteLLMApiKey } from "./litellm.ts";
+import { fetchNanoGPTModels, validateNanoGPTApiKey } from "./nanogpt.ts";
 import { fetchRequestyModels, validateRequestyApiKey } from "./requesty.ts";
 
 export interface ApiModelMeta {
@@ -33,10 +34,11 @@ export type ApiFetchResult =
 
 export type ApiKeyValidation = { valid: true } | { valid: false; error: ApiModelError };
 
-const API_KEY_VALIDATION_PROVIDERS = new Set(["openrouter", "requesty", "litellm"]);
+const API_KEY_VALIDATION_PROVIDERS = new Set(["openrouter", "requesty", "nanogpt", "litellm"]);
 const MODEL_FETCHING_PROVIDERS = new Set([
 	"openrouter",
 	"requesty",
+	"nanogpt",
 	"ollama",
 	"lmstudio",
 	"llamacpp",
@@ -77,6 +79,8 @@ export async function fetchApiModels(
 		}
 		case "requesty":
 			return fetchRequestyModels(apiKey);
+		case "nanogpt":
+			return fetchNanoGPTModels(apiKey);
 		case "litellm": {
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { ok: false, error: "unknown" };
@@ -106,6 +110,8 @@ export async function validateApiKey(
 			return validateOpenRouterApiKey(apiKey);
 		case "requesty":
 			return validateRequestyApiKey(apiKey);
+		case "nanogpt":
+			return validateNanoGPTApiKey(apiKey);
 		case "litellm": {
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { valid: false, error: "unknown" };

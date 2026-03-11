@@ -72,6 +72,16 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		},
 	},
 	{
+		// https://docs.nano-gpt.com/integrations/claude-code
+		id: "nanogpt",
+		description: "NanoGPT",
+		baseUrl: "https://nano-gpt.com/api/v1",
+		defaultModels: [],
+		env: {
+			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+		},
+	},
+	{
 		// https://novita.ai/docs/guides/claude-code
 		// https://novita.ai/docs/guides/llm-anthropic-compatibility#supported-models
 		id: "novita",
