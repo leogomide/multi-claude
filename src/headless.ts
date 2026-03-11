@@ -25,6 +25,7 @@ export interface HeadlessArgs {
 	provider: string;
 	model: string | undefined;
 	installation: string | undefined;
+	masterPassword: string | undefined;
 	claudeArgs: string[];
 }
 
@@ -43,6 +44,7 @@ export function extractHeadlessArgs(args: string[]): HeadlessArgs | null {
 	let provider: string | undefined;
 	let model: string | undefined;
 	let installation: string | undefined;
+	let masterPassword: string | undefined;
 	const claudeArgs: string[] = [];
 
 	let i = 0;
@@ -86,6 +88,22 @@ export function extractHeadlessArgs(args: string[]): HeadlessArgs | null {
 			continue;
 		}
 
+		// --master-password (consumed, not forwarded)
+		if (arg === "--master-password") {
+			if (i + 1 >= args.length) {
+				console.error("Error: --master-password requires a value.");
+				process.exit(1);
+			}
+			masterPassword = args[i + 1]!;
+			i += 2;
+			continue;
+		}
+		if (arg.startsWith("--master-password=")) {
+			masterPassword = arg.slice("--master-password=".length);
+			i += 1;
+			continue;
+		}
+
 		// --model / -m (peeked: read value but keep in claudeArgs for runner.ts)
 		if ((arg === "--model" || arg === "-m") && i + 1 < args.length) {
 			model = args[i + 1]!;
@@ -107,7 +125,7 @@ export function extractHeadlessArgs(args: string[]): HeadlessArgs | null {
 
 	if (provider === undefined) return null;
 
-	return { provider, model, installation, claudeArgs };
+	return { provider, model, installation, masterPassword, claudeArgs };
 }
 
 // --- Resolvers ---
@@ -244,12 +262,13 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 
 	await initKeystore();
 
-	// Handle master password in headless mode via env var
+	// Handle master password in headless mode: --master-password flag > env var
 	const preConfig = await loadConfig();
 	if (hasMasterPassword(preConfig)) {
-		const mp = process.env["MCLAUDE_MASTER_PASSWORD"];
+		const mp = args.masterPassword ?? process.env["MCLAUDE_MASTER_PASSWORD"];
 		if (!mp) {
-			console.error("Error: Master password is configured. Set MCLAUDE_MASTER_PASSWORD env var.");
+			console.error("Error: Master password is configured.");
+			console.error("Use --master-password <password> or set MCLAUDE_MASTER_PASSWORD env var.");
 			return 1;
 		}
 		if (!verifyMasterPassword(mp, preConfig)) {

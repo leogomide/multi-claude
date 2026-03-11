@@ -126,6 +126,7 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 	console.log("  --provider <name>       Provider name, template ID, or slug");
 	console.log("  --model <model>         Model to use (auto-selects first if omitted)");
 	console.log("  --installation <name>   Installation to use (default if omitted)");
+	console.log("  --master-password <pw>  Master password (if configured)");
 	console.log("  --list                  List providers, models and installations (JSON)");
 	console.log("");
 	console.log("Examples:");
