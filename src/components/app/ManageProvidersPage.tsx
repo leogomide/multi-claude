@@ -36,37 +36,33 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 		});
 	}, []);
 
+	const hasProviders = providers.length > 0;
+
 	const groups = useMemo(() => {
-		const providerItems: GroupedSelectItem[] = providers.map((p) => ({
-			label: p.name,
-			value: `provider:${p.id}`,
-			icon: p.apiKeyValid === false ? "⚠" : "🔧",
-			color: p.apiKeyValid === false ? "yellow" : undefined,
-		}));
+		const result = [];
 
-		const providerGroup =
-			providerItems.length > 0
-				? { label: t("manageProviders.title"), items: providerItems }
-				: {
-						label: t("manageProviders.title"),
-						items: [
-							{ label: t("manageProviders.noProviders"), value: "__no-providers__", icon: "💤" },
-						],
-					};
+		if (hasProviders) {
+			const providerItems: GroupedSelectItem[] = providers.map((p) => ({
+				label: p.name,
+				value: `provider:${p.id}`,
+				icon: p.apiKeyValid === false ? "⚠" : "🔧",
+				color: p.apiKeyValid === false ? "yellow" : undefined,
+			}));
+			result.push({ label: t("manageProviders.title"), items: providerItems });
+		}
 
-		const actionsGroup = {
+		result.push({
 			label: t("mainMenu.options"),
 			items: [
 				{ label: t("manageProviders.addProvider"), value: "add-provider", icon: "➕" },
 				{ label: t("manageProviders.back"), value: "back", icon: "↩" },
 			],
-		};
+		});
 
-		return [providerGroup, actionsGroup];
-	}, [providers, t]);
+		return result;
+	}, [providers, hasProviders, t]);
 
 	const handleSelect = (item: GroupedSelectItem) => {
-		if (item.value === "__no-providers__") return;
 		if (item.value.startsWith("provider:")) {
 			const providerId = item.value.replace("provider:", "");
 			const provider = providers.find((p) => p.id === providerId);
@@ -155,6 +151,9 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 		<AppShell sidebar={sidebarContent} footerItems={footerItems}>
 			{lastMessage && (
 				<StatusMessage variant={lastMessage.variant}>{lastMessage.text}</StatusMessage>
+			)}
+			{!hasProviders && (
+				<StatusMessage variant="info">{t("manageProviders.noProviders")}</StatusMessage>
 			)}
 			<GroupedSelect
 				groups={groups}

@@ -16,6 +16,7 @@ export const en: TranslationDictionary = {
 		modelNameRequired: "Model name is required.",
 		urlInvalid: "Invalid URL format.",
 		urlMustBeHttp: "URL must start with http:// or https://",
+		nameDuplicate: "A provider with this name already exists.",
 	},
 	selector: {
 		selectProvider: "Select a provider",
@@ -196,6 +197,8 @@ export const en: TranslationDictionary = {
 		waitingForAuth: "Waiting for authentication...",
 		loginSuccess: 'Account "{{name}}" authenticated successfully!',
 		loginFailed: "Authentication failed. Please try again.",
+		loginFailedNew: "Authentication failed. Provider was not added.",
+		reAuthFailed: "Re-authentication failed.",
 		authExpired: "Authentication has expired or is missing.",
 		reAuthenticate: "Re-authenticate",
 		authenticated: "Authenticated",
@@ -259,6 +262,10 @@ export const en: TranslationDictionary = {
 		quantization: "Quantization",
 		architecture: "Architecture",
 		fileSize: "Size",
+		envVar: "Env Var",
+		flag: "Flag",
+		envVarInfo: "Env Var Info",
+		flagInfo: "Flag Info",
 	},
 	terminal: {
 		tooSmall: "Terminal too small ({{current}}). Minimum: {{min}}",

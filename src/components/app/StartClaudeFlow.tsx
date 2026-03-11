@@ -535,10 +535,10 @@ export function StartClaudeFlow({
 		if (!highlightedFlag) return null;
 		const isEnv = highlightedFlag.isEnvVar;
 		const items: SidebarItem[] = [
-			{ label: isEnv ? "Env Var" : "Flag", value: highlightedFlag.value },
+			{ label: isEnv ? t("sidebar.envVar") : t("sidebar.flag"), value: highlightedFlag.value },
 			{ label: t("sidebar.name"), value: highlightedFlag.description },
 		];
-		return <Sidebar title={isEnv ? "Env Var Info" : "Flag Info"} items={items} />;
+		return <Sidebar title={isEnv ? t("sidebar.envVarInfo") : t("sidebar.flagInfo")} items={items} />;
 	}, [highlightedFlag, t]);
 
 	const footerItems = [

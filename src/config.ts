@@ -29,6 +29,9 @@ export function getSessionMasterPassword(): string | undefined {
 }
 
 export async function loadConfig(): Promise<Config> {
+	if (!existsSync(CONFIG_FILE)) {
+		return defaultConfig();
+	}
 	try {
 		const raw = await readFile(CONFIG_FILE, "utf-8");
 		const parsed = JSON.parse(raw);
@@ -49,6 +52,12 @@ export async function loadConfig(): Promise<Config> {
 
 		return config;
 	} catch {
+		console.error(
+			"[mclaude] Warning: config.json is corrupted or invalid. A backup was saved as config.json.bak",
+		);
+		try {
+			await rename(CONFIG_FILE, CONFIG_FILE + ".bak");
+		} catch {}
 		return defaultConfig();
 	}
 }

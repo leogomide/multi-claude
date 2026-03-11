@@ -14,6 +14,7 @@ export interface TranslationDictionary {
 		modelNameRequired: string;
 		urlInvalid: string;
 		urlMustBeHttp: string;
+		nameDuplicate: string;
 	};
 	selector: {
 		selectProvider: string;
@@ -188,6 +189,8 @@ export interface TranslationDictionary {
 		waitingForAuth: string;
 		loginSuccess: string;
 		loginFailed: string;
+		loginFailedNew: string;
+		reAuthFailed: string;
 		authExpired: string;
 		reAuthenticate: string;
 		authenticated: string;
@@ -250,6 +253,10 @@ export interface TranslationDictionary {
 		quantization: string;
 		architecture: string;
 		fileSize: string;
+		envVar: string;
+		flag: string;
+		envVarInfo: string;
+		flagInfo: string;
 	};
 	terminal: {
 		tooSmall: string;

@@ -42,6 +42,13 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const [baseUrl, setBaseUrl] = useState("");
 	const [apiKey, setApiKey] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
+	const [existingNames, setExistingNames] = useState<string[]>([]);
+
+	useEffect(() => {
+		loadConfig().then((config) => {
+			setExistingNames(config.providers.map((p) => p.name.toLowerCase()));
+		});
+	}, []);
 
 	useInput(
 		(_input, key) => {
@@ -246,6 +253,8 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 					placeholder="My Anthropic Account"
 					validate={(val) => {
 						if (!val.trim()) return t("validation.nameRequired");
+						if (existingNames.includes(val.trim().toLowerCase()))
+							return t("validation.nameDuplicate");
 						return undefined;
 					}}
 					onSubmit={(val) => {
@@ -303,6 +312,8 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 				focus={activeField === "name"}
 				validate={(val) => {
 					if (!val.trim()) return t("validation.nameRequired");
+					if (existingNames.includes(val.trim().toLowerCase()))
+						return t("validation.nameDuplicate");
 					return undefined;
 				}}
 				onSubmit={(val) => {

@@ -1,14 +1,30 @@
 #!/usr/bin/env bun
 
 import { execSync, spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { decryptCredential } from "./src/credential-store.ts";
 import { createLogger, formatError, initLogger } from "./src/debug.ts";
+import { en } from "./src/i18n/locales/en.ts";
+import { es } from "./src/i18n/locales/es.ts";
+import { ptBR } from "./src/i18n/locales/pt-BR.ts";
+import type { TranslationDictionary } from "./src/i18n/types.ts";
 import { initKeystore } from "./src/keystore.ts";
 import type { ConfiguredProvider } from "./src/schema.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
+
+function getLocaleDict(): TranslationDictionary {
+	try {
+		const configPath = join(homedir(), ".multi-claude", "config.json");
+		const raw = readFileSync(configPath, "utf-8");
+		const lang = JSON.parse(raw).language;
+		if (lang === "pt-BR") return ptBR;
+		if (lang === "es") return es;
+	} catch {}
+	return en;
+}
 
 interface TuiSelection {
 	providerId: string;
@@ -228,9 +244,11 @@ while (true) {
 					env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
 				});
 
+				const dict = getLocaleDict();
 				if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
 					log.info("OAuth login successful");
-					console.log(`\n\u2713 Conta "${oauthData.providerName}" autenticada com sucesso!\n`);
+					const msg = dict.anthropic.loginSuccess.replace("{{name}}", oauthData.providerName);
+					console.log(`\n\u2713 ${msg}\n`);
 				} else {
 					log.info("OAuth login failed");
 					if (oauthData.isNew) {
@@ -238,11 +256,9 @@ while (true) {
 						cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
 						await saveConfig(cfg);
 						await removeAccountDir(oauthData.providerId);
-						console.error(
-							"\n\u2717 Autentica\u00e7\u00e3o falhou. Provedor n\u00e3o foi adicionado.\n",
-						);
+						console.error(`\n\u2717 ${dict.anthropic.loginFailedNew}\n`);
 					} else {
-						console.error("\n\u2717 Re-autentica\u00e7\u00e3o falhou.\n");
+						console.error(`\n\u2717 ${dict.anthropic.reAuthFailed}\n`);
 					}
 				}
 			} catch (err) {
