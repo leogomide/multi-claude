@@ -30,7 +30,10 @@ function mapLiteLLMModel(m: LiteLLMModelRaw): ApiModelMeta {
 		max_output_tokens: info?.max_output_tokens ?? info?.max_tokens ?? undefined,
 		pricing:
 			info?.input_cost_per_token != null && info?.output_cost_per_token != null
-				? { prompt: String(info.input_cost_per_token), completion: String(info.output_cost_per_token) }
+				? {
+						prompt: String(info.input_cost_per_token),
+						completion: String(info.output_cost_per_token),
+					}
 				: undefined,
 	};
 }
@@ -58,7 +61,10 @@ export async function fetchLiteLLMModels(baseUrl: string, apiKey: string): Promi
 	}
 }
 
-export async function validateLiteLLMApiKey(baseUrl: string, apiKey: string): Promise<ApiKeyValidation> {
+export async function validateLiteLLMApiKey(
+	baseUrl: string,
+	apiKey: string,
+): Promise<ApiKeyValidation> {
 	try {
 		const response = await fetch(`${baseUrl}/health`, {
 			headers: { Authorization: `Bearer ${apiKey}` },

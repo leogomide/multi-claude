@@ -123,7 +123,8 @@ export const ptBR: TranslationDictionary = {
 		back: "Voltar",
 	},
 	encryption: {
-		decryptionFailed: "Não foi possível descriptografar a chave de API de \"{{name}}\". Por favor, insira novamente.",
+		decryptionFailed:
+			'Não foi possível descriptografar a chave de API de "{{name}}". Por favor, insira novamente.',
 		reenterApiKey: "Re-inserir chave de API",
 		credentialsMigrated: "Credenciais criptografadas com sucesso.",
 	},
@@ -298,7 +299,8 @@ export const ptBR: TranslationDictionary = {
 		descSkipPermissions: "Pular todos os prompts de permissão (use com cautela)",
 		descVerbose: "Habilitar log detalhado, mostra saída completa turno a turno",
 		descWorktree: "Executar em uma worktree git isolada",
-		descAgentTeams: "Habilitar equipes de agentes experimentais (vários agentes Claude colaborando)",
+		descAgentTeams:
+			"Habilitar equipes de agentes experimentais (vários agentes Claude colaborando)",
 		worktreePlaceholder: "Nome da worktree (vazio para gerar automaticamente)",
 	},
 };

@@ -1,10 +1,10 @@
+import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { chmod, mkdir, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { randomBytes } from "node:crypto";
-import { decrypt, deriveKey, encrypt, isEncryptedPayload, legacyDeriveKey } from "./crypto.ts";
 import type { EncryptedPayload } from "./crypto.ts";
+import { decrypt, deriveKey, encrypt, isEncryptedPayload, legacyDeriveKey } from "./crypto.ts";
 
 const CONFIG_DIR = join(homedir(), ".multi-claude");
 const KEY_FILE = join(CONFIG_DIR, ".key");

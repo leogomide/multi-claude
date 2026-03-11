@@ -1,6 +1,12 @@
 import { timingSafeEqual } from "node:crypto";
-import { decrypt, encrypt, hashPassword, isEncryptedPayload, legacyHashPassword } from "./crypto.ts";
 import type { EncryptedPayload } from "./crypto.ts";
+import {
+	decrypt,
+	encrypt,
+	hashPassword,
+	isEncryptedPayload,
+	legacyHashPassword,
+} from "./crypto.ts";
 import { createLogger } from "./debug.ts";
 import { getEncryptionKey, readSaltFile } from "./keystore.ts";
 import type { Config } from "./schema.ts";
@@ -17,10 +23,7 @@ export async function encryptCredential(
 	return JSON.stringify(payload);
 }
 
-export async function decryptCredential(
-	value: string,
-	masterPassword?: string,
-): Promise<string> {
+export async function decryptCredential(value: string, masterPassword?: string): Promise<string> {
 	if (!value || !isEncryptedPayload(value)) return value;
 	try {
 		const key = await getEncryptionKey(masterPassword);
@@ -61,7 +64,8 @@ export function verifyMasterPassword(password: string, config: Config): MasterPa
 	const salt = readSaltFile();
 	// Try new format (domain-separated) first
 	const newHash = hashPassword(password, salt);
-	if (timingSafeCompare(newHash, config.masterPasswordHash)) return { valid: true, isLegacy: false };
+	if (timingSafeCompare(newHash, config.masterPasswordHash))
+		return { valid: true, isLegacy: false };
 	// Fallback: legacy format (no domain separation)
 	const oldHash = legacyHashPassword(password, salt);
 	if (timingSafeCompare(oldHash, config.masterPasswordHash)) return { valid: true, isLegacy: true };

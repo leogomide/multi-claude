@@ -100,7 +100,9 @@ export async function runClaude(
 		"CLAUDE_CODE_OAUTH_TOKEN",
 	]);
 	const sanitizedEnv: Record<string, string> = {};
-	for (const k of Object.keys(env).filter((k) => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE") || k.startsWith("OPENROUTER"))) {
+	for (const k of Object.keys(env).filter(
+		(k) => k.startsWith("ANTHROPIC") || k.startsWith("CLAUDE") || k.startsWith("OPENROUTER"),
+	)) {
 		const v = env[k];
 		sanitizedEnv[k] = sensitiveKeys.has(k) && v ? v.slice(0, 4) + "***" : (v ?? "");
 	}

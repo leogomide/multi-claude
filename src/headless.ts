@@ -13,10 +13,14 @@ import {
 	migrateProviderTemplateIds,
 	readOAuthCredentials,
 	setSessionMasterPassword,
-	TEMPLATE_ID_RENAMES,
 	slugify,
+	TEMPLATE_ID_RENAMES,
 } from "./config.ts";
-import { generateMasterPasswordHash, hasMasterPassword, verifyMasterPassword } from "./credential-store.ts";
+import {
+	generateMasterPasswordHash,
+	hasMasterPassword,
+	verifyMasterPassword,
+} from "./credential-store.ts";
 import { initKeystore, migrateKeyWrapping } from "./keystore.ts";
 import { getEffectiveModels } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";

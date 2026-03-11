@@ -114,7 +114,8 @@ export const en: TranslationDictionary = {
 		masterPasswordInvalid: "Invalid master password.",
 		masterPasswordResetOption: "(R) Remove master password",
 		masterPasswordResetWarning: "ALL API keys will be invalidated. Confirm? (y/n)",
-		masterPasswordResetSuccess: "Master password removed. Please re-enter the API keys for your providers.",
+		masterPasswordResetSuccess:
+			"Master password removed. Please re-enter the API keys for your providers.",
 		masterPasswordRetry: "(Enter) Try again",
 		resetAll: "Reset all settings",
 		confirmResetAll: "This will delete all providers, accounts, and installations. Are you sure?",
@@ -122,7 +123,7 @@ export const en: TranslationDictionary = {
 		back: "Back",
 	},
 	encryption: {
-		decryptionFailed: "Could not decrypt API key for \"{{name}}\". Please re-enter it.",
+		decryptionFailed: 'Could not decrypt API key for "{{name}}". Please re-enter it.',
 		reenterApiKey: "Re-enter API key",
 		credentialsMigrated: "Credentials encrypted successfully.",
 	},

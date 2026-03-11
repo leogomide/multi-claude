@@ -42,7 +42,7 @@ const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
 	"--dangerously-skip-permissions",
 	"--verbose",
 	"--worktree",
-	"-w"
+	"-w",
 ]);
 
 function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[] {
@@ -329,7 +329,11 @@ while (true) {
 	if (isDefault) {
 		const { runClaudeDefault } = await import("./src/runner.ts");
 		log.info("calling runClaudeDefault()");
-		exitCode = await runClaudeDefault(mergedArgs, selection.installationId, selection.selectedEnvVars);
+		exitCode = await runClaudeDefault(
+			mergedArgs,
+			selection.installationId,
+			selection.selectedEnvVars,
+		);
 		log.info("runClaudeDefault() returned exitCode=" + exitCode);
 	} else {
 		const { runClaude } = await import("./src/runner.ts");

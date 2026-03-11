@@ -115,7 +115,8 @@ export const es: TranslationDictionary = {
 		masterPasswordInvalid: "Contraseña maestra inválida.",
 		masterPasswordResetOption: "(R) Eliminar contraseña maestra",
 		masterPasswordResetWarning: "TODAS las claves de API serán invalidadas. ¿Confirmar? (y/n)",
-		masterPasswordResetSuccess: "Contraseña maestra eliminada. Vuelva a ingresar las claves de API de sus proveedores.",
+		masterPasswordResetSuccess:
+			"Contraseña maestra eliminada. Vuelva a ingresar las claves de API de sus proveedores.",
 		masterPasswordRetry: "(Enter) Intentar de nuevo",
 		resetAll: "Restablecer toda la configuración",
 		confirmResetAll:
@@ -124,7 +125,8 @@ export const es: TranslationDictionary = {
 		back: "Volver",
 	},
 	encryption: {
-		decryptionFailed: "No se pudo descifrar la clave de API de \"{{name}}\". Por favor, ingrésela nuevamente.",
+		decryptionFailed:
+			'No se pudo descifrar la clave de API de "{{name}}". Por favor, ingrésela nuevamente.',
 		reenterApiKey: "Re-ingresar clave de API",
 		credentialsMigrated: "Credenciales cifradas exitosamente.",
 	},
@@ -301,7 +303,8 @@ export const es: TranslationDictionary = {
 		descSkipPermissions: "Omitir todos los permisos (usar con precaución)",
 		descVerbose: "Habilitar registro detallado, muestra salida completa turno a turno",
 		descWorktree: "Ejecutar en un worktree git aislado",
-		descAgentTeams: "Habilitar equipos de agentes experimentales (varios agentes Claude colaborando)",
+		descAgentTeams:
+			"Habilitar equipos de agentes experimentales (varios agentes Claude colaborando)",
 		worktreePlaceholder: "Nombre del worktree (vacío para generar automáticamente)",
 	},
 };

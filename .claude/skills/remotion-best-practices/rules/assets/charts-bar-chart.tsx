@@ -1,33 +1,28 @@
-import {loadFont} from '@remotion/google-fonts/Inter';
-import {AbsoluteFill, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import { loadFont } from "@remotion/google-fonts/Inter";
+import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig } from "remotion";
 
-const {fontFamily} = loadFont();
+const { fontFamily } = loadFont();
 
-const COLOR_BAR = '#D4AF37';
-const COLOR_TEXT = '#ffffff';
-const COLOR_MUTED = '#888888';
-const COLOR_BG = '#0a0a0a';
-const COLOR_AXIS = '#333333';
+const COLOR_BAR = "#D4AF37";
+const COLOR_TEXT = "#ffffff";
+const COLOR_MUTED = "#888888";
+const COLOR_BG = "#0a0a0a";
+const COLOR_AXIS = "#333333";
 
 // Ideal composition size: 1280x720
 
-const Title: React.FC<{children: React.ReactNode}> = ({children}) => (
-	<div style={{textAlign: 'center', marginBottom: 40}}>
-		<div style={{color: COLOR_TEXT, fontSize: 48, fontWeight: 600}}>
-			{children}
-		</div>
+const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+	<div style={{ textAlign: "center", marginBottom: 40 }}>
+		<div style={{ color: COLOR_TEXT, fontSize: 48, fontWeight: 600 }}>{children}</div>
 	</div>
 );
 
-const YAxis: React.FC<{steps: number[]; height: number}> = ({
-	steps,
-	height,
-}) => (
+const YAxis: React.FC<{ steps: number[]; height: number }> = ({ steps, height }) => (
 	<div
 		style={{
-			display: 'flex',
-			flexDirection: 'column',
-			justifyContent: 'space-between',
+			display: "flex",
+			flexDirection: "column",
+			justifyContent: "space-between",
 			height,
 			paddingRight: 16,
 		}}
@@ -41,7 +36,7 @@ const YAxis: React.FC<{steps: number[]; height: number}> = ({
 					style={{
 						color: COLOR_MUTED,
 						fontSize: 20,
-						textAlign: 'right',
+						textAlign: "right",
 					}}
 				>
 					{step.toLocaleString()}
@@ -53,21 +48,21 @@ const YAxis: React.FC<{steps: number[]; height: number}> = ({
 const Bar: React.FC<{
 	height: number;
 	progress: number;
-}> = ({height, progress}) => (
+}> = ({ height, progress }) => (
 	<div
 		style={{
 			flex: 1,
-			display: 'flex',
-			flexDirection: 'column',
-			justifyContent: 'flex-end',
+			display: "flex",
+			flexDirection: "column",
+			justifyContent: "flex-end",
 		}}
 	>
 		<div
 			style={{
-				width: '100%',
+				width: "100%",
 				height,
 				backgroundColor: COLOR_BAR,
-				borderRadius: '8px 8px 0 0',
+				borderRadius: "8px 8px 0 0",
 				opacity: progress,
 			}}
 		/>
@@ -78,12 +73,12 @@ const XAxis: React.FC<{
 	children: React.ReactNode;
 	labels: string[];
 	height: number;
-}> = ({children, labels, height}) => (
-	<div style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+}> = ({ children, labels, height }) => (
+	<div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
 		<div
 			style={{
-				display: 'flex',
-				alignItems: 'flex-end',
+				display: "flex",
+				alignItems: "flex-end",
 				gap: 16,
 				height,
 				borderLeft: `2px solid ${COLOR_AXIS}`,
@@ -95,7 +90,7 @@ const XAxis: React.FC<{
 		</div>
 		<div
 			style={{
-				display: 'flex',
+				display: "flex",
 				gap: 16,
 				paddingLeft: 16,
 				marginTop: 12,
@@ -106,7 +101,7 @@ const XAxis: React.FC<{
 					key={label}
 					style={{
 						flex: 1,
-						textAlign: 'center',
+						textAlign: "center",
 						color: COLOR_MUTED,
 						fontSize: 20,
 					}}
@@ -120,15 +115,15 @@ const XAxis: React.FC<{
 
 export const MyAnimation = () => {
 	const frame = useCurrentFrame();
-	const {fps, height} = useVideoConfig();
+	const { fps, height } = useVideoConfig();
 
 	const data = [
-		{month: 'Jan', price: 2039},
-		{month: 'Mar', price: 2160},
-		{month: 'May', price: 2327},
-		{month: 'Jul', price: 2426},
-		{month: 'Sep', price: 2634},
-		{month: 'Nov', price: 2672},
+		{ month: "Jan", price: 2039 },
+		{ month: "Mar", price: 2160 },
+		{ month: "May", price: 2327 },
+		{ month: "Jul", price: 2426 },
+		{ month: "Sep", price: 2634 },
+		{ month: "Nov", price: 2672 },
 	];
 
 	const minPrice = 2000;
@@ -142,29 +137,26 @@ export const MyAnimation = () => {
 			style={{
 				backgroundColor: COLOR_BG,
 				padding: 60,
-				display: 'flex',
-				flexDirection: 'column',
+				display: "flex",
+				flexDirection: "column",
 				fontFamily,
 			}}
 		>
 			<Title>Gold Price 2024</Title>
 
-			<div style={{display: 'flex', flex: 1}}>
+			<div style={{ display: "flex", flex: 1 }}>
 				<YAxis steps={yAxisSteps} height={chartHeight} />
 				<XAxis height={chartHeight} labels={data.map((d) => d.month)}>
 					{data.map((item, i) => {
 						const progress = spring({
 							frame: frame - i * 5 - 10,
 							fps,
-							config: {damping: 18, stiffness: 80},
+							config: { damping: 18, stiffness: 80 },
 						});
 
-						const barHeight =
-							((item.price - minPrice) / priceRange) * chartHeight * progress;
+						const barHeight = ((item.price - minPrice) / priceRange) * chartHeight * progress;
 
-						return (
-							<Bar key={item.month} height={barHeight} progress={progress} />
-						);
+						return <Bar key={item.month} height={barHeight} progress={progress} />;
 					})}
 				</XAxis>
 			</div>

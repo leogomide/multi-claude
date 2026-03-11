@@ -1,8 +1,21 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import {
+	CONFIG_DIR,
+	loadConfig,
+	migrateInstallations,
+	migrateProviderTemplateIds,
+	saveConfig,
+	setSessionMasterPassword,
+} from "./config.ts";
+import {
+	encryptCredential,
+	generateMasterPasswordHash,
+	hasMasterPassword,
+	needsEncryptionMigration,
+	verifyMasterPassword,
+} from "./credential-store.ts";
 import { isEncryptedPayload } from "./crypto.ts";
-import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig, setSessionMasterPassword } from "./config.ts";
-import { encryptCredential, generateMasterPasswordHash, hasMasterPassword, needsEncryptionMigration, verifyMasterPassword } from "./credential-store.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { i18n, initLocale } from "./i18n/index.ts";
 import { clearCachedKey, initKeystore, migrateKeyWrapping, resetKeyFile } from "./keystore.ts";
@@ -258,9 +271,7 @@ if (result) {
 		try {
 			const latestConfig = await loadConfig();
 			latestConfig.lastFlags = result.selectedFlags.filter((f) => f.startsWith("--"));
-			latestConfig.lastEnvVars = result.selectedEnvVars
-				? Object.keys(result.selectedEnvVars)
-				: [];
+			latestConfig.lastEnvVars = result.selectedEnvVars ? Object.keys(result.selectedEnvVars) : [];
 			await saveConfig(latestConfig);
 			log.info("lastFlags and lastEnvVars saved to config");
 		} catch (err) {

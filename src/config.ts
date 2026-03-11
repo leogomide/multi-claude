@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { chmod, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { isEncryptedPayload } from "./crypto.ts";
 import { decryptCredential, encryptCredential } from "./credential-store.ts";
+import { isEncryptedPayload } from "./crypto.ts";
 import type { Config } from "./schema.ts";
 import { configSchema } from "./schema.ts";
 

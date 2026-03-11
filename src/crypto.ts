@@ -1,9 +1,4 @@
-import {
-	createCipheriv,
-	createDecipheriv,
-	pbkdf2Sync,
-	randomBytes,
-} from "node:crypto";
+import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from "node:crypto";
 
 export interface EncryptedPayload {
 	v: 1;
@@ -59,7 +54,9 @@ export function deriveKey(secret: string, salt: Buffer): Buffer {
 
 export function hashPassword(password: string, salt: Buffer): string {
 	const domainSalt = Buffer.concat([Buffer.from("mclaude-hash:"), salt]);
-	return pbkdf2Sync(password, domainSalt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512").toString("base64");
+	return pbkdf2Sync(password, domainSalt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512").toString(
+		"base64",
+	);
 }
 
 // Legacy functions (without domain separation) — used only for migration
