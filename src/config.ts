@@ -92,6 +92,22 @@ export async function renameInstallationDir(oldDirName: string, newDirName: stri
 	}
 }
 
+export const TEMPLATE_ID_RENAMES: Record<string, string> = {
+	alibaba: "alibaba-coding",
+};
+
+export async function migrateProviderTemplateIds(config: Config): Promise<void> {
+	let changed = false;
+	for (const provider of config.providers) {
+		const newId = TEMPLATE_ID_RENAMES[provider.templateId];
+		if (newId) {
+			provider.templateId = newId;
+			changed = true;
+		}
+	}
+	if (changed) await saveConfig(config);
+}
+
 export async function migrateInstallations(config: Config): Promise<void> {
 	const needsMigration = config.installations.some((inst) => !inst.dirName);
 	if (!needsMigration) return;

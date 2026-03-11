@@ -7,7 +7,9 @@ import {
 	isOAuthTokenValid,
 	loadConfig,
 	migrateInstallations,
+	migrateProviderTemplateIds,
 	readOAuthCredentials,
+	TEMPLATE_ID_RENAMES,
 	slugify,
 } from "./config.ts";
 import { getEffectiveModels } from "./providers.ts";
@@ -118,8 +120,11 @@ function resolveProvider(
 	const byName = providers.filter((p) => p.name.toLowerCase() === inputLower);
 	if (byName.length === 1) return { ok: true, value: byName[0]! };
 
-	// 2. Exact templateId match
-	const byTemplate = providers.filter((p) => p.templateId === inputLower);
+	// 2. Exact templateId match (with legacy alias support)
+	const resolvedTemplateId = TEMPLATE_ID_RENAMES[inputLower] ?? inputLower;
+	const byTemplate = providers.filter(
+		(p) => p.templateId === inputLower || p.templateId === resolvedTemplateId,
+	);
 	if (byTemplate.length === 1) return { ok: true, value: byTemplate[0]! };
 
 	// 3. Slug of provider name
@@ -235,6 +240,7 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 	log.info("started, provider=" + args.provider);
 
 	const config = await loadConfig();
+	await migrateProviderTemplateIds(config);
 	await migrateInstallations(config);
 
 	if (config.providers.length === 0) {
@@ -304,6 +310,7 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 
 export async function printHeadlessInfo(): Promise<void> {
 	const config = await loadConfig();
+	await migrateProviderTemplateIds(config);
 	await migrateInstallations(config);
 
 	const output = {

@@ -16,8 +16,8 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 	},
 	{
 		// https://www.alibabacloud.com/help/en/model-studio/coding-plan
-		id: "alibaba",
-		description: "Alibaba Cloud",
+		id: "alibaba-coding",
+		description: "Alibaba Cloud (Coding Plan)",
 		baseUrl: "https://coding-intl.dashscope.aliyuncs.com/apps/anthropic",
 		defaultModels: [
 			"qwen3-coder-next",

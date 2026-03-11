@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { CONFIG_DIR, loadConfig, migrateInstallations, saveConfig } from "./config.ts";
+import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig } from "./config.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { initLocale } from "./i18n/index.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
@@ -31,6 +31,7 @@ const cliArgs = process.argv.slice(2);
 log.debug("cliArgs=" + JSON.stringify(cliArgs));
 
 const config = await loadConfig();
+await migrateProviderTemplateIds(config);
 await migrateInstallations(config);
 
 if (!config.language) {
