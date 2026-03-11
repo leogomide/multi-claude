@@ -24,6 +24,7 @@ type Step =
 
 interface EditProviderFlowProps {
 	providerId: string;
+	initialStep?: Step;
 	onDone: (message?: FlowMessage) => void;
 	onManageModels: () => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
@@ -32,6 +33,7 @@ interface EditProviderFlowProps {
 
 export function EditProviderFlow({
 	providerId,
+	initialStep,
 	onDone,
 	onManageModels,
 	onOAuthLogin,
@@ -73,6 +75,7 @@ export function EditProviderFlow({
 					const prov = config.providers.find((p) => p.id === providerId);
 					if (prov) {
 						prov.apiKey = pendingApiKey.trim();
+						prov.apiKeyValid = true;
 					}
 					saveConfig(config).then(() => {
 						if (cancelled) return;
@@ -110,7 +113,7 @@ export function EditProviderFlow({
 				return;
 			}
 			setProvider(prov);
-			setStep("menu");
+			setStep(initialStep ?? "menu");
 		});
 	}, []);
 
@@ -316,6 +319,7 @@ export function EditProviderFlow({
 								const prov = config.providers.find((p) => p.id === providerId);
 								if (prov) {
 									prov.apiKey = effectiveKey;
+									prov.apiKeyValid = true;
 								}
 								saveConfig(config).then(() => {
 									refreshProvider().then(() => {

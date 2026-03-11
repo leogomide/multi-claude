@@ -18,6 +18,7 @@ export const configuredProviderSchema = z.object({
 	templateId: z.string(),
 	type: z.enum(["api", "oauth"]).default("api"),
 	apiKey: z.string().default(""),
+	apiKeyValid: z.boolean().default(true),
 	models: z.array(z.string()).default([]),
 	baseUrl: z.string().optional(),
 });

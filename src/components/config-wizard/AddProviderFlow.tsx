@@ -78,6 +78,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 						templateId,
 						type: "api",
 						apiKey,
+						apiKeyValid: true,
 						models: [...(template?.defaultModels ?? [])],
 						baseUrl: baseUrl && baseUrl !== template?.baseUrl ? baseUrl : undefined,
 					};
@@ -256,7 +257,8 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 							templateId: "anthropic",
 							type: "oauth" as const,
 							apiKey: "",
-							models: [],
+							apiKeyValid: true,
+							models: [] as string[],
 						};
 						loadConfig().then((config) => {
 							config.providers.push(newProvider);
@@ -367,6 +369,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 										templateId,
 										type: "api",
 										apiKey: effectiveKey,
+										apiKeyValid: true,
 										models: [...(template?.defaultModels ?? [])],
 										baseUrl: baseUrl !== template?.baseUrl ? baseUrl : undefined,
 									};
@@ -411,6 +414,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 										templateId,
 										type: "api",
 										apiKey: key,
+										apiKeyValid: true,
 										models: [...(template?.defaultModels ?? [])],
 									};
 									config.providers.push(provider);

@@ -110,6 +110,10 @@ export interface TranslationDictionary {
 		masterPasswordCurrentLabel: string;
 		masterPasswordMismatch: string;
 		masterPasswordInvalid: string;
+		masterPasswordResetOption: string;
+		masterPasswordResetWarning: string;
+		masterPasswordResetSuccess: string;
+		masterPasswordRetry: string;
 		resetAll: string;
 		confirmResetAll: string;
 		resetAllSuccess: string;
@@ -238,6 +242,8 @@ export interface TranslationDictionary {
 		reasoning: string;
 		moderated: string;
 		authStatus: string;
+		apiKeyStatus: string;
+		apiKeyInvalid: string;
 		type: string;
 		params: string;
 		quantization: string;

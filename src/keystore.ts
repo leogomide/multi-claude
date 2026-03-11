@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { chmod, mkdir, writeFile } from "node:fs/promises";
+import { chmod, mkdir, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
@@ -106,6 +106,13 @@ export async function unwrapKey(masterPassword: string): Promise<void> {
 
 	await writeFile(KEY_FILE, keyBase64, "utf-8");
 	await setSecurePermissions(KEY_FILE);
+	cachedKey = null;
+}
+
+export async function resetKeyFile(): Promise<void> {
+	if (existsSync(KEY_FILE)) {
+		await rm(KEY_FILE);
+	}
 	cachedKey = null;
 }
 

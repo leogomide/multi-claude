@@ -73,6 +73,7 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 	const [lastMessage, setLastMessage] = useState<FlowMessage | null>(null);
 	const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
 	const [selectedProviderForEdit, setSelectedProviderForEdit] = useState<string | null>(null);
+	const [editProviderInitialStep, setEditProviderInitialStep] = useState<"edit-key" | undefined>();
 	const [selectedInstallationId, setSelectedInstallationId] = useState<string | null>(null);
 
 	const goTo = useCallback(
@@ -147,13 +148,17 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 	);
 
 	const handleManageProvidersSelect = useCallback(
-		(result: ManageProvidersResult) => {
+		async (result: ManageProvidersResult) => {
 			const mpCrumb = t("manageProviders.title");
 			switch (result.type) {
-				case "select-provider":
+				case "select-provider": {
+					const config = await loadConfig();
+					const prov = config.providers.find((p) => p.id === result.providerId);
 					setSelectedProviderForEdit(result.providerId);
+					setEditProviderInitialStep(prov?.apiKeyValid === false ? "edit-key" : undefined);
 					goTo("edit-provider", [mpCrumb, result.providerName]);
 					break;
+				}
 				case "add-provider":
 					goTo("add-provider", [mpCrumb, t("manageProviders.addProvider")]);
 					break;
@@ -314,6 +319,7 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 				<EditProviderFlow
 					key={flowKey}
 					providerId={selectedProviderForEdit}
+					initialStep={editProviderInitialStep}
 					onDone={backToManageProviders}
 					onManageModels={() => {
 						goTo("manage-models", [

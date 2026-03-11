@@ -318,6 +318,7 @@ while (true) {
 		templateId: selection.templateId,
 		type: selection.type ?? "api",
 		apiKey: selection.apiKey ?? "",
+		apiKeyValid: true,
 		models: selection.models,
 	};
 

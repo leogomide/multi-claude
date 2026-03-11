@@ -1,11 +1,12 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { isEncryptedPayload } from "./crypto.ts";
 import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig, setSessionMasterPassword } from "./config.ts";
 import { encryptCredential, hasMasterPassword, needsEncryptionMigration, verifyMasterPassword } from "./credential-store.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { i18n, initLocale } from "./i18n/index.ts";
-import { initKeystore } from "./keystore.ts";
-import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
+import { clearCachedKey, initKeystore, resetKeyFile } from "./keystore.ts";
+import { configSchema, DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
 
 export const SELECTION_FILE = join(CONFIG_DIR, "last-selection.json");
 
@@ -43,49 +44,130 @@ if (hasMasterPassword(preConfig)) {
 		initLocale(preConfig.language);
 	}
 
-	// Master password required — prompt via stdin
-	const password = await new Promise<string>((resolve) => {
-		process.stdout.write(i18n.t("settings.masterPassword") + ": ");
-		let input = "";
-		process.stdin.setEncoding("utf-8");
-		if (process.stdin.isTTY && process.stdin.setRawMode) {
-			process.stdin.setRawMode(true);
-		}
-		const onData = (data: string) => {
-			for (const ch of data) {
-				if (ch === "\r" || ch === "\n") {
-					process.stdout.write("\n");
-					process.stdin.removeListener("data", onData);
-					if (process.stdin.isTTY && process.stdin.setRawMode) {
-						process.stdin.setRawMode(false);
+	const promptPassword = (label: string): Promise<string> => {
+		return new Promise<string>((resolve) => {
+			process.stdout.write(label);
+			let input = "";
+			process.stdin.setEncoding("utf-8");
+			if (process.stdin.isTTY && process.stdin.setRawMode) {
+				process.stdin.setRawMode(true);
+			}
+			const onData = (data: string) => {
+				for (const ch of data) {
+					if (ch === "\r" || ch === "\n") {
+						process.stdout.write("\n");
+						process.stdin.removeListener("data", onData);
+						if (process.stdin.isTTY && process.stdin.setRawMode) {
+							process.stdin.setRawMode(false);
+						}
+						resolve(input);
+						return;
 					}
-					resolve(input);
-					return;
+					if (ch === "\x03") {
+						process.exit(1);
+					}
+					if (ch === "\x7f" || ch === "\b") {
+						if (input.length > 0) {
+							input = input.slice(0, -1);
+							process.stdout.write("\b \b");
+						}
+						continue;
+					}
+					input += ch;
+					process.stdout.write("*");
+				}
+			};
+			process.stdin.on("data", onData);
+			process.stdin.resume();
+		});
+	};
+
+	const waitForSingleKey = (): Promise<string> => {
+		return new Promise<string>((resolve) => {
+			process.stdin.setEncoding("utf-8");
+			if (process.stdin.isTTY && process.stdin.setRawMode) {
+				process.stdin.setRawMode(true);
+			}
+			const onData = (data: string) => {
+				const ch = data[0] ?? "";
+				process.stdin.removeListener("data", onData);
+				if (process.stdin.isTTY && process.stdin.setRawMode) {
+					process.stdin.setRawMode(false);
 				}
 				if (ch === "\x03") {
-					// Ctrl+C
 					process.exit(1);
 				}
-				if (ch === "\x7f" || ch === "\b") {
-					if (input.length > 0) {
-						input = input.slice(0, -1);
-						process.stdout.write("\b \b");
-					}
-					continue;
-				}
-				input += ch;
-				process.stdout.write("*");
-			}
-		};
-		process.stdin.on("data", onData);
-		process.stdin.resume();
-	});
+				resolve(ch);
+			};
+			process.stdin.on("data", onData);
+			process.stdin.resume();
+		});
+	};
 
-	if (!verifyMasterPassword(password, preConfig)) {
-		console.error(i18n.t("settings.masterPasswordInvalid"));
-		process.exit(1);
+	const performMasterPasswordReset = async (): Promise<void> => {
+		const configFile = join(CONFIG_DIR, "config.json");
+		const raw = await readFile(configFile, "utf-8");
+		const parsed = JSON.parse(raw);
+		const rawConfig = configSchema.parse(parsed);
+
+		// Invalidate all encrypted API keys
+		for (const provider of rawConfig.providers) {
+			if (provider.apiKey && isEncryptedPayload(provider.apiKey)) {
+				provider.apiKey = "";
+				provider.apiKeyValid = false;
+			}
+		}
+
+		// Remove master password hash
+		delete rawConfig.masterPasswordHash;
+
+		// Write config directly (no encryption needed since keys are cleared)
+		await writeFile(configFile, JSON.stringify(rawConfig, null, 2) + "\n", "utf-8");
+
+		// Reset key file and re-init keystore with a fresh key
+		await resetKeyFile();
+		clearCachedKey();
+		await initKeystore();
+
+		log.info("master password force-removed, all API keys invalidated");
+	};
+
+	// Master password loop: prompt → verify → retry/reset
+	let authenticated = false;
+	while (!authenticated) {
+		const password = await promptPassword(i18n.t("settings.masterPassword") + ": ");
+
+		if (verifyMasterPassword(password, preConfig)) {
+			setSessionMasterPassword(password);
+			authenticated = true;
+		} else {
+			process.stdout.write("\n");
+			console.error(i18n.t("settings.masterPasswordInvalid"));
+			process.stdout.write("\n");
+			console.log(i18n.t("settings.masterPasswordResetOption"));
+			console.log(i18n.t("settings.masterPasswordRetry"));
+			console.log("(Ctrl+C)");
+			process.stdout.write("\n");
+
+			const key = await waitForSingleKey();
+			process.stdout.write("\n");
+
+			if (key === "r" || key === "R") {
+				console.log(i18n.t("settings.masterPasswordResetWarning"));
+				const confirm = await waitForSingleKey();
+				process.stdout.write("\n");
+
+				if (confirm === "y" || confirm === "Y" || confirm === "s" || confirm === "S") {
+					await performMasterPasswordReset();
+					console.log(i18n.t("settings.masterPasswordResetSuccess"));
+					process.stdout.write("\n");
+					authenticated = true;
+				}
+				// If not confirmed, loop continues → re-prompt
+			}
+			// If Enter or any other key, loop continues → re-prompt
+		}
 	}
-	setSessionMasterPassword(password);
 }
 
 const config = await loadConfig();

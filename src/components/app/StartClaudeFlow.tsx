@@ -144,6 +144,7 @@ export function StartClaudeFlow({
 					templateId: DEFAULT_LAUNCH_TEMPLATE_ID,
 					type: "api",
 					apiKey: "",
+					apiKeyValid: true,
 					models: [],
 				};
 				setSelectedProvider(virtualProvider);

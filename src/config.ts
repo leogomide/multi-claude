@@ -37,7 +37,13 @@ export async function loadConfig(): Promise<Config> {
 		// Decrypt API keys in memory
 		for (const provider of config.providers) {
 			if (provider.apiKey && isEncryptedPayload(provider.apiKey)) {
-				provider.apiKey = await decryptCredential(provider.apiKey, sessionMasterPassword);
+				const encrypted = provider.apiKey;
+				const decrypted = await decryptCredential(encrypted, sessionMasterPassword);
+				if (decrypted === "" && encrypted !== "") {
+					// Decryption failed — key is irrecoverable
+					provider.apiKeyValid = false;
+				}
+				provider.apiKey = decrypted;
 			}
 		}
 

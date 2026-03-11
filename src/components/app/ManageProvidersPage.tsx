@@ -40,7 +40,8 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 		const providerItems: GroupedSelectItem[] = providers.map((p) => ({
 			label: p.name,
 			value: `provider:${p.id}`,
-			icon: "🔧",
+			icon: p.apiKeyValid === false ? "⚠" : "🔧",
+			color: p.apiKeyValid === false ? "yellow" : undefined,
 		}));
 
 		const providerGroup =
@@ -121,6 +122,13 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 				items.push({
 					label: t("sidebar.baseUrl"),
 					value: effectiveUrl.replace(/^https?:\/\//, ""),
+				});
+			}
+			if (provider.apiKeyValid === false) {
+				items.push({
+					label: t("sidebar.apiKeyStatus"),
+					value: t("sidebar.apiKeyInvalid"),
+					color: "red",
 				});
 			}
 			return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
