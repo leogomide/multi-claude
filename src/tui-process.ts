@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { CONFIG_DIR, loadConfig, migrateInstallations, migrateProviderTemplateIds, saveConfig, setSessionMasterPassword } from "./config.ts";
 import { encryptCredential, hasMasterPassword, needsEncryptionMigration, verifyMasterPassword } from "./credential-store.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
-import { initLocale } from "./i18n/index.ts";
+import { i18n, initLocale } from "./i18n/index.ts";
 import { initKeystore } from "./keystore.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
 
@@ -38,9 +38,14 @@ await initKeystore();
 const preConfig = await loadConfig();
 
 if (hasMasterPassword(preConfig)) {
+	// Initialize i18n early so the master password prompt is translated
+	if (preConfig.language) {
+		initLocale(preConfig.language);
+	}
+
 	// Master password required — prompt via stdin
 	const password = await new Promise<string>((resolve) => {
-		process.stdout.write("Master password: ");
+		process.stdout.write(i18n.t("settings.masterPassword") + ": ");
 		let input = "";
 		process.stdin.setEncoding("utf-8");
 		if (process.stdin.isTTY && process.stdin.setRawMode) {
@@ -77,7 +82,7 @@ if (hasMasterPassword(preConfig)) {
 	});
 
 	if (!verifyMasterPassword(password, preConfig)) {
-		console.error("Invalid master password.");
+		console.error(i18n.t("settings.masterPasswordInvalid"));
 		process.exit(1);
 	}
 	setSessionMasterPassword(password);
