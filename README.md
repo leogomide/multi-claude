@@ -280,6 +280,15 @@ OpenRouter validates your API key when you add or edit a provider.
 - **API key:** Get one at [z.ai](https://z.ai)
 - **Default models:** `GLM-4-32B-0414-128K`, `GLM-4.5`, `GLM-4.5-Air`, `GLM-4.5-AirX`, `GLM-4.5-Flash`, `GLM-4.5-X`, `GLM-4.6`, `GLM-4.7`, `GLM-4.7-Flash`, `GLM-4.7-FlashX`, `GLM-5`, `GLM-5-Code`
 
+### LiteLLM Proxy
+
+- **Docs:** [LiteLLM documentation](https://docs.litellm.ai/docs/) | [Claude Code integration](https://docs.litellm.ai/docs/tutorials/claude_responses_api)
+- **Base URL:** `http://localhost:4000` (configurable — edit the provider to point to your proxy)
+- **API key:** Your LiteLLM master key or virtual key
+- **Default models:** None — models are fetched from the LiteLLM proxy via `/model/info`. Configure them in your LiteLLM `config.yaml`.
+
+LiteLLM acts as a unified proxy for 100+ LLM providers (Anthropic, AWS Bedrock, Azure, Vertex AI, etc.), providing centralized authentication, cost tracking, and rate limiting. Run the proxy anywhere (local or remote) and point multi-claude to it.
+
 ### Local Providers
 
 These providers run locally on your machine — no API key is required (a placeholder is used automatically).
