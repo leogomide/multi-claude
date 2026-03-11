@@ -40,6 +40,7 @@ export const ptBR: TranslationDictionary = {
 		selectTemplate: "Selecione um template de provedor",
 		nameLabel: "Nome para esta configuração de provedor",
 		apiKeyLabel: "Chave de API",
+		apiKeyLabelOptional: "Chave de API (opcional - Enter para pular)",
 		urlLabel: "URL do servidor",
 		success: 'Provedor "{{name}}" adicionado com sucesso!',
 		defaultModels: "Modelos padrão",
@@ -255,9 +256,6 @@ export const ptBR: TranslationDictionary = {
 	},
 	terminal: {
 		tooSmall: "Terminal muito pequeno ({{current}}). Minimo: {{min}}",
-	},
-	localProvider: {
-		noApiKeyNeeded: "Sem chave de API (provedor local)",
 	},
 	footer: {
 		navigate: "navegar",

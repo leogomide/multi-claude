@@ -39,6 +39,7 @@ export const en: TranslationDictionary = {
 		selectTemplate: "Select a provider template",
 		nameLabel: "Name for this provider configuration",
 		apiKeyLabel: "API key",
+		apiKeyLabelOptional: "API key (optional - Enter to skip)",
 		urlLabel: "Server URL",
 		success: 'Provider "{{name}}" added successfully!',
 		defaultModels: "Default models",
@@ -253,9 +254,6 @@ export const en: TranslationDictionary = {
 	},
 	terminal: {
 		tooSmall: "Terminal too small ({{current}}). Minimum: {{min}}",
-	},
-	localProvider: {
-		noApiKeyNeeded: "No API key needed (local provider)",
 	},
 	footer: {
 		navigate: "navigate",

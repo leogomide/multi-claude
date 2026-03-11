@@ -40,6 +40,7 @@ export const es: TranslationDictionary = {
 		selectTemplate: "Seleccione una plantilla de proveedor",
 		nameLabel: "Nombre para esta configuración de proveedor",
 		apiKeyLabel: "Clave de API",
+		apiKeyLabelOptional: "Clave de API (opcional - Enter para omitir)",
 		urlLabel: "URL del servidor",
 		success: '¡Proveedor "{{name}}" agregado exitosamente!',
 		defaultModels: "Modelos predeterminados",
@@ -258,9 +259,6 @@ export const es: TranslationDictionary = {
 	},
 	terminal: {
 		tooSmall: "Terminal muy pequeno ({{current}}). Minimo: {{min}}",
-	},
-	localProvider: {
-		noApiKeyNeeded: "Sin clave de API (proveedor local)",
 	},
 	footer: {
 		navigate: "navegar",

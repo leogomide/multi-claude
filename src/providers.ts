@@ -205,15 +205,15 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		description: "LiteLLM Proxy",
 		baseUrl: "http://localhost:4000",
 		defaultModels: [],
+		defaultApiKey: "litellm",
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
 	},
-	// --- Local providers ---
 	{
 		// https://github.com/ggml-org/llama.cpp
 		id: "llamacpp",
-		description: "llama.cpp (Local)",
+		description: "llama.cpp",
 		baseUrl: "http://127.0.0.1:8080",
 		defaultModels: [],
 		defaultApiKey: "llamacpp",
@@ -225,7 +225,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 	{
 		// https://lmstudio.ai/docs/integrations/claude-code
 		id: "lmstudio",
-		description: "LM Studio (Local)",
+		description: "LM Studio",
 		baseUrl: "http://localhost:1234",
 		defaultModels: [],
 		defaultApiKey: "lmstudio",
@@ -237,7 +237,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 	{
 		// https://ollama.com/blog/claude
 		id: "ollama",
-		description: "Ollama (Local)",
+		description: "Ollama",
 		baseUrl: "http://localhost:11434",
 		defaultModels: [],
 		defaultApiKey: "ollama",

@@ -67,7 +67,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		if (step !== "validating-key") return;
 		let cancelled = false;
 
-		validateApiKey(templateId, apiKey).then((result) => {
+		validateApiKey(templateId, apiKey, baseUrl || undefined).then((result) => {
 			if (cancelled) return;
 			if (result.valid) {
 				loadConfig().then((config) => {
@@ -79,6 +79,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 						type: "api",
 						apiKey,
 						models: [...(template?.defaultModels ?? [])],
+						baseUrl: baseUrl && baseUrl !== template?.baseUrl ? baseUrl : undefined,
 					};
 					config.providers.push(provider);
 					saveConfig(config).then(() => {
@@ -122,16 +123,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		const items: SidebarItem[] = [{ label: t("sidebar.name"), value: tmpl.description }];
 
 		if (isOAuthTemplate(tmpl.id)) {
-			items.push(
-				{ label: t("sidebar.type"), value: "OAuth" },
-				{ label: "", value: t("anthropic.noApiKeyNeeded") },
-			);
-		} else if (tmpl.defaultApiKey) {
-			items.push(
-				{ label: t("sidebar.baseUrl"), value: tmpl.baseUrl.replace(/^https?:\/\//, "") },
-				{ label: t("sidebar.type"), value: "Local" },
-				{ label: "", value: t("localProvider.noApiKeyNeeded") },
-			);
+			items.push({ label: "", value: t("anthropic.noApiKeyNeeded") });
 		} else {
 			items.push(
 				{ label: t("sidebar.baseUrl"), value: tmpl.baseUrl.replace(/^https?:\/\//, "") },
@@ -290,7 +282,13 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	}
 
 	const detailsFooterItems = [
-		{ key: "⏎", label: activeField === "name" ? t("footer.next") : t("footer.confirm") },
+		{
+			key: "⏎",
+			label:
+				activeField === "name" || (activeField === "url" && template?.defaultApiKey)
+					? t("footer.next")
+					: t("footer.confirm"),
+		},
 		{ key: "esc", label: t("footer.back") },
 	];
 
@@ -340,28 +338,54 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 							return undefined;
 						}}
 						onSubmit={(url) => {
-							const trimmedUrl = url.trim().replace(/\/+$/, "");
-							const defaultKey = template?.defaultApiKey!;
-							loadConfig().then((config) => {
-								const provider: ConfiguredProvider = {
-									id: crypto.randomUUID(),
-									name,
-									templateId,
-									type: "api",
-									apiKey: defaultKey,
-									models: [...(template?.defaultModels ?? [])],
-									baseUrl: trimmedUrl !== template?.baseUrl ? trimmedUrl : undefined,
-								};
-								config.providers.push(provider);
-								saveConfig(config).then(() => {
-									onDone({ text: t("addFlow.success", { name }), variant: "success" });
-								});
-							});
+							setBaseUrl(url.trim().replace(/\/+$/, ""));
+							setActiveField("key");
 						}}
 						onCancel={() => {
 							setActiveField("name");
 						}}
 					/>
+				</Box>
+			)}
+			{template?.defaultApiKey && activeField === "key" && (
+				<Box marginTop={1}>
+					<TextPrompt
+						label={t("addFlow.apiKeyLabelOptional")}
+						mask="*"
+						focus={activeField === "key"}
+						onSubmit={(key) => {
+							const effectiveKey = key.trim() || template?.defaultApiKey!;
+							if (key.trim() && hasApiKeyValidation(templateId)) {
+								setApiKey(effectiveKey);
+								setValidationError(null);
+								setStep("validating-key");
+							} else {
+								loadConfig().then((config) => {
+									const provider: ConfiguredProvider = {
+										id: crypto.randomUUID(),
+										name,
+										templateId,
+										type: "api",
+										apiKey: effectiveKey,
+										models: [...(template?.defaultModels ?? [])],
+										baseUrl: baseUrl !== template?.baseUrl ? baseUrl : undefined,
+									};
+									config.providers.push(provider);
+									saveConfig(config).then(() => {
+										onDone({ text: t("addFlow.success", { name }), variant: "success" });
+									});
+								});
+							}
+						}}
+						onCancel={() => {
+							setActiveField("url");
+						}}
+					/>
+					{validationError && (
+						<Box marginTop={1}>
+							<StatusMessage variant="error">{validationError}</StatusMessage>
+						</Box>
+					)}
 				</Box>
 			)}
 			{!template?.defaultApiKey && (

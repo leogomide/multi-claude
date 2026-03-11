@@ -137,7 +137,6 @@ export function EditProviderFlow({
 	if (step === "menu" && provider) {
 		const template = getTemplate(provider.templateId);
 		const isOAuth = provider.type === "oauth";
-		const hasDefaultApiKey = template?.defaultApiKey != null;
 		const menuItems = isOAuth
 			? [
 					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
@@ -147,9 +146,7 @@ export function EditProviderFlow({
 				]
 			: [
 					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
-					...(!hasDefaultApiKey
-						? [{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" }]
-						: []),
+					{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" },
 					{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" },
 					{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
 					{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
@@ -296,22 +293,29 @@ export function EditProviderFlow({
 				]}
 			>
 				<TextPrompt
-					label={t("editFlow.apiKeyLabel")}
+					label={
+						getTemplate(provider?.templateId ?? "")?.defaultApiKey
+							? t("addFlow.apiKeyLabelOptional")
+							: t("editFlow.apiKeyLabel")
+					}
 					mask="*"
 					validate={(val) => {
-						if (!val.trim()) return t("validation.apiKeyRequired");
+						const tmpl = getTemplate(provider?.templateId ?? "");
+						if (!val.trim() && !tmpl?.defaultApiKey) return t("validation.apiKeyRequired");
 						return undefined;
 					}}
 					onSubmit={(apiKey) => {
-						if (hasApiKeyValidation(provider?.templateId ?? "")) {
-							setPendingApiKey(apiKey);
+						const tmpl = getTemplate(provider?.templateId ?? "");
+						const effectiveKey = apiKey.trim() || tmpl?.defaultApiKey || apiKey;
+						if (apiKey.trim() && hasApiKeyValidation(provider?.templateId ?? "")) {
+							setPendingApiKey(effectiveKey);
 							setValidationError(null);
 							setStep("validating-key");
 						} else {
 							loadConfig().then((config) => {
 								const prov = config.providers.find((p) => p.id === providerId);
 								if (prov) {
-									prov.apiKey = apiKey.trim();
+									prov.apiKey = effectiveKey;
 								}
 								saveConfig(config).then(() => {
 									refreshProvider().then(() => {

@@ -37,6 +37,7 @@ export interface TranslationDictionary {
 		selectTemplate: string;
 		nameLabel: string;
 		apiKeyLabel: string;
+		apiKeyLabelOptional: string;
 		urlLabel: string;
 		success: string;
 		defaultModels: string;
@@ -245,9 +246,6 @@ export interface TranslationDictionary {
 	};
 	terminal: {
 		tooSmall: string;
-	};
-	localProvider: {
-		noApiKeyNeeded: string;
 	};
 	footer: {
 		navigate: string;
