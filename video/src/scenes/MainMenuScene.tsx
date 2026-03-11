@@ -17,6 +17,7 @@ const MENU_GROUPS = [
     label: "Start Claude Code",
     items: [
       { icon: "🏠", label: "Claude Code (default)" },
+      { icon: "🚀", label: "Z.AI" },
       { icon: "🚀", label: "OpenRouter" },
       { icon: "🚀", label: "DeepSeek" },
     ],
@@ -41,13 +42,13 @@ const SIDEBAR_DEFAULT = {
   ],
 };
 
-const SIDEBAR_OPENROUTER = {
+const SIDEBAR_ZAI = {
   title: "Provider Info",
   entries: [
-    { label: "Name", value: "OpenRouter" },
-    { label: "Template", value: "OpenRouter" },
-    { label: "Models", value: "47 models", color: COLORS.cyan },
-    { label: "Base URL", value: "openrouter.ai/api", color: COLORS.gray },
+    { label: "Name", value: "Z.AI" },
+    { label: "Template", value: "Z.AI" },
+    { label: "Models", value: "12 models", color: COLORS.cyan },
+    { label: "Base URL", value: "api.z.ai/api/anthropic", color: COLORS.gray },
   ],
 };
 
@@ -75,7 +76,7 @@ export const MainMenuScene: React.FC = () => {
         })
       : 0;
 
-  const sidebar = activeIndex === 0 ? SIDEBAR_DEFAULT : SIDEBAR_OPENROUTER;
+  const sidebar = activeIndex === 0 ? SIDEBAR_DEFAULT : SIDEBAR_ZAI;
 
   // Keystroke indicator
   const showDownKey = frame >= cursorFrame - 5 && frame < cursorFrame + 15;

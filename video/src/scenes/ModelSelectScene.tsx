@@ -13,17 +13,21 @@ import { TextOverlay } from "../components/TextOverlay";
 import { TerminalCursor } from "../components/TerminalCursor";
 
 const ALL_MODELS = [
-  "anthropic/claude-sonnet-4",
-  "anthropic/claude-haiku-4",
-  "google/gemini-2.5-pro",
-  "deepseek/deepseek-chat-v3",
-  "meta-llama/llama-4-maverick",
-  "openai/gpt-4.1",
-  "mistral/mistral-large",
-  "qwen/qwen3-235b",
+  "GLM-5",
+  "GLM-5-Code",
+  "GLM-4.7",
+  "GLM-4.7-FlashX",
+  "GLM-4.7-Flash",
+  "GLM-4.6",
+  "GLM-4.5",
+  "GLM-4.5-Air",
+  "GLM-4.5-AirX",
+  "GLM-4.5-Flash",
+  "GLM-4.5-X",
+  "GLM-4-32B-0414-128K",
 ];
 
-const SEARCH_TEXT = "claude";
+const SEARCH_TEXT = "GLM-5";
 const TYPE_START = 20;
 const CHAR_FRAMES = 3;
 
@@ -70,7 +74,7 @@ export const ModelSelectScene: React.FC = () => {
   return (
     <div style={{ width: "100%", height: "100%", position: "absolute", opacity: fadeIn }}>
       <TerminalWindow>
-        <TerminalHeader breadcrumb={["OpenRouter"]} />
+        <TerminalHeader breadcrumb={["Z.AI"]} />
         <div
           style={{
             flex: 1,
@@ -165,17 +169,17 @@ export const ModelSelectScene: React.FC = () => {
             <Sidebar
               title="Model Info"
               entries={[
-                { label: "Name", value: "claude-sonnet-4" },
-                { label: "Context", value: "200K tokens", color: COLORS.cyan },
+                { label: "Name", value: "GLM-5" },
+                { label: "Context", value: "128K tokens", color: COLORS.cyan },
                 { label: "Max Output", value: "16K tokens" },
                 {
                   label: "Input",
-                  value: "$3.00 / 1M tokens",
+                  value: "$0.50 / 1M tokens",
                   color: COLORS.green,
                 },
                 {
                   label: "Output",
-                  value: "$15.00 / 1M tokens",
+                  value: "$2.00 / 1M tokens",
                   color: COLORS.yellow,
                 },
                 { label: "Tools", value: "Yes", color: COLORS.green },

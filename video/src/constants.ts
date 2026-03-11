@@ -23,7 +23,7 @@ export const SCENE_DURATIONS = {
   mainMenu: 5 * FPS,
   modelSelect: 5 * FPS,
   flags: 4 * FPS,
-  launch: 3 * FPS,
+  launch: 4 * FPS,
   outro: 5 * FPS,
 };
 

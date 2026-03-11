@@ -13,9 +13,8 @@ import { Sidebar } from "../components/Sidebar";
 import { TextOverlay } from "../components/TextOverlay";
 
 // Timing
-const MOVE_TO_RESUME = 40;
-const TOGGLE_RESUME = 60;
-const ENTER_LAUNCH = 100;
+const TOGGLE_SKIP = 40;
+const ENTER_LAUNCH = 90;
 
 export const FlagsScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -27,20 +26,20 @@ export const FlagsScene: React.FC = () => {
     config: { damping: 200 },
   });
 
-  // Active index: 0 at start, 1 (--resume) after MOVE_TO_RESUME
-  const activeIndex = frame < MOVE_TO_RESUME ? 0 : 1;
+  // Cursor stays on index 0 (--dangerously-skip-permissions)
+  const activeIndex = 0;
 
-  // Resume checked after toggle
-  const resumeChecked = frame >= TOGGLE_RESUME;
+  // Skip permissions checked after toggle
+  const skipChecked = frame >= TOGGLE_SKIP;
 
   const groups = [
     {
       label: "Permissions",
-      items: [{ label: "--dangerously-skip-permissions", checked: false }],
+      items: [{ label: "--dangerously-skip-permissions", checked: skipChecked }],
     },
     {
       label: "Session",
-      items: [{ label: "--resume", checked: resumeChecked }],
+      items: [{ label: "--resume", checked: false }],
     },
     {
       label: "Development",
@@ -55,29 +54,18 @@ export const FlagsScene: React.FC = () => {
     },
   ];
 
-  // Sidebar info based on active
-  const sidebarEntries =
-    activeIndex === 0
-      ? [
-          { label: "Flag", value: "--dangerously-skip-permissions" },
-          {
-            label: "Description",
-            value: "Skip all permission prompts",
-            color: COLORS.yellow,
-          },
-        ]
-      : [
-          { label: "Flag", value: "--resume" },
-          {
-            label: "Description",
-            value: "Resume a previous session",
-            color: COLORS.cyan,
-          },
-        ];
+  // Sidebar info
+  const sidebarEntries = [
+    { label: "Flag", value: "--dangerously-skip-permissions" },
+    {
+      label: "Description",
+      value: "Skip all permission prompts",
+      color: COLORS.yellow,
+    },
+  ];
 
   // Key indicators
-  const showDownKey = frame >= MOVE_TO_RESUME - 5 && frame < MOVE_TO_RESUME + 15;
-  const showSpaceKey = frame >= TOGGLE_RESUME - 5 && frame < TOGGLE_RESUME + 15;
+  const showSpaceKey = frame >= TOGGLE_SKIP - 5 && frame < TOGGLE_SKIP + 15;
   const showEnterKey = frame >= ENTER_LAUNCH - 5 && frame < ENTER_LAUNCH + 15;
 
   // Select flash
@@ -91,7 +79,7 @@ export const FlagsScene: React.FC = () => {
   return (
     <div style={{ width: "100%", height: "100%", position: "absolute", opacity: fadeIn }}>
       <TerminalWindow>
-        <TerminalHeader breadcrumb={["OpenRouter", "claude-sonnet-4"]} />
+        <TerminalHeader breadcrumb={["Z.AI", "GLM-5"]} />
         <div
           style={{
             flex: 1,
@@ -129,11 +117,8 @@ export const FlagsScene: React.FC = () => {
       </TerminalWindow>
 
       {/* Keystroke indicators */}
-      {showDownKey && (
-        <KeyBadge label="↓" frame={frame} startFrame={MOVE_TO_RESUME - 5} />
-      )}
       {showSpaceKey && (
-        <KeyBadge label="Space" frame={frame} startFrame={TOGGLE_RESUME - 5} />
+        <KeyBadge label="Space" frame={frame} startFrame={TOGGLE_SKIP - 5} />
       )}
       {showEnterKey && (
         <KeyBadge label="⏎" frame={frame} startFrame={ENTER_LAUNCH - 5} />
