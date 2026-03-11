@@ -243,6 +243,15 @@ This is ideal if you already have a Claude Pro/Team/Enterprise subscription and 
 - **API key:** Get one at [platform.moonshot.ai](https://platform.moonshot.ai)
 - **Default models:** `kimi-k2-0711-preview`, `kimi-k2-0905-preview`, `kimi-k2-thinking-turbo`, `kimi-k2-thinking`, `kimi-k2-turbo-preview`, `kimi-k2.5`
 
+### NanoGPT
+
+- **Docs:** [NanoGPT Claude Code integration](https://docs.nano-gpt.com/integrations/claude-code)
+- **Base URL:** `https://nano-gpt.com/api/v1`
+- **API key:** Get one at [nano-gpt.com/api](https://nano-gpt.com/api)
+- **Default models:** None — models are fetched from the NanoGPT API. Supports 400+ models including Claude, GPT, Gemini, DeepSeek, and more.
+
+NanoGPT validates your API key when you add or edit a provider.
+
 ### Novita AI
 
 - **Docs:** [Novita AI Claude Code guide](https://novita.ai/docs/guides/claude-code) | [Supported models](https://novita.ai/docs/guides/llm-anthropic-compatibility#supported-models)
