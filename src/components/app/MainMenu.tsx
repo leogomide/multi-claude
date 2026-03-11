@@ -55,7 +55,8 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			...providers.map((p) => ({
 				label: p.name,
 				value: `provider:${p.id}`,
-				icon: p.type === "oauth" ? "🔐" : "🚀",
+				icon: p.apiKeyValid === false ? "⚠" : p.type === "oauth" ? "🔐" : "🚀",
+				color: p.apiKeyValid === false ? "yellow" : undefined,
 			})),
 		];
 
@@ -159,6 +160,13 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 				items.push({
 					label: t("sidebar.baseUrl"),
 					value: template.baseUrl.replace("https://", ""),
+				});
+			}
+			if (provider.apiKeyValid === false) {
+				items.push({
+					label: t("sidebar.apiKeyStatus"),
+					value: t("sidebar.apiKeyInvalid"),
+					color: "red",
 				});
 			}
 			return <Sidebar title={t("sidebar.providerInfo")} items={items} />;
