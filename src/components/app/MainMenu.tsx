@@ -201,9 +201,7 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 
 	return (
 		<AppShell sidebar={sidebarContent} footerItems={footerItems}>
-			{message && (
-				<StatusMessage variant={message.variant}>{message.text}</StatusMessage>
-			)}
+			{message && <StatusMessage variant={message.variant}>{message.text}</StatusMessage>}
 			<GroupedSelect
 				groups={groups}
 				onSelect={handleSelect}

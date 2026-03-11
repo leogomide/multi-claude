@@ -6,7 +6,13 @@
 
 These providers expose their own models through the Anthropic Messages API format without requiring a translation proxy. Each works by simply setting `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN`.
 
-**Fireworks AI** is the standout Western inference provider with confirmed Anthropic SDK compatibility. Their official documentation at `docs.fireworks.ai/tools-sdks/anthropic-compatibility` shows the base URL **`https://api.fireworks.ai/inference`** working directly with the Anthropic Python SDK. Models include DeepSeek V3p1, Kimi K2, LLaMA variants, and Qwen series — all open-source, no actual Claude models. Pricing is pay-per-use with **$1 free credits** for new users. The configuration is straightforward:
+**Fireworks AI** is the standout Western inference provider with confirmed Anthropic SDK compatibility. 
+Their official documentation at `docs.fireworks.ai/tools-sdks/anthropic-compatibility` shows the base URL **`https://api.fireworks.ai/inference`** 
+working directly with the Anthropic Python SDK. 
+Models include DeepSeek V3p1, Kimi K2, LLaMA variants, and Qwen series — all open-source, 
+no actual Claude models. 
+
+Pricing is pay-per-use with **$1 free credits** for new users. The configuration is straightforward:
 
 ```
 export ANTHROPIC_BASE_URL="https://api.fireworks.ai/inference"

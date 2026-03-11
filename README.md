@@ -328,6 +328,16 @@ OpenRouter validates your API key when you add or edit a provider.
 - **API key:** Get one at [z.ai](https://z.ai)
 - **Default models:** `GLM-4-32B-0414-128K`, `GLM-4.5`, `GLM-4.5-Air`, `GLM-4.5-AirX`, `GLM-4.5-Flash`, `GLM-4.5-X`, `GLM-4.6`, `GLM-4.7`, `GLM-4.7-Flash`, `GLM-4.7-FlashX`, `GLM-5`, `GLM-5-Code`
 
+**Coding Plan:** Subscription tiers with a rolling 5-hour window and weekly limits. All plans include GLM-4.7; Pro and Max also support GLM-5 (uses 3× quota during peak hours 14:00–18:00 UTC+8, 2× off-peak). Quarterly saves 10%, yearly saves 30%.
+
+| Tier | Price | Prompts / 5h | Prompts / week | Features |
+|------|-------|-------------|---------------|----------|
+| Lite | $10/mo | ~80 | ~400 | 3× Claude Pro usage, 20+ coding tools |
+| Pro | $30/mo | ~400 | ~2,000 | 5× Lite, 40–60% faster, GLM-5, Vision/Web Search/Web Reader MCP |
+| Max | $80/mo | ~1,600 | ~8,000 | 4× Pro, GLM-5, first access to new models, guaranteed peak-hour performance |
+
+[Subscribe here](https://z.ai/subscribe).
+
 ### LiteLLM Proxy
 
 - **Docs:** [LiteLLM documentation](https://docs.litellm.ai/docs/) | [Claude Code integration](https://docs.litellm.ai/docs/tutorials/claude_responses_api)

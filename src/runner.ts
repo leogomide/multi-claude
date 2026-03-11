@@ -23,7 +23,13 @@ export async function runClaude(
 ): Promise<number> {
 	const env = buildClaudeEnv(provider, model, installationId);
 	if (!env) {
-		console.error('Error: template for provider "' + provider.name + '" (' + provider.templateId + ') not found.');
+		console.error(
+			'Error: template for provider "' +
+				provider.name +
+				'" (' +
+				provider.templateId +
+				") not found.",
+		);
 		return 1;
 	}
 
