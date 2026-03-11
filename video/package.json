@@ -1,0 +1,20 @@
+{
+  "name": "mclaude-video",
+  "private": true,
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render Main out/mclaude-demo.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4",
+    "@remotion/transitions": "^4",
+    "@remotion/google-fonts": "^4",
+    "react": "^19",
+    "react-dom": "^19",
+    "remotion": "^4"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
