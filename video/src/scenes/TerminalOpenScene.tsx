@@ -43,7 +43,9 @@ export const TerminalOpenScene: React.FC = () => {
 
   // After enter: show TUI loading
   const showLoading = frame >= ENTER_FRAME + 10;
-  const loadingDots = ".".repeat((Math.floor((frame - ENTER_FRAME - 10) / 8) % 3) + 1);
+  const loadingDots = showLoading
+    ? ".".repeat((Math.floor((frame - ENTER_FRAME - 10) / 8) % 3) + 1)
+    : "";
 
   return (
     <div
