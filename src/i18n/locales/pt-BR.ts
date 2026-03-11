@@ -172,6 +172,7 @@ export const ptBR: TranslationDictionary = {
 		noProviders: "Nenhum provedor configurado",
 		defaultLaunch: "Claude Code (padr\u00e3o)",
 		defaultLaunchDesc: "Iniciar com sua conta Anthropic padr\u00e3o (sem overrides de provedor)",
+		apiKeyInvalidError: "Chave de API inv\u00e1lida. Atualize em Gerenciar provedores.",
 	},
 	providerSubmenu: {
 		title: "Gerenciar provedores",

@@ -170,6 +170,7 @@ export const en: TranslationDictionary = {
 		noProviders: "No providers configured",
 		defaultLaunch: "Claude Code (default)",
 		defaultLaunchDesc: "Launch with your default Anthropic account (no provider overrides)",
+		apiKeyInvalidError: "API key is invalid. Update it in Manage providers.",
 	},
 	providerSubmenu: {
 		title: "Manage providers",

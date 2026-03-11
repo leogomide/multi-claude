@@ -35,6 +35,7 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 	const { t } = useTranslation();
 	const [providers, setProviders] = useState<ConfiguredProvider[]>([]);
 	const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
+	const [message, setMessage] = useState<FlowMessage | null>(lastMessage ?? null);
 	const { latestVersion } = useUpdateCheck(pkg.version);
 
 	useEffect(() => {
@@ -101,6 +102,10 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 		} else if (item.value.startsWith("provider:")) {
 			const providerId = item.value.replace("provider:", "");
 			const provider = providers.find((p) => p.id === providerId);
+			if (provider?.apiKeyValid === false) {
+				setMessage({ variant: "error", text: t("mainMenu.apiKeyInvalidError") });
+				return;
+			}
 			onSelect({ type: "launch-provider", providerId, providerName: provider?.name ?? "" });
 		} else if (item.value === "manage-providers") {
 			onSelect({ type: "manage-providers" });
@@ -196,8 +201,8 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 
 	return (
 		<AppShell sidebar={sidebarContent} footerItems={footerItems}>
-			{lastMessage && (
-				<StatusMessage variant={lastMessage.variant}>{lastMessage.text}</StatusMessage>
+			{message && (
+				<StatusMessage variant={message.variant}>{message.text}</StatusMessage>
 			)}
 			<GroupedSelect
 				groups={groups}

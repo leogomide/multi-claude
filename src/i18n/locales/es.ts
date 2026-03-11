@@ -175,6 +175,7 @@ export const es: TranslationDictionary = {
 		defaultLaunch: "Claude Code (predeterminado)",
 		defaultLaunchDesc:
 			"Iniciar con su cuenta Anthropic predeterminada (sin overrides de proveedor)",
+		apiKeyInvalidError: "Clave de API inv\u00e1lida. Actual\u00edcela en Gestionar proveedores.",
 	},
 	providerSubmenu: {
 		title: "Gestionar proveedores",

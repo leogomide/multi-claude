@@ -162,6 +162,7 @@ export interface TranslationDictionary {
 		noProviders: string;
 		defaultLaunch: string;
 		defaultLaunchDesc: string;
+		apiKeyInvalidError: string;
 	};
 	providerSubmenu: {
 		title: string;
