@@ -91,15 +91,21 @@ export async function ensureStatusLineScript(): Promise<string> {
 	return scriptPath;
 }
 
-export function buildStatusLineSettingsJson(scriptPath: string): string {
+export function buildStatusLineSettingsJson(
+	scriptPath: string,
+	envVars?: Record<string, string>,
+): string {
 	const normalizedPath = scriptPath.replace(/\\/g, "/");
-	const settings = {
+	const settings: Record<string, unknown> = {
 		statusLine: {
 			type: "command",
 			command: `bun "${normalizedPath}"`,
 			padding: 0,
 		},
 	};
+	if (envVars && Object.keys(envVars).length > 0) {
+		settings.env = envVars;
+	}
 	return JSON.stringify(settings);
 }
 

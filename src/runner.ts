@@ -79,8 +79,8 @@ export async function runClaude(
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
 		const autoCompact = config.statusLine?.autoCompact ?? true;
-		Object.assign(env, getStatusLineEnvVars(provider, model, slTemplate, language, autoCompact));
-		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
+		const slEnvVars = getStatusLineEnvVars(provider, model, slTemplate, language, autoCompact);
+		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate);
 	}
 
@@ -194,19 +194,14 @@ export async function runClaudeDefault(
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
 		const autoCompact = config.statusLine?.autoCompact ?? true;
-		process.env["MCLAUDE_PROVIDER_NAME"] = "";
-		process.env["MCLAUDE_MODEL"] = "";
-		process.env["MCLAUDE_STATUSLINE_TEMPLATE"] = slTemplate;
-		process.env["MCLAUDE_LANG"] = language;
-		process.env["MCLAUDE_AUTO_COMPACT"] = String(autoCompact);
-		addedEnvKeys.push(
-			"MCLAUDE_PROVIDER_NAME",
-			"MCLAUDE_MODEL",
-			"MCLAUDE_STATUSLINE_TEMPLATE",
-			"MCLAUDE_LANG",
-			"MCLAUDE_AUTO_COMPACT",
-		);
-		args.push("--settings", buildStatusLineSettingsJson(scriptPath));
+		const slEnvVars: Record<string, string> = {
+			MCLAUDE_PROVIDER_NAME: "",
+			MCLAUDE_MODEL: "",
+			MCLAUDE_STATUSLINE_TEMPLATE: slTemplate,
+			MCLAUDE_LANG: language,
+			MCLAUDE_AUTO_COMPACT: String(autoCompact),
+		};
+		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate + " (default launch)");
 	}
 
