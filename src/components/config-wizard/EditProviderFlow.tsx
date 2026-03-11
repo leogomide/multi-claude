@@ -147,12 +147,10 @@ export function EditProviderFlow({
 				]
 			: [
 					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
-					...(hasDefaultApiKey
-						? [{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" }]
-						: []),
 					...(!hasDefaultApiKey
 						? [{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" }]
 						: []),
+					{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" },
 					{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
 					{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
 					{ label: `↩ ${t("editProvider.back")}`, value: "back" },
