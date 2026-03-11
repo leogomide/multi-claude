@@ -310,10 +310,10 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				console.log(
 					fmtLine([
-						cc + "Ctx " + pct + "%" + C.reset,
+						cc + "Ctx " + pct + "%" + ctxStatus + C.reset,
 						C.green + fmtCost(cost) + C.reset,
 						C.cyan + fmtDurShort(durMs) + C.reset,
-					]) + ctxStatus,
+					]),
 				);
 				break;
 			}

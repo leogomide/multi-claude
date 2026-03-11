@@ -150,12 +150,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text dimColor>)</Text>
 				</Text>
 				<Text>
-					<Text color="#ff8700">Ctx 77%</Text>
+					<Text color="#ff8700">{"Ctx 77% (imminent)"}</Text>
 					<Sep />
 					<Text color="green">$11.15</Text>
 					<Sep />
 					<Text color="cyan">3h31m</Text>
-					<Text color="#ff8700">{" (imminent)"}</Text>
 				</Text>
 			</Box>
 		);
