@@ -20,6 +20,12 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
   <img src="cover.png" alt="multi-claude cover" width="600"/>
 </div>
 
+<div align="center">
+
+https://github.com/user-attachments/assets/d8565001-350a-46b8-ae28-6b5cc6937aa5
+
+</div>
+
 CLI tool to manage multiple API providers and launch [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the correct environment variables.
 
 Run `mclaude` to open a terminal UI where you can select a provider and model, manage your provider configurations, and launch Claude Code — all in one place.
