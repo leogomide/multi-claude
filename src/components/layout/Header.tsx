@@ -28,7 +28,7 @@ export function Header() {
 		<Box flexDirection="column" paddingX={1}>
 			<Box justifyContent="space-between">
 				<Text bold color="magenta">
-					{`✨ multi-claude v${pkg.version}`}
+					{`🐙 multi-claude v${pkg.version}`}
 				</Text>
 				<Text color="cyan">
 					{claudeVersion ? `claude code v${claudeVersion}` : "claude not found"}
