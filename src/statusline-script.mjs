@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 // mclaude status line script - auto-managed by mclaude
 import { execSync } from "child_process";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 
 const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || "";
 const MODEL_HINT = process.env.MCLAUDE_MODEL || "";
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || "default";
 const LANG = process.env.MCLAUDE_LANG || "en";
+const OAUTH_TOKEN = process.env.MCLAUDE_OAUTH_TOKEN || "";
+const CACHE_DIR = join(tmpdir(), "mclaude-cache");
+const CACHE_FILE = join(CACHE_DIR, "usage-cache.json");
+const CACHE_TTL_MS = 30000; // 30 seconds
 const C = {
 	cyan: "\x1b[36m",
 	green: "\x1b[32m",
@@ -32,6 +39,10 @@ const L = {
 		ctxApproaching: "approaching",
 		ctxImminent: "imminent",
 		ctxCompact: "/compact",
+		usage5h: "5h",
+		usage7d: "7d",
+		usageReset: "reset",
+		usageWeekly: "weekly",
 	},
 	"pt-BR": {
 		left: "rest.",
@@ -43,6 +54,10 @@ const L = {
 		ctxApproaching: "aproximando",
 		ctxImminent: "iminente",
 		ctxCompact: "/compact",
+		usage5h: "5h",
+		usage7d: "7d",
+		usageReset: "reset",
+		usageWeekly: "semanal",
 	},
 	es: {
 		left: "rest.",
@@ -54,6 +69,10 @@ const L = {
 		ctxApproaching: "aproximando",
 		ctxImminent: "inminente",
 		ctxCompact: "/compact",
+		usage5h: "5h",
+		usage7d: "7d",
+		usageReset: "reset",
+		usageWeekly: "semanal",
 	},
 }[LANG] || {
 	left: "left",
@@ -65,6 +84,10 @@ const L = {
 	ctxApproaching: "approaching",
 	ctxImminent: "imminent",
 	ctxCompact: "/compact",
+	usage5h: "5h",
+	usage7d: "7d",
+	usageReset: "reset",
+	usageWeekly: "weekly",
 };
 
 const fmtK = (n) => {
@@ -91,6 +114,70 @@ const ctxC = (pct) => {
 	if (pct >= 70) return C.orange;
 	if (pct >= 61) return C.yellow;
 	return C.white;
+};
+const usageC = (pct) => {
+	if (pct >= 90) return C.bold + C.red;
+	if (pct >= 80) return C.orange;
+	if (pct >= 70) return C.yellow;
+	return C.white;
+};
+const fmtResetTime = (isoStr) => {
+	try {
+		const diffMs = new Date(isoStr).getTime() - Date.now();
+		if (diffMs <= 0) return "now";
+		const m = Math.floor(diffMs / 60000);
+		if (m >= 1440) {
+			const d = Math.floor(m / 1440);
+			const h = Math.floor((m % 1440) / 60);
+			return d + "d" + String(h).padStart(2, "0") + "h";
+		}
+		if (m >= 60) {
+			const h = Math.floor(m / 60);
+			const rm = m % 60;
+			return h + "h" + String(rm).padStart(2, "0") + "m";
+		}
+		return m + "m";
+	} catch {
+		return "--";
+	}
+};
+const getUsageData = async () => {
+	if (!OAUTH_TOKEN) return null;
+	// Fast path: read fresh cache
+	try {
+		if (existsSync(CACHE_FILE)) {
+			const age = Date.now() - statSync(CACHE_FILE).mtimeMs;
+			if (age < CACHE_TTL_MS) {
+				return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+			}
+		}
+	} catch {}
+	// Slow path: fetch from API
+	try {
+		const resp = await fetch("https://api.anthropic.com/api/oauth/usage", {
+			headers: {
+				Authorization: "Bearer " + OAUTH_TOKEN,
+				"anthropic-beta": "oauth-2025-04-20",
+			},
+			signal: AbortSignal.timeout(5000),
+		});
+		if (!resp.ok) throw new Error("HTTP " + resp.status);
+		const data = await resp.json();
+		if (data && data.five_hour) {
+			try {
+				if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
+				writeFileSync(CACHE_FILE, JSON.stringify(data));
+			} catch {}
+			return data;
+		}
+	} catch {}
+	// Fallback: stale cache
+	try {
+		if (existsSync(CACHE_FILE)) {
+			return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+		}
+	} catch {}
+	return null;
 };
 const SEP = C.dim + " | " + C.reset;
 const SEP_W = 3; // visible width of ' | '
@@ -129,6 +216,23 @@ const mkBarLine = (cc, pct, barW, W, ctxTokens, remaining, remPct, leftLabel, st
 	);
 };
 
+// Build usage bar line: bar | 5h% | reset time left | weekly%
+const mkUsageBarLine = (cc, pct5h, barW, W, reset5h, pct7d, has7d) => {
+	const padPlain = (s, w) => (s.length >= w ? s : s + " ".repeat(w - s.length));
+	const resetStr = reset5h ? fmtResetTime(reset5h) + " " + L.left : "--";
+	const weeklyStr = has7d ? Math.floor(pct7d) + "% " + L.usageWeekly : "";
+	return (
+		cc +
+		mkBar(pct5h, barW) +
+		" | " +
+		padPlain(Math.floor(pct5h) + "%", W) +
+		" | " +
+		padPlain(resetStr, W) +
+		(weeklyStr ? " | " + weeklyStr : "") +
+		C.reset
+	);
+};
+
 // Simple uniform padding for non-grid templates (mini)
 const fmtLine = (core, tail = []) => {
 	const fc = core.filter(Boolean);
@@ -139,7 +243,7 @@ const fmtLine = (core, tail = []) => {
 
 let input = "";
 process.stdin.on("data", (chunk) => (input += chunk));
-process.stdin.on("end", () => {
+process.stdin.on("end", async () => {
 	try {
 		const d = JSON.parse(input);
 
@@ -247,6 +351,15 @@ process.stdin.on("end", () => {
 				? C.green + "+" + linesAdd + C.reset + " " + C.red + "-" + linesRem + C.reset
 				: "";
 
+		// -- Usage limits (Anthropic only) --
+		const usage = await getUsageData();
+		const has5h = usage?.five_hour != null;
+		const has7d = usage?.seven_day != null;
+		const u5h = usage?.five_hour?.utilization ?? 0;
+		const u7d = usage?.seven_day?.utilization ?? 0;
+		const reset5h = usage?.five_hour?.resets_at || "";
+		const reset7d = usage?.seven_day?.resets_at || "";
+
 		// Shared parts
 		const provModel = PROVIDER
 			? C.cyan + PROVIDER + C.reset + "/" + C.white + model + C.reset
@@ -295,6 +408,10 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (has5h || has7d) {
+					const uc = usageC(u5h);
+					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+				}
 				break;
 			}
 			case "full": {
@@ -334,6 +451,16 @@ process.stdin.on("end", () => {
 
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
+				if (has5h || has7d) {
+					const uc = usageC(u5h);
+					const resetStr = reset5h ? L.usageReset + ":" + fmtResetTime(reset5h) : "--";
+					const usageParts = [
+						uc + padV(L.usage5h + ":" + Math.floor(u5h) + "%", W) + C.reset,
+						uc + padV(resetStr, W) + C.reset,
+						has7d ? uc + padV(L.usage7d + ":" + Math.floor(u7d) + "%", W) + C.reset : "",
+					].filter(Boolean);
+					console.log(usageParts.join(SEP));
+				}
 				break;
 			}
 			case "slim": {
@@ -373,6 +500,10 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (has5h || has7d) {
+					const uc = usageC(u5h);
+					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+				}
 				break;
 			}
 			case "mini": {
@@ -382,13 +513,13 @@ process.stdin.on("end", () => {
 					provModel +
 					(gitAndLines ? " " + C.dim + "(" + C.reset + gitAndLines + C.dim + ")" + C.reset : "");
 				console.log(provModelLine);
-				console.log(
-					fmtLine([
-						cc + "Ctx " + pct + "%" + ctxStatus + C.reset,
-						C.green + fmtCost(cost) + C.reset,
-						C.cyan + fmtDurShort(durMs) + C.reset,
-					]),
-				);
+				const miniParts = [
+					cc + "Ctx " + pct + "%" + ctxStatus + C.reset,
+					C.green + fmtCost(cost) + C.reset,
+					C.cyan + fmtDurShort(durMs) + C.reset,
+				];
+				if (has5h) miniParts.push(usageC(u5h) + L.usage5h + ":" + Math.floor(u5h) + "%" + C.reset);
+				console.log(fmtLine(miniParts));
 				break;
 			}
 			case "cost": {
@@ -437,6 +568,10 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (has5h || has7d) {
+					const uc = usageC(u5h);
+					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+				}
 				break;
 			}
 			case "perf": {
@@ -485,6 +620,10 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (has5h || has7d) {
+					const uc = usageC(u5h);
+					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+				}
 				break;
 			}
 			case "context": {
@@ -529,6 +668,10 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
+				if (has5h || has7d) {
+					const uc = usageC(u5h);
+					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+				}
 				break;
 			}
 			default:

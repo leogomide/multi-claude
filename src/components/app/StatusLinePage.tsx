@@ -58,6 +58,20 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Sep />
 					<Text color="#ff8700">{"46.1k/23% left (imminent)"}</Text>
 				</Text>
+				<Text>
+					<Text color="white">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.37)) + "\u254c".repeat(bW - Math.floor(bW * 0.37))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="white">{P("37%", W)}</Text>
+					<Sep />
+					<Text color="white">{"4h09m left | 30% weekly"}</Text>
+				</Text>
 			</Box>
 		);
 	}
@@ -98,6 +112,13 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Sep />
 					<Text color="#ff8700">{"(imminent)"}</Text>
 				</Text>
+				<Text>
+					<Text color="white">{P("5h:37%", W)}</Text>
+					<Sep />
+					<Text color="white">{P("reset:4h09m", W)}</Text>
+					<Sep />
+					<Text color="white">{P("7d:30%", W)}</Text>
+				</Text>
 			</Box>
 		);
 	}
@@ -136,6 +157,20 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Sep />
 					<Text color="#ff8700">{"46.1k/23% left (imminent)"}</Text>
 				</Text>
+				<Text>
+					<Text color="white">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.37)) + "\u254c".repeat(bW - Math.floor(bW * 0.37))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="white">{P("37%", W)}</Text>
+					<Sep />
+					<Text color="white">{"4h09m left | 30% weekly"}</Text>
+				</Text>
 			</Box>
 		);
 	}
@@ -155,6 +190,8 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Text color="green">$11.15</Text>
 					<Sep />
 					<Text color="cyan">3h31m</Text>
+					<Sep />
+					<Text color="white">5h:37%</Text>
 				</Text>
 			</Box>
 		);
@@ -199,6 +236,20 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Sep />
 					<Text color="#ff8700">{"46.1k/23% left (imminent)"}</Text>
 				</Text>
+				<Text>
+					<Text color="white">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.37)) + "\u254c".repeat(bW - Math.floor(bW * 0.37))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="white">{P("37%", W)}</Text>
+					<Sep />
+					<Text color="white">{"4h09m left | 30% weekly"}</Text>
+				</Text>
 			</Box>
 		);
 	}
@@ -242,6 +293,20 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Sep />
 					<Text color="#ff8700">{"46.1k/23% left (imminent)"}</Text>
 				</Text>
+				<Text>
+					<Text color="white">
+						{(() => {
+							const bW = 2 * W + 3;
+							return (
+								"\u2501".repeat(Math.floor(bW * 0.37)) + "\u254c".repeat(bW - Math.floor(bW * 0.37))
+							);
+						})()}
+					</Text>
+					<Sep />
+					<Text color="white">{P("37%", W)}</Text>
+					<Sep />
+					<Text color="white">{"4h09m left | 30% weekly"}</Text>
+				</Text>
 			</Box>
 		);
 	}
@@ -283,6 +348,20 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 				<Text color="#ff8700">{P("153.9k/77%", W)}</Text>
 				<Sep />
 				<Text color="#ff8700">{"46.1k/23% left (imminent)"}</Text>
+			</Text>
+			<Text>
+				<Text color="white">
+					{(() => {
+						const bW = 2 * W + 3;
+						return (
+							"\u2501".repeat(Math.floor(bW * 0.37)) + "\u254c".repeat(bW - Math.floor(bW * 0.37))
+						);
+					})()}
+				</Text>
+				<Sep />
+				<Text color="white">{P("37%", W)}</Text>
+				<Sep />
+				<Text color="white">{"4h09m left | 30% weekly"}</Text>
 			</Text>
 		</Box>
 	);
