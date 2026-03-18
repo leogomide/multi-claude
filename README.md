@@ -543,6 +543,8 @@ Color-coded indicators change from green to yellow to red based on context usage
 ### v1.0.19 (current)
 
 - **fix:** Status line 5h usage data now uses distributed cache (lock file) and fresh OAuth token reading to prevent stale data from rate limiting and expired tokens
+- **fix:** Usage cache TTL increased to 240s to reduce API calls
+- **docs:** Added changelog section to README and maintenance instructions to CLAUDE.md
 
 ### v1.0.18
 
