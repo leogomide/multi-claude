@@ -121,6 +121,10 @@ export async function runClaude(
 			if (creds) {
 				slEnvVars["MCLAUDE_OAUTH_TOKEN"] = creds.accessToken;
 			}
+			// Pass config dir so the script can read fresh tokens
+			if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
+				slEnvVars["MCLAUDE_CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
+			}
 		}
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate);
@@ -248,6 +252,10 @@ export async function runClaudeDefault(
 		const defaultToken = readDefaultOAuthToken();
 		if (defaultToken) {
 			slEnvVars["MCLAUDE_OAUTH_TOKEN"] = defaultToken;
+		}
+		// Pass config dir for isolated installations
+		if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
+			slEnvVars["MCLAUDE_CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
 		}
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate + " (default launch)");

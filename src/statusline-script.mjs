@@ -2,7 +2,7 @@
 // mclaude status line script - auto-managed by mclaude
 import { execSync } from "child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
-import { tmpdir } from "os";
+import { homedir, tmpdir } from "os";
 import { join } from "path";
 
 const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || "";
@@ -10,9 +10,13 @@ const MODEL_HINT = process.env.MCLAUDE_MODEL || "";
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || "default";
 const LANG = process.env.MCLAUDE_LANG || "en";
 const OAUTH_TOKEN = process.env.MCLAUDE_OAUTH_TOKEN || "";
+const CLAUDE_CONFIG_DIR = process.env.MCLAUDE_CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
 const CACHE_DIR = join(tmpdir(), "mclaude-cache");
 const CACHE_FILE = join(CACHE_DIR, "usage-cache.json");
-const CACHE_TTL_MS = 30000; // 30 seconds
+const LOCK_FILE = join(CACHE_DIR, "usage.lock");
+const CACHE_TTL_MS = 120000; // 120 seconds
+const LOCK_TTL_MS = 30000; // 30 seconds — rate limit between API attempts
+const DEFAULT_RATE_LIMIT_BACKOFF_MS = 300000; // 5 min backoff for 429
 const C = {
 	cyan: "\x1b[36m",
 	green: "\x1b[32m",
@@ -141,9 +145,86 @@ const fmtResetTime = (isoStr) => {
 		return "--";
 	}
 };
+const readFreshOAuthToken = () => {
+	// Read token from the active config dir (default or isolated installation)
+	try {
+		const credFile = join(CLAUDE_CONFIG_DIR, ".credentials.json");
+		if (existsSync(credFile)) {
+			const raw = JSON.parse(readFileSync(credFile, "utf-8"));
+			const token = raw?.claudeAiOauth?.accessToken;
+			if (token) return token;
+		}
+	} catch {}
+	// macOS Keychain fallback (only for default installation)
+	if (process.platform === "darwin" && !process.env.MCLAUDE_CLAUDE_CONFIG_DIR) {
+		try {
+			const result = execSync('security find-generic-password -s "Claude Code-credentials" -w', {
+				encoding: "utf-8",
+				timeout: 3000,
+				stdio: ["pipe", "pipe", "ignore"],
+			});
+			const parsed = JSON.parse(result.trim());
+			return parsed?.claudeAiOauth?.accessToken || null;
+		} catch {}
+	}
+	return null;
+};
+const isLockActive = () => {
+	try {
+		if (!existsSync(LOCK_FILE)) return false;
+		const lock = JSON.parse(readFileSync(LOCK_FILE, "utf-8"));
+		return lock.blockedUntil > Date.now();
+	} catch {
+		try {
+			const age = Date.now() - statSync(LOCK_FILE).mtimeMs;
+			return age < LOCK_TTL_MS;
+		} catch {}
+	}
+	return false;
+};
+const writeLock = (blockedUntilMs) => {
+	try {
+		if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
+		writeFileSync(LOCK_FILE, JSON.stringify({ blockedUntil: blockedUntilMs }));
+	} catch {}
+};
+const tryFetchUsage = async (token) => {
+	if (!token) return { data: null, rateLimited: false };
+	try {
+		const resp = await fetch("https://api.anthropic.com/api/oauth/usage", {
+			headers: {
+				Authorization: "Bearer " + token,
+				"anthropic-beta": "oauth-2025-04-20",
+			},
+			signal: AbortSignal.timeout(5000),
+		});
+		if (resp.status === 429) {
+			const retryAfter = resp.headers.get("retry-after");
+			const backoffMs = retryAfter
+				? parseInt(retryAfter, 10) * 1000 || DEFAULT_RATE_LIMIT_BACKOFF_MS
+				: DEFAULT_RATE_LIMIT_BACKOFF_MS;
+			return { data: null, rateLimited: true, backoffMs };
+		}
+		if (!resp.ok) return { data: null, rateLimited: false };
+		const data = await resp.json();
+		return { data: data?.five_hour ? data : null, rateLimited: false };
+	} catch {
+		return { data: null, rateLimited: false };
+	}
+};
+const readStaleCache = () => {
+	try {
+		if (existsSync(CACHE_FILE)) {
+			return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+		}
+	} catch {}
+	return null;
+};
 const getUsageData = async () => {
-	if (!OAUTH_TOKEN) return null;
-	// Fast path: read fresh cache
+	const hasAnyToken = OAUTH_TOKEN || readFreshOAuthToken();
+	if (!hasAnyToken) return null;
+
+	// 1. Fresh cache → use immediately
 	try {
 		if (existsSync(CACHE_FILE)) {
 			const age = Date.now() - statSync(CACHE_FILE).mtimeMs;
@@ -152,32 +233,40 @@ const getUsageData = async () => {
 			}
 		}
 	} catch {}
-	// Slow path: fetch from API
-	try {
-		const resp = await fetch("https://api.anthropic.com/api/oauth/usage", {
-			headers: {
-				Authorization: "Bearer " + OAUTH_TOKEN,
-				"anthropic-beta": "oauth-2025-04-20",
-			},
-			signal: AbortSignal.timeout(5000),
-		});
-		if (!resp.ok) throw new Error("HTTP " + resp.status);
-		const data = await resp.json();
-		if (data && data.five_hour) {
-			try {
-				if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
-				writeFileSync(CACHE_FILE, JSON.stringify(data));
-			} catch {}
-			return data;
+
+	// 2. Lock active → another instance is fetching, use stale cache
+	if (isLockActive()) return readStaleCache();
+
+	// 3. Acquire lock and fetch
+	writeLock(Date.now() + LOCK_TTL_MS);
+
+	// Try with env var token first
+	let result = await tryFetchUsage(OAUTH_TOKEN);
+
+	// If failed (not rate-limited), try with fresh token from config dir
+	if (!result.data && !result.rateLimited) {
+		const freshToken = readFreshOAuthToken();
+		if (freshToken && freshToken !== OAUTH_TOKEN) {
+			result = await tryFetchUsage(freshToken);
 		}
-	} catch {}
+	}
+
+	// If rate limited, write lock with long backoff
+	if (result.rateLimited) {
+		writeLock(Date.now() + (result.backoffMs || DEFAULT_RATE_LIMIT_BACKOFF_MS));
+	}
+
+	// Cache successful data
+	if (result.data) {
+		try {
+			if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
+			writeFileSync(CACHE_FILE, JSON.stringify(result.data));
+		} catch {}
+		return result.data;
+	}
+
 	// Fallback: stale cache
-	try {
-		if (existsSync(CACHE_FILE)) {
-			return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
-		}
-	} catch {}
-	return null;
+	return readStaleCache();
 };
 const SEP = C.dim + " | " + C.reset;
 const SEP_W = 3; // visible width of ' | '
