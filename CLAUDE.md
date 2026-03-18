@@ -135,6 +135,15 @@ Os usuários instalam via:
 - `bun install -g github:leogomide/multi-claude#latest` (última versão)
 - `bun install -g github:leogomide/multi-claude#v1.x.x` (versão específica)
 
+## Changelog
+
+O README.md contem uma seção `## Changelog` com o historico de alteracoes agrupado por versao. Sempre que uma alteracao relevante for feita (feat, fix, refactor que impacte o usuario), adicione uma entrada na versao atual do changelog no README.md.
+
+- Use o formato: `- **tipo:** descricao curta em ingles`
+- Tipos: `feat`, `fix`, `refactor`, `docs`
+- Adicione na versao que esta no `package.json` (seção mais recente do changelog)
+- Nao documente bumps de versao, lint, ou alteracoes internas sem impacto ao usuario
+
 ## Descricao automática para commits
 
 Após cada modificação ou plano criado, gere no console uma descrição para usar no commit das modificações realizadas.

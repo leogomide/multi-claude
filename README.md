@@ -538,6 +538,116 @@ CacheCreate:2.1k | CacheRead:18.5k | Cache:20.6M
 
 Color-coded indicators change from green to yellow to red based on context usage, cost, and cache hit rates.
 
+## Changelog
+
+### v1.0.19 (current)
+
+- **fix:** Status line 5h usage data now uses distributed cache (lock file) and fresh OAuth token reading to prevent stale data from rate limiting and expired tokens
+
+### v1.0.18
+
+- **docs:** Added multi-account proxy feasibility report for Claude Code
+- **feat:** Added Anthropic usage limits (5h/7d) to status line with 30s cache
+
+### v1.0.17
+
+- **feat:** Changed header icon from sparkles to octopus
+- **docs:** Added coding plan pricing info for Z.AI, Alibaba, MiniMax, BytePlus
+
+### v1.0.16
+
+- **fix:** Fixed diacritics in pt-BR and es locale files
+- **fix:** Blocked provider selection when API key is invalid
+- **feat:** Added invalid API key warning in main menu and sidebar
+
+### v1.0.15
+
+- **fix:** Fixed critical vulnerability — master password hash was identical to encryption key (domain separation)
+- **fix:** Fixed master password confirmation field pre-filled
+- **feat:** Added option to remove master password from login screen (force-reset)
+- **fix:** Translated master password prompt using i18n
+- **fix:** Unified flow for LiteLLM, Ollama, llama.cpp, and LM Studio providers (URL + optional API key)
+
+### v1.0.14
+
+- **feat:** Created Remotion project for demo video (7 scenes, 1920x1080, ~31s)
+- **feat:** Added Remotion best practices skill
+
+### v1.0.13
+
+- **feat:** Added context status indicators in status line (approaching/imminent/compact)
+- **refactor:** Standardized all status line templates (full, slim, cost, perf, context) to follow default template layout and colors
+- **refactor:** Removed unused "Dev" status line template
+
+### v1.0.12
+
+- **feat:** Added AES-256-GCM credential encryption with optional master password
+- **feat:** Added master password support in headless mode (flag + env var)
+- **docs:** Documented credential encryption and master password in README
+
+### v1.0.11
+
+- **feat:** Added NanoGPT provider with model listing and API key validation
+- **feat:** Added LiteLLM Proxy provider
+- **feat:** Added base URL editing for cloud providers
+- **feat:** Added BytePlus ModelArk provider
+- **refactor:** Renamed Alibaba provider to "alibaba-coding"
+
+### v1.0.10
+
+- **feat:** Status line templates consolidated from 12 to 7 focused layouts (none/default/full/slim/mini/cost/perf/context)
+- **feat:** Status line env vars passed via `--settings` instead of `process.env`
+- **feat:** Added specialized status line templates: cost, perf, and context
+- **refactor:** Extracted status line script from inline string to separate `statusline-script.mjs`
+
+### v1.0.9
+
+- **feat:** Added auto-return loop to TUI after Claude Code exits
+- **feat:** Added strategic flag selection step before Claude Code launch (resume, skip-permissions, verbose, worktree)
+- **feat:** Flag selection persisted between sessions
+- **feat:** Terminal title set to provider/model during Claude Code session
+
+### v1.0.8
+
+- **feat:** Added option to launch Claude Code without a provider (default Anthropic account)
+- **fix:** Robust terminal size detection with fallbacks for Windows
+- **fix:** Terminal resize handling via polling (Windows fix)
+
+### v1.0.7
+
+- **feat:** Session-based debug logging with per-PID files and automatic cleanup
+- **feat:** Added auto-update check in main menu
+- **fix:** Fixed OAuth spawn crash on Windows (UV_EPIPE)
+
+### v1.0.6
+
+- **feat:** Added headless mode for non-interactive CLI usage (`--provider`, `--model`, `--installation`)
+- **feat:** Added `--list` flag for provider/model/installation discovery
+- **feat:** Added mclaude-headless skill for AI agents
+- **feat:** Added complete Claude Code CLI reference
+
+### v1.0.5
+
+- **feat:** Installation directory names changed to readable format (`{8hex}-{slug}`)
+- **feat:** Added custom URL field for local providers (Ollama, LM Studio, llama.cpp)
+
+### v1.0.4
+
+- **feat:** Added mclaude version in app header
+- **feat:** Global error handling with debug.log output
+
+### v1.0.3
+
+- **feat:** Added i18n support (English, Português BR, Español)
+- **feat:** Added configuration reset option
+
+### v1.0.0
+
+- Initial release — TUI for managing multiple API providers and launching Claude Code
+- Supported providers: Anthropic (OAuth), Alibaba Cloud, DeepSeek, MiniMax, Moonshot AI, Novita AI, OpenRouter, Poe, Requesty, Z.AI, Ollama, LM Studio, llama.cpp
+- Installation management with isolated Claude Code config directories
+- Multiple Anthropic account support via OAuth
+
 ## Development
 
 ```bash
