@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.16-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.20-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -540,7 +540,12 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.19 (current)
+### v1.0.20 (current)
+
+- **fix:** Preserved essential Claude Code env vars (`CLAUDE_CODE_GIT_BASH_PATH`, `CLAUDE_CODE_SHELL`, `CLAUDE_CODE_TMPDIR`) during provider env cleanup
+- **refactor:** Centralized `CLAUDE_CODE_*` env var cleanup into single `cleanupClaudeCodeVars()` function
+
+### v1.0.19
 
 - **fix:** Status line 5h usage data now uses distributed cache (lock file) and fresh OAuth token reading to prevent stale data from rate limiting and expired tokens
 - **fix:** Usage cache TTL increased to 240s to reduce API calls

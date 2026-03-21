@@ -267,18 +267,30 @@ function defaultEnvConfigurator(
 	delete env["ANTHROPIC_API_KEY"];
 }
 
+/** Essential CLAUDE_CODE vars that must survive env cleanup (platform/shell requirements). */
+const PRESERVED_CLAUDE_CODE_VARS = new Set([
+	"CLAUDE_CODE_GIT_BASH_PATH", // Bash path on Windows
+	"CLAUDE_CODE_SHELL", // Shell override
+	"CLAUDE_CODE_TMPDIR", // Temp directory override
+]);
+
+/** Remove all CLAUDECODE/CLAUDE_CODE env vars except essential ones. */
+function cleanupClaudeCodeVars(env: Record<string, string>): void {
+	for (const key of Object.keys(env)) {
+		if (PRESERVED_CLAUDE_CODE_VARS.has(key)) continue;
+		if (key.startsWith("CLAUDECODE") || key.startsWith("CLAUDE_CODE")) {
+			delete env[key];
+		}
+	}
+}
+
 function cleanupAndApplyTemplateEnv(env: Record<string, string>, template: ProviderTemplate): void {
 	// Apply template extra env vars
 	for (const [key, value] of Object.entries(template.env)) {
 		env[key] = value;
 	}
 
-	// Remove CLAUDECODE and CLAUDE_CODE env vars (avoid interference)
-	for (const key of Object.keys(env)) {
-		if (key.startsWith("CLAUDECODE") || key.startsWith("CLAUDE_CODE")) {
-			delete env[key];
-		}
-	}
+	cleanupClaudeCodeVars(env);
 
 	// Re-apply template env vars that start with CLAUDE_CODE (they take priority)
 	for (const [key, value] of Object.entries(template.env)) {
@@ -328,12 +340,7 @@ export function buildClaudeEnv(
 		delete env["ANTHROPIC_DEFAULT_HAIKU_MODEL"];
 		delete env["API_TIMEOUT_MS"];
 
-		// Clean CLAUDE_CODE vars (also removes CLAUDE_CODE_SUBAGENT_MODEL)
-		for (const key of Object.keys(env)) {
-			if (key.startsWith("CLAUDECODE") || key.startsWith("CLAUDE_CODE")) {
-				delete env[key];
-			}
-		}
+		cleanupClaudeCodeVars(env);
 
 		// Set OAuth token AFTER cleanup (cleanup removes CLAUDE_CODE_* vars)
 		if (creds) {
