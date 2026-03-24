@@ -156,6 +156,12 @@ export const ptBR: TranslationDictionary = {
 			"Foco na janela de contexto: barra de uso maior, breakdown detalhado por tipo de token e total usado vs limite",
 		changed: "Template de linha de status alterado para {{template}}.",
 	},
+	changelog: {
+		title: "Changelog",
+		menuItem: "Changelog",
+		menuItemNew: "Changelog (NOVO)",
+		empty: "Não foi possível carregar o changelog.",
+	},
 	languageSelect: {
 		title: "Select language / Selecione o idioma",
 		changed: "Idioma alterado para {{lang}}.",
@@ -268,6 +274,7 @@ export const ptBR: TranslationDictionary = {
 		flag: "Flag",
 		envVarInfo: "Info da Var. Ambiente",
 		flagInfo: "Info da Flag",
+		changelogDesc: "Ver histórico de versões e alterações recentes",
 	},
 	terminal: {
 		tooSmall: "Terminal muito pequeno ({{current}}). Mínimo: {{min}}",
@@ -283,6 +290,7 @@ export const ptBR: TranslationDictionary = {
 		search: "buscar",
 		toggle: "alternar",
 		launch: "iniciar",
+		scroll: "rolar",
 	},
 	update: {
 		groupLabel: "ATUALIZAÇÃO DISPONÍVEL",

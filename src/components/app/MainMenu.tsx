@@ -23,6 +23,7 @@ export type MainMenuResult =
 	| { type: "manage-installations" }
 	| { type: "settings" }
 	| { type: "update" }
+	| { type: "changelog" }
 	| { type: "exit" };
 
 interface MainMenuProps {
@@ -36,11 +37,13 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 	const [providers, setProviders] = useState<ConfiguredProvider[]>([]);
 	const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
 	const [message, setMessage] = useState<FlowMessage | null>(lastMessage ?? null);
+	const [hasNewChangelog, setHasNewChangelog] = useState(false);
 	const { latestVersion } = useUpdateCheck(pkg.version);
 
 	useEffect(() => {
 		loadConfig().then((config) => {
 			setProviders(config.providers);
+			setHasNewChangelog(config.lastSeenChangelogVersion !== pkg.version);
 		});
 	}, []);
 
@@ -69,6 +72,12 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 				{ label: t("mainMenu.manageProviders"), value: "manage-providers", icon: "🔧" },
 				{ label: t("mainMenu.manageInstallations"), value: "manage-installations", icon: "📁" },
 				{ label: t("mainMenu.settings"), value: "settings", icon: "⚙️" },
+				{
+					label: hasNewChangelog ? t("changelog.menuItemNew") : t("changelog.menuItem"),
+					value: "changelog",
+					icon: "📋",
+					color: hasNewChangelog ? "green" : undefined,
+				},
 				{ label: t("menu.exit"), value: "exit", icon: "🚪" },
 			],
 		};
@@ -90,7 +99,7 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 		}
 		result.push(launchGroup, actionsGroup);
 		return result;
-	}, [providers, t, latestVersion]);
+	}, [providers, t, latestVersion, hasNewChangelog]);
 
 	const handleSelect = (item: GroupedSelectItem) => {
 		if (item.value === "__launch-default__") {
@@ -113,6 +122,8 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			onSelect({ type: "manage-installations" });
 		} else if (item.value === "settings") {
 			onSelect({ type: "settings" });
+		} else if (item.value === "changelog") {
+			onSelect({ type: "changelog" });
 		} else if (item.value === "exit") {
 			onSelect({ type: "exit" });
 		}
@@ -184,6 +195,7 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 		else if (highlightedValue === "manage-installations")
 			description = t("sidebar.manageInstallationsDesc");
 		else if (highlightedValue === "settings") description = t("sidebar.settingsDesc");
+		else if (highlightedValue === "changelog") description = t("sidebar.changelogDesc");
 		else if (highlightedValue === "exit") description = t("sidebar.exitDesc");
 
 		if (description) {

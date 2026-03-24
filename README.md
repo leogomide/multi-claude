@@ -540,7 +540,11 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.21 (current)
+### v1.0.22 (current)
+
+- **feat:** Added changelog viewer in TUI with scrollable display and NEW badge indicator on main menu
+
+### v1.0.21
 
 - **feat:** Added Kimi Code provider with `kimi-for-coding` model and `ENABLE_TOOL_SEARCH=false` env var
 

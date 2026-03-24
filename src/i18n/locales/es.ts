@@ -158,6 +158,12 @@ export const es: TranslationDictionary = {
 			"Enfocado en la ventana de contexto: barra de uso m\u00e1s grande, desglose detallado por tipo de token y total usado vs l\u00edmite",
 		changed: "Plantilla de l\u00ednea de estado cambiada a {{template}}.",
 	},
+	changelog: {
+		title: "Changelog",
+		menuItem: "Changelog",
+		menuItemNew: "Changelog (NUEVO)",
+		empty: "No se pudo cargar el changelog.",
+	},
 	languageSelect: {
 		title: "Select language / Selecione o idioma",
 		changed: "Idioma cambiado a {{lang}}.",
@@ -272,6 +278,7 @@ export const es: TranslationDictionary = {
 		flag: "Flag",
 		envVarInfo: "Info de Var. Entorno",
 		flagInfo: "Info de Flag",
+		changelogDesc: "Ver historial de versiones y cambios recientes",
 	},
 	terminal: {
 		tooSmall: "Terminal muy pequeño ({{current}}). Mínimo: {{min}}",
@@ -287,6 +294,7 @@ export const es: TranslationDictionary = {
 		search: "buscar",
 		toggle: "alternar",
 		launch: "iniciar",
+		scroll: "desplazar",
 	},
 	update: {
 		groupLabel: "ACTUALIZACIÓN DISPONIBLE",

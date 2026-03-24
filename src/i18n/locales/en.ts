@@ -154,6 +154,12 @@ export const en: TranslationDictionary = {
 			"Context window focused: larger usage bar, detailed token breakdown by type and total used vs window limit",
 		changed: "Status line template changed to {{template}}.",
 	},
+	changelog: {
+		title: "Changelog",
+		menuItem: "Changelog",
+		menuItemNew: "Changelog (NEW)",
+		empty: "Could not load changelog.",
+	},
 	languageSelect: {
 		title: "Select language / Selecione o idioma",
 		changed: "Language changed to {{lang}}.",
@@ -266,6 +272,7 @@ export const en: TranslationDictionary = {
 		flag: "Flag",
 		envVarInfo: "Env Var Info",
 		flagInfo: "Flag Info",
+		changelogDesc: "View release history and recent changes",
 	},
 	terminal: {
 		tooSmall: "Terminal too small ({{current}}). Minimum: {{min}}",
@@ -281,6 +288,7 @@ export const en: TranslationDictionary = {
 		search: "search",
 		toggle: "toggle",
 		launch: "launch",
+		scroll: "scroll",
 	},
 	update: {
 		groupLabel: "UPDATE AVAILABLE",

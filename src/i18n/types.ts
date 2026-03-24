@@ -146,6 +146,12 @@ export interface TranslationDictionary {
 		contextDesc: string;
 		changed: string;
 	};
+	changelog: {
+		title: string;
+		menuItem: string;
+		menuItemNew: string;
+		empty: string;
+	};
 	languageSelect: {
 		title: string;
 		changed: string;
@@ -257,6 +263,7 @@ export interface TranslationDictionary {
 		flag: string;
 		envVarInfo: string;
 		flagInfo: string;
+		changelogDesc: string;
 	};
 	terminal: {
 		tooSmall: string;
@@ -272,6 +279,7 @@ export interface TranslationDictionary {
 		search: string;
 		toggle: string;
 		launch: string;
+		scroll: string;
 	};
 	update: {
 		groupLabel: string;

@@ -13,6 +13,7 @@ import { EditInstallationFlow } from "../config-wizard/EditInstallationFlow.tsx"
 import { EditProviderFlow } from "../config-wizard/EditProviderFlow.tsx";
 import { ManageModelsFlow } from "../config-wizard/ManageModelsFlow.tsx";
 import type { FlowMessage } from "../types.ts";
+import { ChangelogPage } from "./ChangelogPage.tsx";
 import type { MainMenuResult } from "./MainMenu.tsx";
 import { MainMenu } from "./MainMenu.tsx";
 import type { ManageInstallationsResult } from "./ManageInstallationsPage.tsx";
@@ -36,7 +37,8 @@ type AppView =
 	| "edit-installation"
 	| "settings"
 	| "change-language"
-	| "statusline";
+	| "statusline"
+	| "changelog";
 
 interface UnifiedAppProps {
 	cliArgs?: string[];
@@ -135,6 +137,9 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 					break;
 				case "settings":
 					goTo("settings", [t("settings.title")]);
+					break;
+				case "changelog":
+					goTo("changelog", [t("changelog.title")]);
 					break;
 				case "update":
 					onRunUpdate();
@@ -341,6 +346,8 @@ function UnifiedAppInner({ cliArgs, onStartClaude, onOAuthLogin, onRunUpdate }: 
 					onCancel={() => backToEditProvider()}
 				/>
 			)}
+
+			{view === "changelog" && <ChangelogPage key={flowKey} onBack={() => backToMenu()} />}
 
 			{view === "statusline" && (
 				<StatusLinePage
