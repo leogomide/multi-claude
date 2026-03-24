@@ -45,6 +45,17 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		},
 	},
 	{
+		// https://www.kimi.com/code/docs/en/more/third-party-agents.html
+		id: "kimi-code",
+		description: "Kimi Code",
+		baseUrl: "https://api.kimi.com/coding/",
+		defaultModels: ["kimi-for-coding"],
+		env: {
+			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+			ENABLE_TOOL_SEARCH: "false",
+		},
+	},
+	{
 		// https://platform.minimax.io/docs/coding-plan/claude-code
 		id: "minimax",
 		description: "MiniMax",

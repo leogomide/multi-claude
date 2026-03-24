@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.20-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.21-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -540,7 +540,11 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.20 (current)
+### v1.0.21 (current)
+
+- **feat:** Added Kimi Code provider with `kimi-for-coding` model and `ENABLE_TOOL_SEARCH=false` env var
+
+### v1.0.20
 
 - **fix:** Preserved essential Claude Code env vars (`CLAUDE_CODE_GIT_BASH_PATH`, `CLAUDE_CODE_SHELL`, `CLAUDE_CODE_TMPDIR`) during provider env cleanup
 - **refactor:** Centralized `CLAUDE_CODE_*` env var cleanup into single `cleanupClaudeCodeVars()` function
