@@ -540,7 +540,14 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.22 (current)
+### v1.0.23 (current)
+
+- **refactor:** Changelog viewer now uses version list with sidebar panel for consistency with other TUI pages
+- **fix:** Fixed changelog sidebar showing stale entries when scrolling between versions
+- **fix:** Fixed invisible items in changelog list by replacing ink-select-input with custom non-looping scroll
+- **fix:** Fixed last item not visible in changelog list by reserving space for scroll indicators
+
+### v1.0.22
 
 - **feat:** Added changelog viewer in TUI with scrollable display and NEW badge indicator on main menu
 
