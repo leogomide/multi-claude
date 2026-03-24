@@ -56,6 +56,7 @@ const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
 	"--resume",
 	"-r",
 	"--dangerously-skip-permissions",
+	"--enable-auto-mode",
 	"--verbose",
 	"--worktree",
 	"-w",

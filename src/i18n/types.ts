@@ -297,11 +297,13 @@ export interface TranslationDictionary {
 		groupExperimental: string;
 		resume: string;
 		skipPermissions: string;
+		autoMode: string;
 		verbose: string;
 		worktree: string;
 		agentTeams: string;
 		descResume: string;
 		descSkipPermissions: string;
+		descAutoMode: string;
 		descVerbose: string;
 		descWorktree: string;
 		descAgentTeams: string;

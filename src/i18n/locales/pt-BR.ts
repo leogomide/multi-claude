@@ -308,11 +308,14 @@ export const ptBR: TranslationDictionary = {
 		groupExperimental: "Experimental",
 		resume: "--resume",
 		skipPermissions: "--dangerously-skip-permissions",
+		autoMode: "--enable-auto-mode",
 		verbose: "--verbose",
 		worktree: "--worktree",
 		agentTeams: "Agent Teams [experimental]",
 		descResume: "Retomar uma sessão anterior (seletor interativo)",
 		descSkipPermissions: "Pular todos os prompts de permissão (use com cautela)",
+		descAutoMode:
+			"Habilitar modo automático - aprova ações seguras automaticamente, bloqueia arriscadas",
 		descVerbose: "Habilitar log detalhado, mostra saída completa turno a turno",
 		descWorktree: "Executar em uma worktree git isolada",
 		descAgentTeams:

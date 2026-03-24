@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.21-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.24-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -540,7 +540,11 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.23 (current)
+### v1.0.24 (current)
+
+- **feat:** Added `--enable-auto-mode` flag to TUI launch options (auto-approves safe actions, blocks risky ones)
+
+### v1.0.23
 
 - **refactor:** Changelog viewer now uses version list with sidebar panel for consistency with other TUI pages
 - **fix:** Fixed changelog sidebar showing stale entries when scrolling between versions

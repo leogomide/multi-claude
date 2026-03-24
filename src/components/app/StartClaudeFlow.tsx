@@ -29,6 +29,7 @@ const STRATEGIC_FLAGS = new Set([
 	"--resume",
 	"-r",
 	"--dangerously-skip-permissions",
+	"--enable-auto-mode",
 	"--verbose",
 	"--worktree",
 	"-w",
@@ -301,6 +302,12 @@ export function StartClaudeFlow({
 			{
 				label: t("launchOptions.groupPermissions"),
 				items: [
+					{
+						label: t("launchOptions.autoMode"),
+						value: "--enable-auto-mode",
+						description: t("launchOptions.descAutoMode"),
+						checked: preCheckedFlags.has("--enable-auto-mode"),
+					},
 					{
 						label: t("launchOptions.skipPermissions"),
 						value: "--dangerously-skip-permissions",
