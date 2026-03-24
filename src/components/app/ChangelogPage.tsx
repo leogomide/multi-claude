@@ -6,25 +6,12 @@ import { parseChangelog } from "../../changelog.ts";
 import { loadConfig, saveConfig } from "../../config.ts";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
+import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { AppShell } from "../layout/AppShell.tsx";
+import { ChangelogSidebar } from "./ChangelogSidebar.tsx";
 
 interface ChangelogPageProps {
 	onBack: () => void;
-}
-
-const TYPE_COLORS: Record<string, string> = {
-	feat: "green",
-	fix: "yellow",
-	refactor: "blue",
-	docs: "magenta",
-};
-
-interface ChangelogLine {
-	type: "header" | "entry" | "spacer";
-	version?: string;
-	isCurrent?: boolean;
-	entryType?: string;
-	description?: string;
 }
 
 export function ChangelogPage({ onBack }: ChangelogPageProps) {
@@ -32,11 +19,12 @@ export function ChangelogPage({ onBack }: ChangelogPageProps) {
 	const { rows } = useTerminalSize();
 	const [versions, setVersions] = useState<ChangelogVersion[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [scrollOffset, setScrollOffset] = useState(0);
+	const [highlightedVersion, setHighlightedVersion] = useState<string | null>(null);
 
 	useEffect(() => {
 		parseChangelog().then((v) => {
 			setVersions(v);
+			if (v.length > 0) setHighlightedVersion(v[0]!.version);
 			setLoading(false);
 		});
 		loadConfig().then((config) => {
@@ -47,45 +35,36 @@ export function ChangelogPage({ onBack }: ChangelogPageProps) {
 		});
 	}, []);
 
-	const lines = useMemo(() => {
-		const result: ChangelogLine[] = [];
-		for (const ver of versions) {
-			result.push({ type: "header", version: ver.version, isCurrent: ver.isCurrent });
-			for (const entry of ver.entries) {
-				result.push({ type: "entry", entryType: entry.type, description: entry.description });
-			}
-			result.push({ type: "spacer" });
-		}
-		return result;
-	}, [versions]);
+	const items = useMemo(
+		() =>
+			versions.map((v) => ({
+				label: v.isCurrent ? `${v.version} (current)` : v.version,
+				value: v.version,
+			})),
+		[versions],
+	);
 
-	// header(1) + title(1) + blank(1) + footer(1) + padding = ~6 lines overhead
-	const maxVisible = Math.max(3, rows - 6);
-	const canScrollUp = scrollOffset > 0;
-	const canScrollDown = scrollOffset + maxVisible < lines.length;
+	const highlightedVer = useMemo(
+		() => versions.find((v) => v.version === highlightedVersion) ?? null,
+		[highlightedVersion, versions],
+	);
+
+	const sidebarContent = useMemo(() => {
+		if (!highlightedVer) return null;
+		return <ChangelogSidebar key={highlightedVer.version} version={highlightedVer} />;
+	}, [highlightedVer]);
 
 	useInput((_input, key) => {
-		if (key.escape) {
-			onBack();
-			return;
-		}
-		if (key.upArrow) {
-			setScrollOffset((o) => Math.max(0, o - 1));
-		}
-		if (key.downArrow) {
-			setScrollOffset((o) => Math.min(Math.max(0, lines.length - maxVisible), o + 1));
-		}
+		if (key.escape) onBack();
 	});
 
 	const footerItems = [
-		{ key: "↑↓", label: t("footer.scroll") },
+		{ key: "↑↓", label: t("footer.navigate") },
 		{ key: "esc", label: t("footer.back") },
 	];
 
-	const visibleLines = lines.slice(scrollOffset, scrollOffset + maxVisible);
-
 	return (
-		<AppShell footerItems={footerItems}>
+		<AppShell sidebar={sidebarContent} footerItems={footerItems}>
 			<Text bold color="cyan">
 				{t("changelog.title")}
 			</Text>
@@ -96,33 +75,13 @@ export function ChangelogPage({ onBack }: ChangelogPageProps) {
 			{!loading && versions.length === 0 && <Text color="yellow">{t("changelog.empty")}</Text>}
 
 			{!loading && versions.length > 0 && (
-				<Box flexDirection="column" overflow="hidden">
-					{canScrollUp && <Text dimColor>{" ↑ ..."}</Text>}
-					{visibleLines.map((line, i) => {
-						if (line.type === "header") {
-							return (
-								<Text key={`${line.version}-h-${i}`} bold color="cyan">
-									{"  "}
-									{line.version}
-									{line.isCurrent && <Text color="green">{" (current)"}</Text>}
-								</Text>
-							);
-						}
-						if (line.type === "entry") {
-							const color = TYPE_COLORS[line.entryType ?? ""] ?? "white";
-							return (
-								<Text key={`entry-${i}`}>
-									{"    "}
-									<Text bold color={color}>
-										{line.entryType}
-									</Text>
-									<Text>{`: ${line.description}`}</Text>
-								</Text>
-							);
-						}
-						return <Text key={`spacer-${i}`}> </Text>;
-					})}
-					{canScrollDown && <Text dimColor>{" ↓ ..."}</Text>}
+				<Box flexDirection="column">
+					<CyanSelectInput
+						items={items}
+						limit={Math.max(3, rows - 6)}
+						onHighlight={(item) => setHighlightedVersion(item.value)}
+						onSelect={() => {}}
+					/>
 				</Box>
 			)}
 		</AppShell>

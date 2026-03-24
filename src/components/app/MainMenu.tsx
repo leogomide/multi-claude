@@ -1,6 +1,8 @@
 import { Text } from "ink";
 import React, { useEffect, useMemo, useState } from "react";
 import pkg from "../../../package.json";
+import type { ChangelogVersion } from "../../changelog.ts";
+import { parseChangelog } from "../../changelog.ts";
 import { isAccountAuthenticated, loadConfig } from "../../config.ts";
 import { getCliId } from "../../headless.ts";
 import { useUpdateCheck } from "../../hooks/useUpdateCheck.ts";
@@ -15,6 +17,7 @@ import { AppShell } from "../layout/AppShell.tsx";
 import type { SidebarItem } from "../layout/Sidebar.tsx";
 import { Sidebar } from "../layout/Sidebar.tsx";
 import type { FlowMessage } from "../types.ts";
+import { ChangelogSidebar } from "./ChangelogSidebar.tsx";
 
 export type MainMenuResult =
 	| { type: "launch-provider"; providerId: string; providerName: string }
@@ -38,12 +41,16 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 	const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
 	const [message, setMessage] = useState<FlowMessage | null>(lastMessage ?? null);
 	const [hasNewChangelog, setHasNewChangelog] = useState(false);
+	const [latestChangelog, setLatestChangelog] = useState<ChangelogVersion | null>(null);
 	const { latestVersion } = useUpdateCheck(pkg.version);
 
 	useEffect(() => {
 		loadConfig().then((config) => {
 			setProviders(config.providers);
 			setHasNewChangelog(config.lastSeenChangelogVersion !== pkg.version);
+		});
+		parseChangelog().then((versions) => {
+			if (versions.length > 0) setLatestChangelog(versions[0]!);
 		});
 	}, []);
 
@@ -195,15 +202,21 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 		else if (highlightedValue === "manage-installations")
 			description = t("sidebar.manageInstallationsDesc");
 		else if (highlightedValue === "settings") description = t("sidebar.settingsDesc");
-		else if (highlightedValue === "changelog") description = t("sidebar.changelogDesc");
-		else if (highlightedValue === "exit") description = t("sidebar.exitDesc");
+		else if (highlightedValue === "changelog") {
+			if (latestChangelog) {
+				return (
+					<ChangelogSidebar version={latestChangelog} description={t("sidebar.changelogDesc")} />
+				);
+			}
+			description = t("sidebar.changelogDesc");
+		} else if (highlightedValue === "exit") description = t("sidebar.exitDesc");
 
 		if (description) {
 			return <Sidebar items={[{ label: "", value: description }]} />;
 		}
 
 		return null;
-	}, [highlightedValue, providers, t]);
+	}, [highlightedValue, providers, t, latestChangelog]);
 
 	const footerItems = [
 		{ key: "↑↓", label: t("footer.navigate") },
