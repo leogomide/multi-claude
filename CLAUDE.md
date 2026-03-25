@@ -112,37 +112,58 @@ Configuracoes sao salvas em `~/.multi-claude/config.json`.
 
 - `TODO.md` - Developer's personal notes and task tracking file
 
-## Releases e Tags Git
+## Release Process
 
-Ao lançar uma nova versão:
+Checklist completo para lançar uma nova versão:
 
-1. Atualizar a versão no `package.json`
-2. Criar a tag da versão e mover a tag `latest`:
+### 1. Validação
 
 ```bash
+bunx tsc --noEmit
+bun test
+```
+
+### 2. Bump de versão
+
+Atualizar o campo `version` no `package.json` e rodar `bun install` para atualizar o `bun.lock`.
+
+### 3. Atualizar README.md
+
+- **Badge de versão:** atualizar o número na badge `[![Version](https://img.shields.io/badge/version-X.Y.Z-blue)]`
+- **Changelog:** adicionar nova seção `### vX.Y.Z (current)` com as entradas da versão e remover `(current)` da versão anterior
+
+### 4. Formato do changelog
+
+- Use o formato: `- **tipo:** descricao curta em ingles`
+- Tipos: `feat`, `fix`, `refactor`, `docs`
+- Nao documente bumps de versao, lint, ou alteracoes internas sem impacto ao usuario
+
+### 5. Commit e tags
+
+```bash
+# Commitar as alterações de versão
+git add package.json bun.lock README.md
+git commit -m "docs: bump version to vX.Y.Z"
+
 # Criar tag da versão
-git tag -a v1.x.x -m "Release v1.x.x"
-git push origin v1.x.x
+git tag -a vX.Y.Z -m "Release vX.Y.Z"
+git push origin vX.Y.Z
 
 # Mover a tag latest para o commit atual
 git tag -d latest
 git push origin --delete latest
 git tag -a latest -m "Latest release"
 git push origin latest
+
+# Push do commit
+git push origin master
 ```
 
-Os usuários instalam via:
-- `bun install -g github:leogomide/multi-claude#latest` (última versão)
-- `bun install -g github:leogomide/multi-claude#v1.x.x` (versão específica)
+### Instalação pelos usuários
 
-## Changelog
-
-O README.md contem uma seção `## Changelog` com o historico de alteracoes agrupado por versao. Sempre que uma alteracao relevante for feita (feat, fix, refactor que impacte o usuario), adicione uma entrada na versao atual do changelog no README.md.
-
-- Use o formato: `- **tipo:** descricao curta em ingles`
-- Tipos: `feat`, `fix`, `refactor`, `docs`
-- Adicione na versao que esta no `package.json` (seção mais recente do changelog)
-- Nao documente bumps de versao, lint, ou alteracoes internas sem impacto ao usuario
+- `bun install -g @leogomide/multi-claude@latest` (última versão via npm)
+- `bun install -g github:leogomide/multi-claude#latest` (última versão via git)
+- `bun install -g github:leogomide/multi-claude#vX.Y.Z` (versão específica via git)
 
 ## Descricao automática para commits
 
