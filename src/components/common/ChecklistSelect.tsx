@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import TextInput from "ink-text-input";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 export interface ChecklistItem {
 	label: string;
@@ -11,6 +11,7 @@ export interface ChecklistItem {
 	valuePlaceholder?: string;
 	isEnvVar?: boolean;
 	envVarValue?: string;
+	exclusiveGroup?: string;
 }
 
 export interface ChecklistGroup {
@@ -40,10 +41,38 @@ export function ChecklistSelect({
 }: ChecklistSelectProps) {
 	const allItems = groups.flatMap((g) => g.items);
 	const [activeIndex, setActiveIndex] = useState(0);
+
+	// Build exclusion map: for each item with exclusiveGroup, map to its siblings
+	const exclusionMap = useMemo(() => {
+		const map = new Map<string, Set<string>>();
+		const grouped = new Map<string, string[]>();
+		for (const item of allItems) {
+			if (item.exclusiveGroup) {
+				const members = grouped.get(item.exclusiveGroup) ?? [];
+				members.push(item.value);
+				grouped.set(item.exclusiveGroup, members);
+			}
+		}
+		for (const members of grouped.values()) {
+			for (const value of members) {
+				map.set(value, new Set(members.filter((v) => v !== value)));
+			}
+		}
+		return map;
+	}, [allItems]);
+
 	const [checkedValues, setCheckedValues] = useState<Set<string>>(() => {
 		const initial = new Set<string>();
+		const groupWinners = new Map<string, string>();
 		for (const item of allItems) {
-			if (item.checked) initial.add(item.value);
+			if (item.checked) {
+				if (item.exclusiveGroup) {
+					const prev = groupWinners.get(item.exclusiveGroup);
+					if (prev) initial.delete(prev);
+					groupWinners.set(item.exclusiveGroup, item.value);
+				}
+				initial.add(item.value);
+			}
 		}
 		return initial;
 	});
@@ -94,6 +123,13 @@ export function ChecklistSelect({
 						next.delete(item.value);
 						setEditingValue(null);
 					} else {
+						// Remove mutually exclusive siblings before adding
+						const siblings = exclusionMap.get(item.value);
+						if (siblings) {
+							for (const sibling of siblings) {
+								next.delete(sibling);
+							}
+						}
 						next.add(item.value);
 						if (item.acceptsValue) {
 							setEditingValue(item.value);
