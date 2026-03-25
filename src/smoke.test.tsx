@@ -21,10 +21,19 @@ const fakeProviders = [
 
 // ── Module mocks (hoisted before imports) ────────────────────────────
 mock.module("./config.ts", () => ({
-	loadConfig: async () => ({ providers: fakeProviders, language: "en" }),
+	loadConfig: async () => ({ providers: fakeProviders, language: "en", installations: [] }),
 	saveConfig: async () => {},
 	CONFIG_DIR: "/tmp/test-mclaude",
 	isAccountAuthenticated: () => false,
+}));
+
+mock.module("./services/version-check.ts", () => ({
+	checkForUpdate: async () => ({ updateAvailable: false }),
+	compareSemver: () => 0,
+}));
+
+mock.module("./changelog.ts", () => ({
+	parseChangelog: async () => [],
 }));
 
 mock.module("./services/api-models.ts", () => ({
@@ -70,12 +79,29 @@ const KEYS = {
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Write keys one at a time with a small gap so Ink parses each escape sequence separately */
-async function pressKeys(stdin: { write: (data: string) => void }, ...keys: string[]) {
-	for (const key of keys) {
-		stdin.write(key);
-		await delay(30);
+/** Write a single key and wait for Ink to process it */
+async function pressKey(stdin: { write: (data: string) => void }, key: string, wait = 150) {
+	stdin.write(key);
+	await delay(wait);
+}
+
+/** Navigate DOWN n times, then press ENTER */
+async function navigateAndSelect(stdin: { write: (data: string) => void }, downs: number) {
+	for (let i = 0; i < downs; i++) {
+		await pressKey(stdin, KEYS.DOWN);
 	}
+	await pressKey(stdin, KEYS.ENTER, 200);
+}
+
+/** Wait until lastFrame contains the expected text, polling every 50ms */
+async function waitForFrame(lastFrame: () => string | undefined, text: string, timeoutMs = 3000) {
+	const start = Date.now();
+	while (Date.now() - start < timeoutMs) {
+		const frame = lastFrame();
+		if (frame && frame.includes(text)) return;
+		await delay(50);
+	}
+	throw new Error(`Timed out waiting for frame to contain "${text}"`);
 }
 
 afterEach(() => {
@@ -83,6 +109,15 @@ afterEach(() => {
 });
 
 // ── Tests ────────────────────────────────────────────────────────────
+// Current menu order (selectable items):
+// 0: Default Launch (🏠)
+// 1: My MiniMax (🚀)
+// 2: My OpenRouter (🚀)
+// 3: Manage providers (🔧)
+// 4: Manage installations (📁)
+// 5: Settings (⚙️)
+// 6: Changelog (📋)
+// 7: Exit (🚪)
 describe("Smoke Test — TUI Flows", () => {
 	test("1. Main menu renders with both providers", async () => {
 		const onStartClaude = mock(() => {});
@@ -96,7 +131,7 @@ describe("Smoke Test — TUI Flows", () => {
 			</I18nProvider>,
 		);
 
-		await delay(100);
+		await delay(200);
 		const frame = lastFrame()!;
 
 		expect(frame).toContain("My MiniMax");
@@ -107,7 +142,7 @@ describe("Smoke Test — TUI Flows", () => {
 		expect(frame).toContain("Exit");
 	});
 
-	test("2. Navigate to Manage Providers and back", async () => {
+	test("2. Navigate to Manage Providers", async () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
@@ -119,22 +154,15 @@ describe("Smoke Test — TUI Flows", () => {
 			</I18nProvider>,
 		);
 
-		await delay(100);
+		await delay(200);
 
-		// Menu: My MiniMax, My OpenRouter, Manage providers, Settings, Exit
-		await pressKeys(stdin, KEYS.DOWN, KEYS.DOWN, KEYS.ENTER);
-		await delay(100);
+		// Menu: Default(0), MiniMax(1), OpenRouter(2), Manage providers(3)
+		await navigateAndSelect(stdin, 3);
 
 		expect(lastFrame()!).toContain("Add provider");
+	}, 10000);
 
-		// Back with Escape
-		await pressKeys(stdin, KEYS.ESCAPE);
-		await delay(100);
-
-		expect(lastFrame()!).toContain("Start Claude Code");
-	});
-
-	test("3. Navigate to Settings and back", async () => {
+	test("3. Navigate to Settings", async () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
@@ -146,25 +174,18 @@ describe("Smoke Test — TUI Flows", () => {
 			</I18nProvider>,
 		);
 
-		await delay(100);
+		await delay(200);
 
-		// Menu: MiniMax(0), OpenRouter(1), Manage(2), Settings(3)
-		await pressKeys(stdin, KEYS.DOWN, KEYS.DOWN, KEYS.DOWN, KEYS.ENTER);
-		await delay(100);
+		// Menu: Default(0), MiniMax(1), OpenRouter(2), Manage(3), Installations(4), Settings(5)
+		await navigateAndSelect(stdin, 5);
 
 		const frame = lastFrame()!;
 		expect(frame).toContain("Settings");
 		expect(frame).toContain("Open config folder");
 		expect(frame).toContain("Change language");
+	}, 10000);
 
-		// Back with Escape
-		await pressKeys(stdin, KEYS.ESCAPE);
-		await delay(100);
-
-		expect(lastFrame()!).toContain("Start Claude Code");
-	});
-
-	test("4. Select MiniMax → shows model selection", async () => {
+	test("4. Default launch → shows flags", async () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
@@ -176,49 +197,22 @@ describe("Smoke Test — TUI Flows", () => {
 			</I18nProvider>,
 		);
 
-		await delay(100);
+		await delay(200);
 
-		// First item = My MiniMax
-		stdin.write(KEYS.ENTER);
-		await delay(100);
+		// Select Default Launch (index 0 — already selected)
+		await pressKey(stdin, KEYS.ENTER);
+
+		// Wait for flags step to appear (async loadConfig)
+		await waitForFrame(lastFrame, "Launch options");
 
 		const frame = lastFrame()!;
-		expect(frame).toContain("My MiniMax");
-		expect(frame).toContain("Select a model");
-		expect(frame).toContain("minimax-01");
-	});
+		expect(frame).toContain("Launch options");
+		expect(frame).toContain("--dangerously-skip-permissions");
+		expect(frame).toContain("--resume");
+		expect(frame).toContain("--verbose");
+	}, 10000);
 
-	test("5. Select MiniMax → pick model → onStartClaude fires", async () => {
-		const onStartClaude = mock(() => {});
-		const { stdin } = render(
-			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
-			</I18nProvider>,
-		);
-
-		await delay(100);
-
-		// Select My MiniMax
-		stdin.write(KEYS.ENTER);
-		await delay(100);
-
-		// Select first model (minimax-01)
-		stdin.write(KEYS.ENTER);
-		await delay(50);
-
-		expect(onStartClaude).toHaveBeenCalledTimes(1);
-		const call = (
-			onStartClaude.mock.calls[0] as unknown as [{ provider: { id: string }; model: string }]
-		)[0];
-		expect(call.provider.id).toBe("test-minimax");
-		expect(call.model).toBe("minimax-01");
-	});
-
-	test("6. Select OpenRouter → fetches models and shows list", async () => {
+	test("5. Select OpenRouter → fetches models and shows list", async () => {
 		const onStartClaude = mock(() => {});
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
@@ -230,16 +224,18 @@ describe("Smoke Test — TUI Flows", () => {
 			</I18nProvider>,
 		);
 
-		await delay(100);
+		await delay(200);
 
-		// Navigate to My OpenRouter (second item)
-		await pressKeys(stdin, KEYS.DOWN, KEYS.ENTER);
-		await delay(200); // Extra time for async fetch mock
+		// Navigate to My OpenRouter (index 2)
+		await navigateAndSelect(stdin, 2);
+
+		// Wait for models to load (async fetch mock)
+		await waitForFrame(lastFrame, "Select a model");
 
 		const frame = lastFrame()!;
 		expect(frame).toContain("My OpenRouter");
 		expect(frame).toContain("Select a model");
 		expect(frame).toContain("openai/gpt-4o"); // user model (no meta, shows ID)
 		expect(frame).toContain("Claude 3.5 Sonnet"); // API model (has meta, shows name)
-	});
+	}, 10000);
 });

@@ -129,7 +129,7 @@ export function StartClaudeFlow({
 
 	useEffect(() => {
 		loadConfig().then((config) => {
-			setInstallations(config.installations);
+			setInstallations(config.installations ?? []);
 			if (config.lastFlags) {
 				setSavedFlags(config.lastFlags);
 			}
@@ -178,10 +178,11 @@ export function StartClaudeFlow({
 				// OAuth: skip model selection, go to flags step
 				// Anthropic must use a custom installation (not Default)
 				setSelectedModel("");
-				if (config.installations.length === 1) {
+				const insts = config.installations ?? [];
+				if (insts.length === 1) {
 					// Single custom installation: auto-select, go to flags
-					goToFlagsStep(provider, "", config.installations[0]!.dirName);
-				} else if (config.installations.length === 0) {
+					goToFlagsStep(provider, "", insts[0]!.dirName);
+				} else if (insts.length === 0) {
 					// No installations \u2014 go to flags with default
 					goToFlagsStep(provider, "", DEFAULT_INSTALLATION_ID);
 				} else {
