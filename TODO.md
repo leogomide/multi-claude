@@ -11,3 +11,5 @@ pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correçõe
 -----------------------------------------------------
 
 # correções
+
+- corrigir para linha de status de uso de sessao somente aparecer quando for a instalação padrao do claude, nao usar com outros provedores
