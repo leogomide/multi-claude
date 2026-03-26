@@ -10,6 +10,7 @@ const MODEL_HINT = process.env.MCLAUDE_MODEL || "";
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || "default";
 const LANG = process.env.MCLAUDE_LANG || "en";
 const OAUTH_TOKEN = process.env.MCLAUDE_OAUTH_TOKEN || "";
+const SHOW_USAGE = process.env.MCLAUDE_SHOW_USAGE === "1";
 const CLAUDE_CONFIG_DIR = process.env.MCLAUDE_CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
 const CACHE_DIR = join(tmpdir(), "mclaude-cache");
 const CACHE_FILE = join(CACHE_DIR, "usage-cache.json");
@@ -221,6 +222,7 @@ const readStaleCache = () => {
 	return null;
 };
 const getUsageData = async () => {
+	if (!SHOW_USAGE) return null;
 	const hasAnyToken = OAUTH_TOKEN || readFreshOAuthToken();
 	if (!hasAnyToken) return null;
 

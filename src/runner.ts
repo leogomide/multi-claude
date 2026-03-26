@@ -117,6 +117,7 @@ export async function runClaude(
 		const slEnvVars = getStatusLineEnvVars(provider, model, slTemplate, language);
 		// Inject OAuth token for Anthropic providers (usage limits)
 		if (provider.type === "oauth") {
+			slEnvVars["MCLAUDE_SHOW_USAGE"] = "1";
 			const creds = readOAuthCredentials(provider.id);
 			if (creds) {
 				slEnvVars["MCLAUDE_OAUTH_TOKEN"] = creds.accessToken;
@@ -247,6 +248,7 @@ export async function runClaudeDefault(
 			MCLAUDE_MODEL: "",
 			MCLAUDE_STATUSLINE_TEMPLATE: slTemplate,
 			MCLAUDE_LANG: language,
+			MCLAUDE_SHOW_USAGE: "1",
 		};
 		// Inject OAuth token for default Anthropic launch (usage limits)
 		const defaultToken = readDefaultOAuthToken();
