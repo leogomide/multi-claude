@@ -60,7 +60,14 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		id: "minimax",
 		description: "MiniMax",
 		baseUrl: "https://api.minimax.io/anthropic",
-		defaultModels: ["MiniMax-M2.5-highspeed", "MiniMax-M2.5", "MiniMax-M2.1", "MiniMax-M2"],
+		defaultModels: [
+			"MiniMax-M2.7",
+			"MiniMax-M2.7-highspeed",
+			"MiniMax-M2.5-highspeed",
+			"MiniMax-M2.5",
+			"MiniMax-M2.1",
+			"MiniMax-M2"
+		],
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
@@ -176,8 +183,9 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		description: "Z.AI",
 		baseUrl: "https://api.z.ai/api/anthropic",
 		defaultModels: [
+			"GLM-5.1",
 			"GLM-5",
-			"GLM-5-Code",
+			"GLM-5-Turbo",
 			"GLM-4.7",
 			"GLM-4.7-FlashX",
 			"GLM-4.6",
