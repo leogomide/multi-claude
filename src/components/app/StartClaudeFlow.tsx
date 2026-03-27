@@ -26,8 +26,6 @@ import type { SidebarItem } from "../layout/Sidebar.tsx";
 import { Sidebar } from "../layout/Sidebar.tsx";
 
 const STRATEGIC_FLAGS = new Set([
-	"--resume",
-	"-r",
 	"--dangerously-skip-permissions",
 	"--enable-auto-mode",
 	"--verbose",
@@ -38,8 +36,7 @@ const STRATEGIC_FLAGS = new Set([
 function parsePreCheckedFlags(args: string[]): Set<string> {
 	const checked = new Set<string>();
 	for (const arg of args) {
-		if (arg === "-r") checked.add("--resume");
-		else if (arg === "-w") checked.add("--worktree");
+		if (arg === "-w") checked.add("--worktree");
 		else if (STRATEGIC_FLAGS.has(arg)) checked.add(arg);
 	}
 	return checked;
@@ -316,17 +313,6 @@ export function StartClaudeFlow({
 						description: t("launchOptions.descSkipPermissions"),
 						checked: preCheckedFlags.has("--dangerously-skip-permissions"),
 						exclusiveGroup: "permissions-mode",
-					},
-				],
-			},
-			{
-				label: t("launchOptions.groupSession"),
-				items: [
-					{
-						label: t("launchOptions.resume"),
-						value: "--resume",
-						description: t("launchOptions.descResume"),
-						checked: preCheckedFlags.has("--resume"),
 					},
 				],
 			},

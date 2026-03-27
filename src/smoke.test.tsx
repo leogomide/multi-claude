@@ -208,7 +208,6 @@ describe("Smoke Test — TUI Flows", () => {
 		const frame = lastFrame()!;
 		expect(frame).toContain("Launch options");
 		expect(frame).toContain("--dangerously-skip-permissions");
-		expect(frame).toContain("--resume");
 		expect(frame).toContain("--verbose");
 	}, 10000);
 

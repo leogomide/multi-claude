@@ -302,17 +302,14 @@ export const ptBR: TranslationDictionary = {
 	},
 	launchOptions: {
 		title: "Opções de lançamento",
-		groupSession: "Sessão",
 		groupPermissions: "Permissões",
 		groupDevelopment: "Desenvolvimento",
 		groupExperimental: "Experimental",
-		resume: "--resume",
 		skipPermissions: "--dangerously-skip-permissions",
 		autoMode: "--enable-auto-mode",
 		verbose: "--verbose",
 		worktree: "--worktree",
 		agentTeams: "Agent Teams [experimental]",
-		descResume: "Retomar uma sessão anterior (seletor interativo)",
 		descSkipPermissions: "Pular todos os prompts de permissão (use com cautela)",
 		descAutoMode:
 			"Habilitar modo automático - aprova ações seguras automaticamente, bloqueia arriscadas",

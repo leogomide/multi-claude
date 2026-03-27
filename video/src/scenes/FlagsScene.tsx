@@ -33,10 +33,6 @@ export const FlagsScene: React.FC = () => {
 			items: [{ label: "--dangerously-skip-permissions", checked: skipChecked }],
 		},
 		{
-			label: "Session",
-			items: [{ label: "--resume", checked: false }],
-		},
-		{
 			label: "Development",
 			items: [
 				{ label: "--verbose", checked: false },

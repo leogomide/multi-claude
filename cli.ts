@@ -53,8 +53,6 @@ initLogger("cli", sessionId);
 const log = createLogger("cli");
 
 const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
-	"--resume",
-	"-r",
 	"--dangerously-skip-permissions",
 	"--enable-auto-mode",
 	"--verbose",
@@ -155,7 +153,6 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 	console.log("Common Claude Code flags:");
 	console.log("  -c, --continue     Continue most recent conversation");
 	console.log('  -p "query"         Print mode (non-interactive)');
-	console.log("  --resume <id>      Resume a specific session");
 	console.log("  --debug            Enable debug mode");
 	console.log("");
 	console.log("Options:");
