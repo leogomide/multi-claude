@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.27-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.28-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -351,6 +351,14 @@ LiteLLM acts as a unified proxy for 100+ LLM providers (Anthropic, AWS Bedrock, 
 
 These providers run locally on your machine — no API key is required (a placeholder is used automatically).
 
+#### @Lordymine/opencode-go-cli
+
+- **Docs:** [opencode-go-cli on GitHub](https://github.com/Lordymine/opencode-go-cli)
+- **Base URL:** `http://localhost:8080` (configurable — edit the provider to point to any local or remote URL)
+- **Default models:** `MiniMax-M2.5`, `MiniMax-M2.7`, `Kimi-K2.5`, `GLM-5`
+
+Local Anthropic API proxy that translates requests to OpenAI-compatible format. Enables access to OpenCode Go and OpenAI models through Claude Code. Install and run the proxy separately, then add it as a provider in multi-claude.
+
 #### llama.cpp
 
 - **Docs:** [llama.cpp on GitHub](https://github.com/ggml-org/llama.cpp)
@@ -368,6 +376,14 @@ These providers run locally on your machine — no API key is required (a placeh
 - **Docs:** [Ollama Claude Code support](https://ollama.com/blog/claude)
 - **Base URL:** `http://localhost:11434`
 - **Default models:** None — depends on the model you pull with Ollama
+
+#### OmniRoute
+
+- **Docs:** [OmniRoute on GitHub](https://github.com/diegosouzapw/OmniRoute)
+- **Base URL:** `http://localhost:20128/v1` (configurable)
+- **Default models:** None — depends on the models configured in your OmniRoute instance
+
+Self-hosted AI gateway with Anthropic API support. Run OmniRoute separately, then add it as a provider in multi-claude.
 
 ## Provider Management
 
@@ -540,7 +556,12 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.27 (current)
+### v1.0.28 (current)
+
+- **feat:** added @Lordymine/opencode-go-cli as a new provider (local Anthropic API proxy with configurable URL)
+- **feat:** added OmniRoute as a new provider (self-hosted AI gateway with Anthropic API support)
+
+### v1.0.27
 
 - **fix:** removed `--resume` flag from launch screen (available via `/resume` within Claude Code)
 - **fix:** updated ZAI and MiniMax models
