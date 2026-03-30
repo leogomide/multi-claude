@@ -4,6 +4,7 @@ import { fetchLlamaCppModels } from "./llamacpp.ts";
 import { fetchLMStudioModels } from "./lmstudio.ts";
 import { fetchNanoGPTModels, validateNanoGPTApiKey } from "./nanogpt.ts";
 import { fetchOllamaModels } from "./ollama.ts";
+import { fetchOmniRouteModels, validateOmniRouteApiKey } from "./omniroute.ts";
 import type { OpenRouterModelMeta } from "./openrouter.ts";
 import { fetchOpenRouterModels, validateOpenRouterApiKey } from "./openrouter.ts";
 import { fetchRequestyModels, validateRequestyApiKey } from "./requesty.ts";
@@ -34,7 +35,13 @@ export type ApiFetchResult =
 
 export type ApiKeyValidation = { valid: true } | { valid: false; error: ApiModelError };
 
-const API_KEY_VALIDATION_PROVIDERS = new Set(["openrouter", "requesty", "nanogpt", "litellm"]);
+const API_KEY_VALIDATION_PROVIDERS = new Set([
+	"openrouter",
+	"requesty",
+	"nanogpt",
+	"litellm",
+	"omniroute",
+]);
 const MODEL_FETCHING_PROVIDERS = new Set([
 	"openrouter",
 	"requesty",
@@ -43,6 +50,7 @@ const MODEL_FETCHING_PROVIDERS = new Set([
 	"lmstudio",
 	"llamacpp",
 	"litellm",
+	"omniroute",
 ]);
 
 export function hasApiModelFetching(templateId: string): boolean {
@@ -86,6 +94,11 @@ export async function fetchApiModels(
 			if (!baseUrl) return { ok: false, error: "unknown" };
 			return fetchLiteLLMModels(baseUrl, apiKey);
 		}
+		case "omniroute": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { ok: false, error: "unknown" };
+			return fetchOmniRouteModels(baseUrl, apiKey);
+		}
 		case "ollama":
 		case "lmstudio":
 		case "llamacpp": {
@@ -116,6 +129,11 @@ export async function validateApiKey(
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { valid: false, error: "unknown" };
 			return validateLiteLLMApiKey(baseUrl, apiKey);
+		}
+		case "omniroute": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { valid: false, error: "unknown" };
+			return validateOmniRouteApiKey(baseUrl, apiKey);
 		}
 		default:
 			return { valid: false, error: "unknown" };

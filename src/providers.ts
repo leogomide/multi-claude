@@ -66,7 +66,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 			"MiniMax-M2.5-highspeed",
 			"MiniMax-M2.5",
 			"MiniMax-M2.1",
-			"MiniMax-M2"
+			"MiniMax-M2",
 		],
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
@@ -263,6 +263,17 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 			API_TIMEOUT_MS: "600000",
+		},
+	},
+	{
+		// https://github.com/diegosouzapw/OmniRoute
+		id: "omniroute",
+		description: "OmniRoute",
+		baseUrl: "http://localhost:20128/v1",
+		defaultModels: [],
+		defaultApiKey: "omniroute",
+		env: {
+			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
 	},
 ];
