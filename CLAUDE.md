@@ -138,7 +138,7 @@ Atualizar o campo `version` no `package.json` e rodar `bun install` para atualiz
 - Tipos: `feat`, `fix`, `refactor`, `docs`
 - Nao documente bumps de versao, lint, ou alteracoes internas sem impacto ao usuario
 
-### 5. Commit e tags
+### 5. Commit, tags e release
 
 ```bash
 # Commitar as alterações de versão
@@ -157,6 +157,10 @@ git push origin latest
 
 # Push do commit
 git push origin master
+
+# Criar GitHub Release a partir da tag
+# --generate-notes gera release notes automaticamente a partir dos commits desde a ultima release
+gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes --latest
 ```
 
 ### Instalação pelos usuários
