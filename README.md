@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.28-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.29-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -556,7 +556,11 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.28 (current)
+### v1.0.29 (current)
+
+- **feat:** added CLAUDE_CODE_NO_FLICKER toggle on launch screen for fullscreen flicker-free rendering
+
+### v1.0.28
 
 - **feat:** added @Lordymine/opencode-go-cli as a new provider (local Anthropic API proxy with configurable URL)
 - **feat:** added OmniRoute as a new provider (self-hosted AI gateway with Anthropic API support)
