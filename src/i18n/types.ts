@@ -304,6 +304,8 @@ export interface TranslationDictionary {
 		descVerbose: string;
 		descWorktree: string;
 		descAgentTeams: string;
+		noFlicker: string;
+		descNoFlicker: string;
 		worktreePlaceholder: string;
 	};
 }

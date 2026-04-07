@@ -321,6 +321,8 @@ export const es: TranslationDictionary = {
 		descWorktree: "Ejecutar en un worktree git aislado",
 		descAgentTeams:
 			"Habilitar equipos de agentes experimentales (varios agentes Claude colaborando)",
+		noFlicker: "No Flicker [experimental]",
+		descNoFlicker: "Habilitar renderización fullscreen sin parpadeo con soporte de ratón",
 		worktreePlaceholder: "Nombre del worktree (vacío para generar automáticamente)",
 	},
 };
