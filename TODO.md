@@ -14,4 +14,4 @@ pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correçõe
 
 # correções
 
-
+- adicioanr flags do arquivo `debug\novas-flags.png`
