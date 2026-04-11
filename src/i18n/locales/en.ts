@@ -313,6 +313,8 @@ export const en: TranslationDictionary = {
 		descVerbose: "Enable verbose logging, shows full turn-by-turn output",
 		descWorktree: "Run in an isolated git worktree",
 		descAgentTeams: "Enable experimental agent teams (multiple Claude agents collaborating)",
+		noFlicker: "No Flicker [experimental]",
+		descNoFlicker: "Enable fullscreen flicker-free rendering with mouse support",
 		worktreePlaceholder: "Worktree name (leave empty for auto-generated)",
 	},
 };

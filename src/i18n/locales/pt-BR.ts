@@ -317,6 +317,8 @@ export const ptBR: TranslationDictionary = {
 		descWorktree: "Executar em uma worktree git isolada",
 		descAgentTeams:
 			"Habilitar equipes de agentes experimentais (vários agentes Claude colaborando)",
+		noFlicker: "No Flicker [experimental]",
+		descNoFlicker: "Habilitar renderização fullscreen sem flicker com suporte a mouse",
 		worktreePlaceholder: "Nome da worktree (vazio para gerar automaticamente)",
 	},
 };

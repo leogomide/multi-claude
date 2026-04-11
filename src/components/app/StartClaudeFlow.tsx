@@ -346,6 +346,14 @@ export function StartClaudeFlow({
 						isEnvVar: true,
 						envVarValue: "1",
 					},
+					{
+						label: t("launchOptions.noFlicker"),
+						value: "CLAUDE_CODE_NO_FLICKER",
+						description: t("launchOptions.descNoFlicker"),
+						checked: preCheckedEnvVars.has("CLAUDE_CODE_NO_FLICKER"),
+						isEnvVar: true,
+						envVarValue: "1",
+					},
 				],
 			},
 		];
