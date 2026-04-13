@@ -15,3 +15,4 @@ pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correçõe
 # correções
 
 - adicioanr flags do arquivo `debug\novas-flags.png`
+- remover provedor do opencode go cli
