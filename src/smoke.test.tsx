@@ -208,7 +208,6 @@ describe("Smoke Test — TUI Flows", () => {
 		const frame = lastFrame()!;
 		expect(frame).toContain("Launch options");
 		expect(frame).toContain("--dangerously-skip-permissions");
-		expect(frame).toContain("--verbose");
 	}, 10000);
 
 	test("5. Select OpenRouter → fetches models and shows list", async () => {

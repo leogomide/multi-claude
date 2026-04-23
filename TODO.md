@@ -6,7 +6,11 @@ https://platform.claude.com/docs/en/agent-sdk/typescript
 
 # templates
 
-precisamos corrigir a linha de status de uso de sessao somente aparecer quando for a instalação padrao do claude, nao usar com outros provedores
+precisamos remover algumas features que nao fazem mais sentido no projeto
+
+- flag de auto-mode, pois ja é um recurso nativo, nao precisa de flag
+- flag de verbose, ninguem realmente usa, pode ser configurado dentro do claude code
+- provedor do lordymine:opencode-go-cli pois ele nao faz o proxy que o multi-claude precisaria para usalo
 
 pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
 

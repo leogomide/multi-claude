@@ -242,18 +242,6 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		},
 	},
 	{
-		// https://github.com/Lordymine/opencode-go-cli
-		id: "opencode-go",
-		description: "@Lordymine/opencode-go-cli",
-		baseUrl: "http://localhost:8080",
-		defaultModels: ["MiniMax-M2.5", "MiniMax-M2.7", "Kimi-K2.5", "GLM-5"],
-		defaultApiKey: "opencode-go",
-		env: {
-			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
-			API_TIMEOUT_MS: "600000",
-		},
-	},
-	{
 		// https://lmstudio.ai/docs/integrations/claude-code
 		id: "lmstudio",
 		description: "LM Studio",

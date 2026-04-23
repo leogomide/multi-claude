@@ -295,13 +295,9 @@ export interface TranslationDictionary {
 		groupDevelopment: string;
 		groupExperimental: string;
 		skipPermissions: string;
-		autoMode: string;
-		verbose: string;
 		worktree: string;
 		agentTeams: string;
 		descSkipPermissions: string;
-		descAutoMode: string;
-		descVerbose: string;
 		descWorktree: string;
 		descAgentTeams: string;
 		noFlicker: string;

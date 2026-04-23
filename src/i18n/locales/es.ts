@@ -310,14 +310,9 @@ export const es: TranslationDictionary = {
 		groupDevelopment: "Desarrollo",
 		groupExperimental: "Experimental",
 		skipPermissions: "--dangerously-skip-permissions",
-		autoMode: "--enable-auto-mode",
-		verbose: "--verbose",
 		worktree: "--worktree",
 		agentTeams: "Agent Teams [experimental]",
 		descSkipPermissions: "Omitir todos los permisos (usar con precaución)",
-		descAutoMode:
-			"Habilitar modo automático - aprueba acciones seguras automáticamente, bloquea las riesgosas",
-		descVerbose: "Habilitar registro detallado, muestra salida completa turno a turno",
 		descWorktree: "Ejecutar en un worktree git aislado",
 		descAgentTeams:
 			"Habilitar equipos de agentes experimentales (varios agentes Claude colaborando)",

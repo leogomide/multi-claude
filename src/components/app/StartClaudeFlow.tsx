@@ -25,13 +25,7 @@ import { AppShell } from "../layout/AppShell.tsx";
 import type { SidebarItem } from "../layout/Sidebar.tsx";
 import { Sidebar } from "../layout/Sidebar.tsx";
 
-const STRATEGIC_FLAGS = new Set([
-	"--dangerously-skip-permissions",
-	"--enable-auto-mode",
-	"--verbose",
-	"--worktree",
-	"-w",
-]);
+const STRATEGIC_FLAGS = new Set(["--dangerously-skip-permissions", "--worktree", "-w"]);
 
 function parsePreCheckedFlags(args: string[]): Set<string> {
 	const checked = new Set<string>();
@@ -301,30 +295,16 @@ export function StartClaudeFlow({
 				label: t("launchOptions.groupPermissions"),
 				items: [
 					{
-						label: t("launchOptions.autoMode"),
-						value: "--enable-auto-mode",
-						description: t("launchOptions.descAutoMode"),
-						checked: preCheckedFlags.has("--enable-auto-mode"),
-						exclusiveGroup: "permissions-mode",
-					},
-					{
 						label: t("launchOptions.skipPermissions"),
 						value: "--dangerously-skip-permissions",
 						description: t("launchOptions.descSkipPermissions"),
 						checked: preCheckedFlags.has("--dangerously-skip-permissions"),
-						exclusiveGroup: "permissions-mode",
 					},
 				],
 			},
 			{
 				label: t("launchOptions.groupDevelopment"),
 				items: [
-					{
-						label: t("launchOptions.verbose"),
-						value: "--verbose",
-						description: t("launchOptions.descVerbose"),
-						checked: preCheckedFlags.has("--verbose"),
-					},
 					{
 						label: t("launchOptions.worktree"),
 						value: "--worktree",

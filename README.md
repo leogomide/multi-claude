@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.29-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.30-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -91,7 +91,7 @@ This opens the TUI where you can:
 All extra arguments are passed directly to Claude Code:
 
 ```bash
-mclaude --verbose
+mclaude --debug
 mclaude -p "explain this codebase"
 mclaude --allowedTools "Bash(git *)" -p "show recent commits"
 ```
@@ -106,7 +106,6 @@ Before launching Claude Code, the TUI presents a flag selection step where you c
 |-------|------|-------------|
 | Session | `--resume` | Resume a previous session (interactive picker) |
 | Permissions | `--dangerously-skip-permissions` | Skip all permission prompts (use with caution) |
-| Development | `--verbose` | Enable verbose logging, shows full turn-by-turn output |
 | Development | `--worktree [name]` | Run in an isolated git worktree |
 
 ### Headless Mode (non-interactive)
@@ -351,14 +350,6 @@ LiteLLM acts as a unified proxy for 100+ LLM providers (Anthropic, AWS Bedrock, 
 
 These providers run locally on your machine — no API key is required (a placeholder is used automatically).
 
-#### @Lordymine/opencode-go-cli
-
-- **Docs:** [opencode-go-cli on GitHub](https://github.com/Lordymine/opencode-go-cli)
-- **Base URL:** `http://localhost:8080` (configurable — edit the provider to point to any local or remote URL)
-- **Default models:** `MiniMax-M2.5`, `MiniMax-M2.7`, `Kimi-K2.5`, `GLM-5`
-
-Local Anthropic API proxy that translates requests to OpenAI-compatible format. Enables access to OpenCode Go and OpenAI models through Claude Code. Install and run the proxy separately, then add it as a provider in multi-claude.
-
 #### llama.cpp
 
 - **Docs:** [llama.cpp on GitHub](https://github.com/ggml-org/llama.cpp)
@@ -556,7 +547,13 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.29 (current)
+### v1.0.30 (current)
+
+- **refactor:** removed `--enable-auto-mode` flag from launch screen (auto-mode is now native in Claude Code)
+- **refactor:** removed `--verbose` flag from launch screen (rarely used; can be set inside Claude Code)
+- **refactor:** removed `@Lordymine/opencode-go-cli` provider (does not provide the Anthropic-compatible proxy required)
+
+### v1.0.29
 
 - **feat:** added CLAUDE_CODE_NO_FLICKER toggle on launch screen for fullscreen flicker-free rendering
 

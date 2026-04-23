@@ -34,10 +34,7 @@ export const FlagsScene: React.FC = () => {
 		},
 		{
 			label: "Development",
-			items: [
-				{ label: "--verbose", checked: false },
-				{ label: "--worktree", checked: false },
-			],
+			items: [{ label: "--worktree", checked: false }],
 		},
 		{
 			label: "Experimental",

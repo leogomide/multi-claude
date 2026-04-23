@@ -54,8 +54,6 @@ const log = createLogger("cli");
 
 const STRATEGIC_FLAGS_WITH_ALIASES = new Set([
 	"--dangerously-skip-permissions",
-	"--enable-auto-mode",
-	"--verbose",
 	"--worktree",
 	"-w",
 ]);
