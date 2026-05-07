@@ -6,27 +6,20 @@ https://platform.claude.com/docs/en/agent-sdk/typescript
 
 # templates
 
-as informacoes disponiveis oficialmente no statusline do claude code foram expandidas, veja a docuemntação em https://code.claude.com/docs/en/statusline#available-data
+vamos corrigir as statuslines 'padrao' e 'completa'
 
-com essa melhoria, nao precisamos mais do mecanismo que usamos atualmente para buscar o limite de uso semanal e de 5 horas via api, usando o token da antropic
+no padrão, vamos criar uma barra de prograsso para o uso semanal, abaixo do uso da sessao, seguindo o mesmo padrao, ficando mais ou menos assim:
 
-vamos remover essa logica que usa a api, simplificando o script de statusline
+━━━━━━━━━━━╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ | 37%            | 4h09m left
+━━━━━━━━━━━╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ | 30%            | 3d7h20m left
 
-vamos tambem aprimorar as statusline atuais, com as informacoes relevantes que foram adicionadas no novo schema json
 
-entenda profuindamente como está implementado, o que precisa ser removido e o que pode ser adicionado
+no completa, ficará:
+
+5h:37%         | reset:4h09m    | 7d:30%   | reset:2d5h09m
 
 pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
 
 -----------------------------------------------------
 
 # correções
-
-
-vamos fazer algumas correções na statuslline padrao
-
-na linhas de uso de tokens, vamos adicionar o aviso de 200k+ de uso, ficando assim:
-
-Input:84.2k    | Output:62.8k   | Cache:20.6M    | 200k+
-
-oa viso de 200k+ so deve aparecer quando for atingido, até lá nem ele e nem o divisor devem aparecer

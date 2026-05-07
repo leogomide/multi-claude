@@ -178,8 +178,23 @@ const mkBarLine = (cc, pct, barW, W, ctxTokens, remaining, remPct, leftLabel, st
 	);
 };
 
+// Build single usage bar line: bar | pct% | reset_time left
+const mkUsageBarLineSingle = (cc, pct, barW, W, resetEpoch) => {
+	const padPlain = (s, w) => (s.length >= w ? s : s + " ".repeat(w - s.length));
+	const resetStr = resetEpoch ? fmtResetTime(resetEpoch) + " " + L.left : "--";
+	return (
+		cc +
+		mkBar(pct, barW) +
+		" | " +
+		padPlain(Math.floor(pct) + "%", W) +
+		" | " +
+		padPlain(resetStr, W) +
+		C.reset
+	);
+};
+
 // Build usage bar line: bar | 5h% | reset time left | weekly%
-const mkUsageBarLine = (cc, pct5h, barW, W, reset5h, pct7d, has7d) => {
+const mkUsageBarLineCombined = (cc, pct5h, barW, W, reset5h, pct7d, has7d) => {
 	const padPlain = (s, w) => (s.length >= w ? s : s + " ".repeat(w - s.length));
 	const resetStr = reset5h ? fmtResetTime(reset5h) + " " + L.left : "--";
 	const weeklyStr = has7d ? Math.floor(pct7d) + "% " + L.usageWeekly : "";
@@ -387,10 +402,8 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				console.log(barLine);
-				if (has5h || has7d) {
-					const uc = usageC(u5h);
-					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
-				}
+				if (has5h) console.log(mkUsageBarLineSingle(usageC(u5h), u5h, 2 * W + SEP_W, W, reset5h));
+				if (has7d) console.log(mkUsageBarLineSingle(usageC(u7d), u7d, 2 * W + SEP_W, W, reset7d));
 				break;
 			}
 			case "full": {
@@ -435,12 +448,15 @@ process.stdin.on("end", () => {
 				console.log(provModelLine);
 				lines.forEach((l) => console.log(l));
 				if (has5h || has7d) {
-					const uc = usageC(u5h);
-					const resetStr = reset5h ? L.usageReset + ":" + fmtResetTime(reset5h) : "--";
+					const uc5 = usageC(u5h);
+					const uc7 = usageC(u7d);
+					const reset5hStr = reset5h ? L.usageReset + ":" + fmtResetTime(reset5h) : "--";
+					const reset7dStr = reset7d ? L.usageReset + ":" + fmtResetTime(reset7d) : "--";
 					const usageParts = [
-						uc + padV(L.usage5h + ":" + Math.floor(u5h) + "%", W) + C.reset,
-						uc + padV(resetStr, W) + C.reset,
-						has7d ? uc + padV(L.usage7d + ":" + Math.floor(u7d) + "%", W) + C.reset : "",
+						has5h ? uc5 + padV(L.usage5h + ":" + Math.floor(u5h) + "%", W) + C.reset : "",
+						has5h ? uc5 + padV(reset5hStr, W) + C.reset : "",
+						has7d ? uc7 + padV(L.usage7d + ":" + Math.floor(u7d) + "%", W) + C.reset : "",
+						has7d ? uc7 + padV(reset7dStr, W) + C.reset : "",
 					].filter(Boolean);
 					console.log(usageParts.join(SEP));
 				}
@@ -485,7 +501,7 @@ process.stdin.on("end", () => {
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
-					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+					console.log(mkUsageBarLineCombined(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
 				}
 				break;
 			}
@@ -553,7 +569,7 @@ process.stdin.on("end", () => {
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
-					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+					console.log(mkUsageBarLineCombined(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
 				}
 				break;
 			}
@@ -605,7 +621,7 @@ process.stdin.on("end", () => {
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
-					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+					console.log(mkUsageBarLineCombined(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
 				}
 				break;
 			}
@@ -653,7 +669,7 @@ process.stdin.on("end", () => {
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
-					console.log(mkUsageBarLine(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
+					console.log(mkUsageBarLineCombined(uc, u5h, 2 * W + SEP_W, W, reset5h, u7d, has7d));
 				}
 				break;
 			}
