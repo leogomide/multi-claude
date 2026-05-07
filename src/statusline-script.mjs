@@ -1,23 +1,12 @@
 #!/usr/bin/env node
 // mclaude status line script - auto-managed by mclaude
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
-import { homedir, tmpdir } from "os";
-import { join } from "path";
 
 const PROVIDER = process.env.MCLAUDE_PROVIDER_NAME || "";
 const MODEL_HINT = process.env.MCLAUDE_MODEL || "";
 const TEMPLATE = process.env.MCLAUDE_STATUSLINE_TEMPLATE || "default";
 const LANG = process.env.MCLAUDE_LANG || "en";
-const OAUTH_TOKEN = process.env.MCLAUDE_OAUTH_TOKEN || "";
-const SHOW_USAGE = process.env.MCLAUDE_SHOW_USAGE === "1";
-const CLAUDE_CONFIG_DIR = process.env.MCLAUDE_CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
-const CACHE_DIR = join(tmpdir(), "mclaude-cache");
-const CACHE_FILE = join(CACHE_DIR, "usage-cache.json");
-const LOCK_FILE = join(CACHE_DIR, "usage.lock");
-const CACHE_TTL_MS = 240000; // 240 seconds
-const LOCK_TTL_MS = 30000; // 30 seconds — rate limit between API attempts
-const DEFAULT_RATE_LIMIT_BACKOFF_MS = 300000; // 5 min backoff for 429
+
 const C = {
 	cyan: "\x1b[36m",
 	green: "\x1b[32m",
@@ -113,7 +102,7 @@ const fmtDur = (ms) => {
 const fmtDurShort = (ms) => Math.floor(ms / 60000) + "m";
 const fmtCost = (usd) => "$" + usd.toFixed(2);
 const mkBar = (pct, w) =>
-	"\u2501".repeat(Math.floor((pct * w) / 100)) + "\u254c".repeat(w - Math.floor((pct * w) / 100));
+	"━".repeat(Math.floor((pct * w) / 100)) + "╌".repeat(w - Math.floor((pct * w) / 100));
 const ctxC = (pct) => {
 	if (pct >= 80) return C.bold + C.red;
 	if (pct >= 70) return C.orange;
@@ -126,149 +115,31 @@ const usageC = (pct) => {
 	if (pct >= 70) return C.yellow;
 	return C.white;
 };
-const fmtResetTime = (isoStr) => {
-	try {
-		const diffMs = new Date(isoStr).getTime() - Date.now();
-		if (diffMs <= 0) return "now";
-		const m = Math.floor(diffMs / 60000);
-		if (m >= 1440) {
-			const d = Math.floor(m / 1440);
-			const h = Math.floor((m % 1440) / 60);
-			return d + "d" + String(h).padStart(2, "0") + "h";
-		}
-		if (m >= 60) {
-			const h = Math.floor(m / 60);
-			const rm = m % 60;
-			return h + "h" + String(rm).padStart(2, "0") + "m";
-		}
-		return m + "m";
-	} catch {
-		return "--";
+// Accepts Unix epoch seconds (number) as provided by Claude Code's
+// rate_limits.{five_hour,seven_day}.resets_at field.
+const fmtResetTime = (epochSec) => {
+	if (!epochSec) return "--";
+	const diffMs = epochSec * 1000 - Date.now();
+	if (diffMs <= 0) return "now";
+	const m = Math.floor(diffMs / 60000);
+	if (m >= 1440) {
+		const d = Math.floor(m / 1440);
+		const h = Math.floor((m % 1440) / 60);
+		return d + "d" + String(h).padStart(2, "0") + "h";
 	}
+	if (m >= 60) {
+		const h = Math.floor(m / 60);
+		const rm = m % 60;
+		return h + "h" + String(rm).padStart(2, "0") + "m";
+	}
+	return m + "m";
 };
-const readFreshOAuthToken = () => {
-	// Read token from the active config dir (default or isolated installation)
-	try {
-		const credFile = join(CLAUDE_CONFIG_DIR, ".credentials.json");
-		if (existsSync(credFile)) {
-			const raw = JSON.parse(readFileSync(credFile, "utf-8"));
-			const token = raw?.claudeAiOauth?.accessToken;
-			if (token) return token;
-		}
-	} catch {}
-	// macOS Keychain fallback (only for default installation)
-	if (process.platform === "darwin" && !process.env.MCLAUDE_CLAUDE_CONFIG_DIR) {
-		try {
-			const result = execSync('security find-generic-password -s "Claude Code-credentials" -w', {
-				encoding: "utf-8",
-				timeout: 3000,
-				stdio: ["pipe", "pipe", "ignore"],
-			});
-			const parsed = JSON.parse(result.trim());
-			return parsed?.claudeAiOauth?.accessToken || null;
-		} catch {}
-	}
-	return null;
-};
-const isLockActive = () => {
-	try {
-		if (!existsSync(LOCK_FILE)) return false;
-		const lock = JSON.parse(readFileSync(LOCK_FILE, "utf-8"));
-		return lock.blockedUntil > Date.now();
-	} catch {
-		try {
-			const age = Date.now() - statSync(LOCK_FILE).mtimeMs;
-			return age < LOCK_TTL_MS;
-		} catch {}
-	}
-	return false;
-};
-const writeLock = (blockedUntilMs) => {
-	try {
-		if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
-		writeFileSync(LOCK_FILE, JSON.stringify({ blockedUntil: blockedUntilMs }));
-	} catch {}
-};
-const tryFetchUsage = async (token) => {
-	if (!token) return { data: null, rateLimited: false };
-	try {
-		const resp = await fetch("https://api.anthropic.com/api/oauth/usage", {
-			headers: {
-				Authorization: "Bearer " + token,
-				"anthropic-beta": "oauth-2025-04-20",
-			},
-			signal: AbortSignal.timeout(5000),
-		});
-		if (resp.status === 429) {
-			const retryAfter = resp.headers.get("retry-after");
-			const backoffMs = retryAfter
-				? parseInt(retryAfter, 10) * 1000 || DEFAULT_RATE_LIMIT_BACKOFF_MS
-				: DEFAULT_RATE_LIMIT_BACKOFF_MS;
-			return { data: null, rateLimited: true, backoffMs };
-		}
-		if (!resp.ok) return { data: null, rateLimited: false };
-		const data = await resp.json();
-		return { data: data?.five_hour ? data : null, rateLimited: false };
-	} catch {
-		return { data: null, rateLimited: false };
-	}
-};
-const readStaleCache = () => {
-	try {
-		if (existsSync(CACHE_FILE)) {
-			return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
-		}
-	} catch {}
-	return null;
-};
-const getUsageData = async () => {
-	if (!SHOW_USAGE) return null;
-	const hasAnyToken = OAUTH_TOKEN || readFreshOAuthToken();
-	if (!hasAnyToken) return null;
-
-	// 1. Fresh cache → use immediately
-	try {
-		if (existsSync(CACHE_FILE)) {
-			const age = Date.now() - statSync(CACHE_FILE).mtimeMs;
-			if (age < CACHE_TTL_MS) {
-				return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
-			}
-		}
-	} catch {}
-
-	// 2. Lock active → another instance is fetching, use stale cache
-	if (isLockActive()) return readStaleCache();
-
-	// 3. Acquire lock and fetch
-	writeLock(Date.now() + LOCK_TTL_MS);
-
-	// Try with env var token first
-	let result = await tryFetchUsage(OAUTH_TOKEN);
-
-	// If failed (not rate-limited), try with fresh token from config dir
-	if (!result.data && !result.rateLimited) {
-		const freshToken = readFreshOAuthToken();
-		if (freshToken && freshToken !== OAUTH_TOKEN) {
-			result = await tryFetchUsage(freshToken);
-		}
-	}
-
-	// If rate limited, write lock with long backoff
-	if (result.rateLimited) {
-		writeLock(Date.now() + (result.backoffMs || DEFAULT_RATE_LIMIT_BACKOFF_MS));
-	}
-
-	// Cache successful data
-	if (result.data) {
-		try {
-			if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
-			writeFileSync(CACHE_FILE, JSON.stringify(result.data));
-		} catch {}
-		return result.data;
-	}
-
-	// Fallback: stale cache
-	return readStaleCache();
+const effortC = (lvl) => {
+	if (lvl === "max") return C.bold + C.red;
+	if (lvl === "xhigh") return C.orange;
+	if (lvl === "high") return C.yellow;
+	if (lvl === "medium") return C.white;
+	return C.dim;
 };
 const SEP = C.dim + " | " + C.reset;
 const SEP_W = 3; // visible width of ' | '
@@ -334,7 +205,7 @@ const fmtLine = (core, tail = []) => {
 
 let input = "";
 process.stdin.on("data", (chunk) => (input += chunk));
-process.stdin.on("end", async () => {
+process.stdin.on("end", () => {
 	try {
 		const d = JSON.parse(input);
 
@@ -355,6 +226,10 @@ process.stdin.on("end", async () => {
 		// -- Output style --
 		const outputStyle = d.output_style?.name || "default";
 
+		// -- Effort & thinking --
+		const effort = d.effort?.level || "";
+		const thinking = d.thinking?.enabled === true;
+
 		// -- Cost --
 		const cost = d.cost?.total_cost_usd || 0;
 		const durMs = d.cost?.total_duration_ms || 0;
@@ -372,7 +247,16 @@ process.stdin.on("end", async () => {
 		const curOut = d.context_window?.current_usage?.output_tokens || 0;
 		const cacheCreate = d.context_window?.current_usage?.cache_creation_input_tokens || 0;
 		const cacheRead = d.context_window?.current_usage?.cache_read_input_tokens || 0;
-		const exceeds200k = d.exceeds_200k_tokens || false;
+		const exceeds200k = d.exceeds_200k_tokens === true;
+
+		// -- Rate limits (native, from Claude Code's stdin JSON) --
+		const rl = d.rate_limits;
+		const has5h = rl?.five_hour?.used_percentage != null;
+		const has7d = rl?.seven_day?.used_percentage != null;
+		const u5h = rl?.five_hour?.used_percentage ?? 0;
+		const u7d = rl?.seven_day?.used_percentage ?? 0;
+		const reset5h = rl?.five_hour?.resets_at ?? 0;
+		const reset7d = rl?.seven_day?.resets_at ?? 0;
 
 		// -- Vim --
 		const vimMode = d.vim?.mode || "";
@@ -442,19 +326,20 @@ process.stdin.on("end", async () => {
 				? C.green + "+" + linesAdd + C.reset + " " + C.red + "-" + linesRem + C.reset
 				: "";
 
-		// -- Usage limits (Anthropic only) --
-		const usage = await getUsageData();
-		const has5h = usage?.five_hour != null;
-		const has7d = usage?.seven_day != null;
-		const u5h = usage?.five_hour?.utilization ?? 0;
-		const u7d = usage?.seven_day?.utilization ?? 0;
-		const reset5h = usage?.five_hour?.resets_at || "";
-		const reset7d = usage?.seven_day?.resets_at || "";
-
 		// Shared parts
-		const provModel = PROVIDER
+		const provModelBase = PROVIDER
 			? C.cyan + PROVIDER + C.reset + "/" + C.white + model + C.reset
 			: C.white + model + C.reset;
+		// Effort/thinking bracket: "[high]", "[high·thinking]", "[thinking]" — omitted when both absent
+		let effortThinking = "";
+		if (effort || thinking) {
+			const parts = [];
+			if (effort) parts.push(effortC(effort) + effort + C.reset);
+			if (thinking) parts.push(C.cyan + "thinking" + C.reset);
+			effortThinking =
+				" " + C.dim + "[" + C.reset + parts.join(C.dim + "·" + C.reset) + C.dim + "]" + C.reset;
+		}
+		const provModel = provModelBase + effortThinking;
 		switch (TEMPLATE) {
 			case "default": {
 				// Grid: 3 columns
@@ -478,7 +363,10 @@ process.stdin.on("end", async () => {
 						C.green + L.cost + ":" + fmtCost(cost) + C.reset,
 					],
 				];
-				const tailPerLine = [[], [C.green + fmtCost(cpm) + "/min" + C.reset]];
+				const tailPerLine = [
+					exceeds200k ? [C.bold + C.red + "200k+" + C.reset] : [],
+					[C.green + fmtCost(cpm) + "/min" + C.reset],
+				];
 				const W = calcW(coreLines);
 				const lines = fmtGrid(W, coreLines, tailPerLine);
 
@@ -515,6 +403,10 @@ process.stdin.on("end", async () => {
 					provModel +
 					(gitAndLines ? " " + C.dim + "(" + C.reset + gitAndLines + C.dim + ")" + C.reset : "");
 
+				// Win cell shows "Win:200k 200k+" (red tag) when exceeds_200k_tokens is true
+				const winCell = exceeds200k
+					? cc + "Win:" + fmtK(ctxSize) + C.reset + " " + C.bold + C.red + "200k+" + C.reset
+					: cc + "Win:" + fmtK(ctxSize) + C.reset;
 				const coreLines = [
 					[
 						C.cyan + "Input:" + fmtK(totalIn) + C.reset,
@@ -529,7 +421,7 @@ process.stdin.on("end", async () => {
 					[
 						cc + "Ctx:" + fmtK(ctxTokens) + "/" + pct + "%" + C.reset,
 						cc + L.left + ":" + fmtK(remaining) + "/" + remPct + "%" + C.reset,
-						cc + "Win:" + fmtK(ctxSize) + C.reset,
+						winCell,
 					],
 				];
 				const tailPerLine = [
@@ -669,7 +561,7 @@ process.stdin.on("end", async () => {
 				// Grid: 3 columns — performance-focused
 				const totalCch = cacheCreate + cacheRead;
 				const cchHit = totalCch > 0 ? Math.floor((cacheRead / totalCch) * 100) : 0;
-				const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : "\u221e";
+				const ioR = curOut > 0 ? (curIn / curOut).toFixed(1) : "∞";
 				const apiPct = durMs > 0 ? Math.floor((apiMs / durMs) * 100) : 0;
 				const outTokS = apiMs > 0 ? Math.floor(totalOut / (apiMs / 1000)) : 0;
 

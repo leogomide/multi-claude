@@ -1,8 +1,5 @@
 import { execSync, spawn } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
-import { getInstallationPath, loadConfig, readOAuthCredentials } from "./config.ts";
+import { getInstallationPath, loadConfig } from "./config.ts";
 import { createLogger } from "./debug.ts";
 
 const log = createLogger("runner");
@@ -16,33 +13,6 @@ import {
 	getStatusLineEnvVars,
 	STATUSLINE_TEMPLATE_IDS,
 } from "./statusline.ts";
-
-function readDefaultOAuthToken(): string | null {
-	const credFile = join(homedir(), ".claude", ".credentials.json");
-	if (existsSync(credFile)) {
-		try {
-			const raw = JSON.parse(readFileSync(credFile, "utf-8")) as Record<string, unknown>;
-			const oauth = raw["claudeAiOauth"] as Record<string, unknown> | undefined;
-			return (oauth?.["accessToken"] as string) || null;
-		} catch {
-			return null;
-		}
-	}
-	if (process.platform === "darwin") {
-		try {
-			const result = execSync('security find-generic-password -s "Claude Code-credentials" -w', {
-				encoding: "utf-8",
-				timeout: 3000,
-			});
-			const parsed = JSON.parse(result.trim()) as Record<string, unknown>;
-			const oauth = parsed["claudeAiOauth"] as Record<string, unknown> | undefined;
-			return (oauth?.["accessToken"] as string) || null;
-		} catch {
-			return null;
-		}
-	}
-	return null;
-}
 
 export async function runClaude(
 	provider: ConfiguredProvider,
@@ -115,18 +85,6 @@ export async function runClaude(
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
 		const slEnvVars = getStatusLineEnvVars(provider, model, slTemplate, language);
-		// Inject OAuth token for Anthropic providers (usage limits)
-		if (provider.type === "oauth") {
-			slEnvVars["MCLAUDE_SHOW_USAGE"] = "1";
-			const creds = readOAuthCredentials(provider.id);
-			if (creds) {
-				slEnvVars["MCLAUDE_OAUTH_TOKEN"] = creds.accessToken;
-			}
-			// Pass config dir so the script can read fresh tokens
-			if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
-				slEnvVars["MCLAUDE_CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
-			}
-		}
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate);
 	}
@@ -146,7 +104,6 @@ export async function runClaude(
 		"ANTHROPIC_API_KEY",
 		"OPENROUTER_API_KEY",
 		"CLAUDE_CODE_OAUTH_TOKEN",
-		"MCLAUDE_OAUTH_TOKEN",
 	]);
 	const sanitizedEnv: Record<string, string> = {};
 	for (const k of Object.keys(env).filter(
@@ -248,17 +205,7 @@ export async function runClaudeDefault(
 			MCLAUDE_MODEL: "",
 			MCLAUDE_STATUSLINE_TEMPLATE: slTemplate,
 			MCLAUDE_LANG: language,
-			MCLAUDE_SHOW_USAGE: "1",
 		};
-		// Inject OAuth token for default Anthropic launch (usage limits)
-		const defaultToken = readDefaultOAuthToken();
-		if (defaultToken) {
-			slEnvVars["MCLAUDE_OAUTH_TOKEN"] = defaultToken;
-		}
-		// Pass config dir for isolated installations
-		if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
-			slEnvVars["MCLAUDE_CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
-		}
 		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
 		log.info("statusline template=" + slTemplate + " (default launch)");
 	}

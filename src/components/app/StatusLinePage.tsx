@@ -23,7 +23,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		return (
 			<Box flexDirection="column">
 				<Text>
-					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>[</Text>
+					<Text color="yellow">high</Text>
+					<Text dimColor>·</Text>
+					<Text color="cyan">thinking</Text>
+					<Text dimColor>]</Text> <Text dimColor>(</Text>
 					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
 					<Text color="red">-7</Text>
 					<Text dimColor>)</Text>
@@ -82,7 +86,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		return (
 			<Box flexDirection="column">
 				<Text>
-					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>[</Text>
+					<Text color="yellow">high</Text>
+					<Text dimColor>·</Text>
+					<Text color="cyan">thinking</Text>
+					<Text dimColor>]</Text> <Text dimColor>(</Text>
 					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
 					<Text color="red">-7</Text>
 					<Text dimColor>)</Text>
@@ -108,7 +116,10 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 					<Sep />
 					<Text color="#ff8700">{P("Left:46.1k/23%", W)}</Text>
 					<Sep />
-					<Text color="#ff8700">{P("Win:200k", W)}</Text>
+					<Text color="#ff8700">Win:200k </Text>
+					<Text bold color="red">
+						{P("200k+", Math.max(0, W - 9))}
+					</Text>
 					<Sep />
 					<Text color="#ff8700">{"(imminent)"}</Text>
 				</Text>
@@ -129,7 +140,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		return (
 			<Box flexDirection="column">
 				<Text>
-					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>[</Text>
+					<Text color="yellow">high</Text>
+					<Text dimColor>·</Text>
+					<Text color="cyan">thinking</Text>
+					<Text dimColor>]</Text> <Text dimColor>(</Text>
 					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
 					<Text color="red">-7</Text>
 					<Text dimColor>)</Text>
@@ -179,7 +194,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		return (
 			<Box flexDirection="column">
 				<Text>
-					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>[</Text>
+					<Text color="yellow">high</Text>
+					<Text dimColor>·</Text>
+					<Text color="cyan">thinking</Text>
+					<Text dimColor>]</Text> <Text dimColor>(</Text>
 					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
 					<Text color="red">-7</Text>
 					<Text dimColor>)</Text>
@@ -203,7 +222,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		return (
 			<Box flexDirection="column">
 				<Text>
-					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>[</Text>
+					<Text color="yellow">high</Text>
+					<Text dimColor>·</Text>
+					<Text color="cyan">thinking</Text>
+					<Text dimColor>]</Text> <Text dimColor>(</Text>
 					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
 					<Text color="red">-7</Text>
 					<Text dimColor>)</Text>
@@ -260,7 +283,11 @@ function StatusLinePreview({ id }: { id: StatusLineTemplateId }) {
 		return (
 			<Box flexDirection="column">
 				<Text>
-					<Text color="cyan">Provider</Text>/Model <Text dimColor>(</Text>
+					<Text color="cyan">Provider</Text>/Model <Text dimColor>[</Text>
+					<Text color="yellow">high</Text>
+					<Text dimColor>·</Text>
+					<Text color="cyan">thinking</Text>
+					<Text dimColor>]</Text> <Text dimColor>(</Text>
 					<Text color="magenta">master</Text> <Text color="green">+45</Text>{" "}
 					<Text color="red">-7</Text>
 					<Text dimColor>)</Text>
