@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.30-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.31-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -547,7 +547,13 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.30 (current)
+### v1.0.31 (current)
+
+- **refactor:** dropped Anthropic API call for 5-hour and weekly usage limits — statusline now reads `rate_limits` directly from Claude Code's native JSON (also removes the on-disk cache and rate-limit lock)
+- **feat:** added `effort.level` and `thinking.enabled` indicators in the statusline header across all templates
+- **feat:** added `200k+` warning tag in the `default` and `full` statusline templates when `exceeds_200k_tokens` is true
+
+### v1.0.30
 
 - **refactor:** removed `--enable-auto-mode` flag from launch screen (auto-mode is now native in Claude Code)
 - **refactor:** removed `--verbose` flag from launch screen (rarely used; can be set inside Claude Code)
