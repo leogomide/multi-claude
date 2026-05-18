@@ -11,6 +11,7 @@ export interface ChecklistItem {
 	valuePlaceholder?: string;
 	isEnvVar?: boolean;
 	envVarValue?: string;
+	isDotenvLoader?: boolean;
 	exclusiveGroup?: string;
 }
 
@@ -24,6 +25,7 @@ export interface ChecklistResult {
 	value?: string;
 	isEnvVar?: boolean;
 	envVarValue?: string;
+	isDotenvLoader?: boolean;
 }
 
 interface ChecklistSelectProps {
@@ -148,6 +150,7 @@ export function ChecklistSelect({
 						value: val || undefined,
 						isEnvVar: item.isEnvVar,
 						envVarValue: item.envVarValue,
+						isDotenvLoader: item.isDotenvLoader,
 					});
 				}
 			}

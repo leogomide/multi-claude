@@ -293,15 +293,16 @@ export interface TranslationDictionary {
 		title: string;
 		groupPermissions: string;
 		groupDevelopment: string;
+		groupEnvironment: string;
 		groupExperimental: string;
 		skipPermissions: string;
 		worktree: string;
+		loadDotenv: string;
 		agentTeams: string;
 		descSkipPermissions: string;
 		descWorktree: string;
+		descLoadDotenv: string;
 		descAgentTeams: string;
-		noFlicker: string;
-		descNoFlicker: string;
 		worktreePlaceholder: string;
 	};
 }

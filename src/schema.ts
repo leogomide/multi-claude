@@ -44,6 +44,7 @@ export const configSchema = z.object({
 	language: z.string().optional(),
 	lastFlags: z.array(z.string()).optional(),
 	lastEnvVars: z.array(z.string()).optional(),
+	lastLoadDotenv: z.boolean().optional(),
 	statusLine: statusLineConfigSchema.optional(),
 	lastSeenChangelogVersion: z.string().optional(),
 	masterPasswordHash: z.string().optional(),

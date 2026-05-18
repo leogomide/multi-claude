@@ -48,6 +48,7 @@ interface UnifiedAppProps {
 		installationId: string;
 		selectedFlags: string[];
 		selectedEnvVars?: Record<string, string>;
+		loadDotenv?: boolean;
 	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onRunUpdate: () => void;

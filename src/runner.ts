@@ -7,6 +7,7 @@ const log = createLogger("runner");
 import { buildClaudeEnv } from "./providers.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
+import { loadDotenvFromCwd } from "./services/dotenv-loader.ts";
 import {
 	buildStatusLineSettingsJson,
 	ensureStatusLineScript,
@@ -20,8 +21,28 @@ export async function runClaude(
 	extraArgs: string[] = [],
 	installationId?: string,
 	selectedEnvVars?: Record<string, string>,
+	loadDotenv?: boolean,
 ): Promise<number> {
+	// Inject .env vars into process.env BEFORE buildClaudeEnv copies it.
+	// Provider's configureEnv runs after and overrides any conflicting keys,
+	// keeping precedence: .env < provider < user-selected.
+	const addedDotenvKeys: string[] = [];
+	if (loadDotenv) {
+		const dotenvVars = loadDotenvFromCwd();
+		for (const [k, v] of Object.entries(dotenvVars)) {
+			process.env[k] = v;
+			addedDotenvKeys.push(k);
+		}
+	}
+
 	const env = buildClaudeEnv(provider, model, installationId);
+
+	// Clean up .env additions from process.env: buildClaudeEnv already copied
+	// them into the local `env`, so the spawned child still receives them.
+	for (const k of addedDotenvKeys) {
+		delete process.env[k];
+	}
+
 	if (!env) {
 		console.error(
 			'Error: template for provider "' +
@@ -146,9 +167,19 @@ export async function runClaudeDefault(
 	extraArgs: string[] = [],
 	installationId?: string,
 	selectedEnvVars?: Record<string, string>,
+	loadDotenv?: boolean,
 ): Promise<number> {
 	// Track env vars we set so we can clean them up after spawn
 	const addedEnvKeys: string[] = [];
+
+	// Load .env first so user-selected env vars (applied later) win on conflict
+	if (loadDotenv) {
+		const dotenvVars = loadDotenvFromCwd();
+		for (const [k, v] of Object.entries(dotenvVars)) {
+			process.env[k] = v;
+			addedEnvKeys.push(k);
+		}
+	}
 
 	// Set installation dir for custom installations
 	if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {

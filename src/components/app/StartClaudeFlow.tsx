@@ -54,6 +54,7 @@ interface StartClaudeFlowProps {
 		installationId: string;
 		selectedFlags: string[];
 		selectedEnvVars?: Record<string, string>;
+		loadDotenv?: boolean;
 	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onCancel: () => void;
@@ -101,6 +102,7 @@ export function StartClaudeFlow({
 	const [highlightedFlag, setHighlightedFlag] = useState<ChecklistItem | null>(null);
 	const [savedFlags, setSavedFlags] = useState<string[]>([]);
 	const [savedEnvVars, setSavedEnvVars] = useState<string[]>([]);
+	const [savedLoadDotenv, setSavedLoadDotenv] = useState<boolean>(false);
 	const preCheckedFlags = useMemo(() => {
 		const fromCli = parsePreCheckedFlags(cliArgs);
 		// Merge with saved flags from config (CLI args take priority)
@@ -125,7 +127,10 @@ export function StartClaudeFlow({
 				setSavedFlags(config.lastFlags);
 			}
 			if (config.lastEnvVars) {
-				setSavedEnvVars(config.lastEnvVars);
+				setSavedEnvVars(config.lastEnvVars.filter((v) => v !== "CLAUDE_CODE_NO_FLICKER"));
+			}
+			if (config.lastLoadDotenv) {
+				setSavedLoadDotenv(true);
 			}
 
 			if (providerId === null) {
@@ -316,6 +321,18 @@ export function StartClaudeFlow({
 				],
 			},
 			{
+				label: t("launchOptions.groupEnvironment"),
+				items: [
+					{
+						label: t("launchOptions.loadDotenv"),
+						value: "__load-dotenv__",
+						description: t("launchOptions.descLoadDotenv"),
+						checked: savedLoadDotenv,
+						isDotenvLoader: true,
+					},
+				],
+			},
+			{
 				label: t("launchOptions.groupExperimental"),
 				items: [
 					{
@@ -326,25 +343,20 @@ export function StartClaudeFlow({
 						isEnvVar: true,
 						envVarValue: "1",
 					},
-					{
-						label: t("launchOptions.noFlicker"),
-						value: "CLAUDE_CODE_NO_FLICKER",
-						description: t("launchOptions.descNoFlicker"),
-						checked: preCheckedEnvVars.has("CLAUDE_CODE_NO_FLICKER"),
-						isEnvVar: true,
-						envVarValue: "1",
-					},
 				],
 			},
 		];
-	}, [t, preCheckedFlags, preCheckedEnvVars]);
+	}, [t, preCheckedFlags, preCheckedEnvVars, savedLoadDotenv]);
 
 	const handleOptionsConfirm = (selected: ChecklistResult[]) => {
 		if (!selectedProvider) return;
 		const flags: string[] = [];
 		const envVars: Record<string, string> = {};
+		let loadDotenv = false;
 		for (const s of selected) {
-			if (s.isEnvVar) {
+			if (s.isDotenvLoader) {
+				loadDotenv = true;
+			} else if (s.isEnvVar) {
 				envVars[s.flag] = s.envVarValue ?? "1";
 			} else {
 				flags.push(s.flag);
@@ -359,6 +371,7 @@ export function StartClaudeFlow({
 			installationId: selectedInstallationIdForFlags,
 			selectedFlags: flags,
 			selectedEnvVars: Object.keys(envVars).length > 0 ? envVars : undefined,
+			loadDotenv: loadDotenv || undefined,
 		});
 	};
 

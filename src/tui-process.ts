@@ -272,8 +272,9 @@ if (result) {
 			const latestConfig = await loadConfig();
 			latestConfig.lastFlags = result.selectedFlags.filter((f) => f.startsWith("--"));
 			latestConfig.lastEnvVars = result.selectedEnvVars ? Object.keys(result.selectedEnvVars) : [];
+			latestConfig.lastLoadDotenv = result.loadDotenv === true ? true : undefined;
 			await saveConfig(latestConfig);
-			log.info("lastFlags and lastEnvVars saved to config");
+			log.info("lastFlags, lastEnvVars and lastLoadDotenv saved to config");
 		} catch (err) {
 			log.warn("failed to save lastFlags: " + String(err));
 		}
@@ -290,6 +291,7 @@ if (result) {
 			installationId: result.installationId,
 			selectedFlags: result.selectedFlags,
 			selectedEnvVars: result.selectedEnvVars,
+			loadDotenv: result.loadDotenv ?? false,
 		};
 		await writeFile(SELECTION_FILE, JSON.stringify(selection), "utf-8");
 		log.info("selection written to " + SELECTION_FILE);

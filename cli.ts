@@ -37,6 +37,7 @@ interface TuiSelection {
 	installationId?: string;
 	selectedFlags?: string[];
 	selectedEnvVars?: Record<string, string>;
+	loadDotenv?: boolean;
 }
 
 interface OAuthSelection {
@@ -345,6 +346,7 @@ while (true) {
 			mergedArgs,
 			selection.installationId,
 			selection.selectedEnvVars,
+			selection.loadDotenv,
 		);
 		log.info("runClaudeDefault() returned exitCode=" + exitCode);
 	} else {
@@ -356,6 +358,7 @@ while (true) {
 			mergedArgs,
 			selection.installationId,
 			selection.selectedEnvVars,
+			selection.loadDotenv,
 		);
 		log.info("runClaude() returned exitCode=" + exitCode);
 	}
