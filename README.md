@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.32-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.33-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -547,7 +547,12 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.32 (current)
+### v1.0.33 (current)
+
+- **feat:** new `Load .env variables` option in the launch screen — reads `.env` from the current directory and injects its variables into Claude Code (empty values are skipped; precedence is `.env` < provider < user-selected)
+- **refactor:** removed the experimental `No Flicker` option from the launch screen
+
+### v1.0.32
 
 - **fix:** `default` statusline template now renders two stacked progress bars (5h session and 7d weekly), each with its own percentage and reset time
 - **fix:** `full` statusline template now shows a dedicated `reset:7d_time` cell next to the weekly usage percentage
