@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.35-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.36-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -387,6 +387,25 @@ Local proxy that routes requests to 40+ AI providers with automatic fallback, Op
 
 > 9Router and OmniRoute both default to port `20128`. If you use both, change the base URL of one of them when adding the provider.
 
+### Custom Provider
+
+- **Base URL:** None — you enter it when adding the provider
+- **API key:** Optional — press Enter to skip it if your gateway does not require authentication
+- **Default models:** None — you enter one model ID when adding the provider, and can add more later in **Manage models**
+
+Use this for any Anthropic-compatible endpoint that does not have its own template: a corporate proxy, a self-hosted gateway, a cloud AI gateway, or a provider that multi-claude does not ship yet.
+
+The wizard asks for a name, the base URL, the authentication header, the token and one model ID. The authentication step matters because gateways disagree on how the token should be sent:
+
+| Choice | Env var set | Header sent |
+|--------|-------------|-------------|
+| Bearer token | `ANTHROPIC_AUTH_TOKEN` | `Authorization: Bearer <token>` |
+| API key header | `ANTHROPIC_API_KEY` | `x-api-key: <token>` |
+
+Pick Bearer first — it is what most Anthropic-compatible gateways expect. If requests come back unauthorized, edit the provider and choose **Edit authentication** to switch to the other one. The base URL, token and models can all be changed later from **Manage providers**.
+
+You can add several custom providers, each with its own URL and token — just give them different names.
+
 ## Provider Management
 
 All provider management is done inside the TUI. From the main menu, select **Manage providers** to:
@@ -558,7 +577,14 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.35 (current)
+### v1.0.36 (current)
+
+- **feat:** added a Custom Provider template — set your own base URL, token and model for any Anthropic-compatible gateway, and pick whether the token is sent as `ANTHROPIC_AUTH_TOKEN` or `ANTHROPIC_API_KEY`
+- **fix:** custom base URLs were ignored when launching from the TUI, so providers like Ollama, LM Studio, llama.cpp, LiteLLM, OmniRoute and 9Router fell back to the template default unless launched with `--provider`
+- **fix:** the main menu sidebar showed the template base URL instead of the one configured on the provider
+- **fix:** editing an API key validated it against the template URL instead of the provider custom URL
+
+### v1.0.35
 
 - **fix:** updated the Z.AI provider to the current GLM Coding Plan lineup — `GLM-5.3`, `GLM-5-Turbo` and `GLM-4.7`, dropping the discontinued GLM-4.5/4.6 models
 - **fix:** the Z.AI provider now sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` and `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, as recommended by Z.AI's official configuration
