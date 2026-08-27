@@ -208,6 +208,7 @@ export const ptBR: TranslationDictionary = {
 		fetchModels: "Buscar modelos da API",
 		authError: "Chave de API inválida. Verifique sua chave de API do {{provider}}.",
 		networkError: "Erro de rede. Não foi possível conectar ao {{provider}}.",
+		fallbackNotice: "Não foi possível acessar {{provider}} — exibindo a lista de modelos salva.",
 		validatingKey: "Validando chave de API...",
 		keyInvalid: "A chave de API é inválida ou expirou.",
 	},

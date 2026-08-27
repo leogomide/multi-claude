@@ -197,6 +197,7 @@ export interface TranslationDictionary {
 		fetchModels: string;
 		authError: string;
 		networkError: string;
+		fallbackNotice: string;
 		validatingKey: string;
 		keyInvalid: string;
 	};

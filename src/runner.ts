@@ -22,6 +22,7 @@ export async function runClaude(
 	installationId?: string,
 	selectedEnvVars?: Record<string, string>,
 	loadDotenv?: boolean,
+	contextWindowTokens?: number,
 ): Promise<number> {
 	// Inject .env vars into process.env BEFORE buildClaudeEnv copies it.
 	// Provider's configureEnv runs after and overrides any conflicting keys,
@@ -35,7 +36,7 @@ export async function runClaude(
 		}
 	}
 
-	const env = buildClaudeEnv(provider, model, installationId);
+	const env = buildClaudeEnv(provider, model, installationId, contextWindowTokens);
 
 	// Clean up .env additions from process.env: buildClaudeEnv already copied
 	// them into the local `env`, so the spawned child still receives them.

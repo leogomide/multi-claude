@@ -211,6 +211,7 @@ export const es: TranslationDictionary = {
 		fetchModels: "Obtener modelos de la API",
 		authError: "Clave de API inválida. Verifique su clave de API de {{provider}}.",
 		networkError: "Error de red. No se pudo conectar a {{provider}}.",
+		fallbackNotice: "No se pudo acceder a {{provider}} — mostrando la lista de modelos guardada.",
 		validatingKey: "Validando clave de API...",
 		keyInvalid: "La clave de API es inválida o ha expirado.",
 	},

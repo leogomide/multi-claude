@@ -1,4 +1,4 @@
-import { getTemplate } from "../providers.ts";
+import { getModelSpec, getTemplate } from "../providers.ts";
 import { fetchLiteLLMModels, validateLiteLLMApiKey } from "./litellm.ts";
 import { fetchLlamaCppModels } from "./llamacpp.ts";
 import { fetchLMStudioModels } from "./lmstudio.ts";
@@ -9,6 +9,7 @@ import { fetchOmniRouteModels, validateOmniRouteApiKey } from "./omniroute.ts";
 import type { OpenRouterModelMeta } from "./openrouter.ts";
 import { fetchOpenRouterModels, validateOpenRouterApiKey } from "./openrouter.ts";
 import { fetchRequestyModels, validateRequestyApiKey } from "./requesty.ts";
+import { fetchZaiModels, validateZaiApiKey } from "./zai.ts";
 
 export interface ApiModelMeta {
 	id: string;
@@ -43,6 +44,7 @@ const API_KEY_VALIDATION_PROVIDERS = new Set([
 	"litellm",
 	"omniroute",
 	"9router",
+	"zai",
 ]);
 const MODEL_FETCHING_PROVIDERS = new Set([
 	"openrouter",
@@ -54,6 +56,7 @@ const MODEL_FETCHING_PROVIDERS = new Set([
 	"litellm",
 	"omniroute",
 	"9router",
+	"zai",
 ]);
 
 export function hasApiModelFetching(templateId: string): boolean {
@@ -77,7 +80,33 @@ function mapOpenRouterModel(m: OpenRouterModelMeta): ApiModelMeta {
 	};
 }
 
+function fillFromTemplate(templateId: string, result: ApiFetchResult): ApiFetchResult {
+	if (!result.ok) return result;
+	return {
+		ok: true,
+		models: result.models.map((m) => {
+			// The API is authoritative; the table only fills what it left out.
+			if (m.context_length !== undefined) return m;
+			const spec = getModelSpec(templateId, m.id);
+			if (!spec) return m;
+			return {
+				...m,
+				context_length: spec.context,
+				max_output_tokens: m.max_output_tokens ?? spec.maxOutput,
+			};
+		}),
+	};
+}
+
 export async function fetchApiModels(
+	templateId: string,
+	apiKey: string,
+	customBaseUrl?: string,
+): Promise<ApiFetchResult> {
+	return fillFromTemplate(templateId, await fetchRaw(templateId, apiKey, customBaseUrl));
+}
+
+async function fetchRaw(
 	templateId: string,
 	apiKey: string,
 	customBaseUrl?: string,
@@ -106,6 +135,11 @@ export async function fetchApiModels(
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { ok: false, error: "unknown" };
 			return fetchNineRouterModels(baseUrl, apiKey);
+		}
+		case "zai": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { ok: false, error: "unknown" };
+			return fetchZaiModels(baseUrl, apiKey);
 		}
 		case "ollama":
 		case "lmstudio":
@@ -147,6 +181,11 @@ export async function validateApiKey(
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { valid: false, error: "unknown" };
 			return validateNineRouterApiKey(baseUrl, apiKey);
+		}
+		case "zai": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { valid: false, error: "unknown" };
+			return validateZaiApiKey(baseUrl, apiKey);
 		}
 		default:
 			return { valid: false, error: "unknown" };

@@ -17,6 +17,7 @@ export type AppResult =
 			selectedFlags: string[];
 			selectedEnvVars?: Record<string, string>;
 			loadDotenv?: boolean;
+			contextWindowTokens?: number;
 	  }
 	| { type: "oauth-login"; providerId: string; providerName: string; isNew: boolean }
 	| { type: "run-update" };
@@ -66,6 +67,7 @@ export async function runApp(cliArgs: string[] = []): Promise<AppResult | null> 
 								selectedFlags: result.selectedFlags,
 								selectedEnvVars: result.selectedEnvVars,
 								loadDotenv: result.loadDotenv,
+								contextWindowTokens: result.contextWindowTokens,
 							});
 						}}
 						onOAuthLogin={(result) => {

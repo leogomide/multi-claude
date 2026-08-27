@@ -233,7 +233,67 @@ describe("Smoke Test — TUI Flows", () => {
 		const frame = lastFrame()!;
 		expect(frame).toContain("My OpenRouter");
 		expect(frame).toContain("Select a model");
-		expect(frame).toContain("openai/gpt-4o"); // user model (no meta, shows ID)
-		expect(frame).toContain("Claude 3.5 Sonnet"); // API model (has meta, shows name)
+		expect(frame).toContain("Claude 3.5 Sonnet"); // API-only model, shown by display name
+		// The saved model "openai/gpt-4o" is also returned by the API, so the API entry
+		// supersedes it: one row, display name, with metadata — not the bare id twice.
+		expect(frame).toContain("GPT-4o");
+		expect(frame).not.toContain("openai/gpt-4o");
+	}, 10000);
+
+	// Regression: Ink re-subscribes useInput through an effect, so the handler could be
+	// one render behind and Enter would act on the item above the highlighted one.
+	test("6. Enter right after arrow keys selects the highlighted item", async () => {
+		const { lastFrame, stdin } = render(
+			<I18nProvider>
+				<UnifiedApp
+					onStartClaude={mock(() => {})}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
+			</I18nProvider>,
+		);
+
+		await delay(200);
+
+		// Settings(5), with almost no pause between the last arrow and Enter
+		for (let i = 0; i < 5; i++) {
+			await pressKey(stdin, KEYS.DOWN, 20);
+		}
+		await pressKey(stdin, KEYS.ENTER, 200);
+
+		const frame = lastFrame()!;
+		expect(frame).toContain("Open config folder");
+		expect(frame).not.toContain("Add installation");
+	}, 10000);
+
+	// Same stale-handler hazard in the model list, where picking the wrong row
+	// means launching Claude Code against the wrong model.
+	test("7. Enter right after arrow keys picks the highlighted model", async () => {
+		const onStartClaude = mock(() => {});
+		const { lastFrame, stdin } = render(
+			<I18nProvider>
+				<UnifiedApp
+					onStartClaude={onStartClaude}
+					onOAuthLogin={mock(() => {})}
+					onRunUpdate={mock(() => {})}
+				/>
+			</I18nProvider>,
+		);
+
+		await delay(200);
+		await navigateAndSelect(stdin, 2); // My OpenRouter
+		await waitForFrame(lastFrame, "Select a model");
+
+		// Models are sorted by display name: Claude 3.5 Sonnet(0), GPT-4o(1)
+		await pressKey(stdin, KEYS.DOWN, 20);
+		const highlighted = lastFrame()!
+			.split("\n")
+			.find((l) => l.includes("❯"));
+		expect(highlighted).toContain("GPT-4o");
+
+		await pressKey(stdin, KEYS.ENTER, 250);
+
+		// Leaving model selection means Enter acted on the highlighted row
+		expect(lastFrame()!).not.toContain("Select a model");
 	}, 10000);
 });

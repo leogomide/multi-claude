@@ -205,6 +205,7 @@ export const en: TranslationDictionary = {
 		fetchModels: "Fetch models from API",
 		authError: "Invalid API key. Please check your {{provider}} API key.",
 		networkError: "Network error. Could not reach {{provider}}.",
+		fallbackNotice: "Could not reach {{provider}} — showing the saved model list.",
 		validatingKey: "Validating API key...",
 		keyInvalid: "The API key is invalid or expired.",
 	},

@@ -1,7 +1,7 @@
 import { Spinner } from "@inkjs/ui";
 import { Box, Text, useInput } from "ink";
 import TextInput from "ink-text-input";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
 	getInstallationPath,
 	isAccountAuthenticated,
@@ -60,6 +60,7 @@ interface StartClaudeFlowProps {
 		selectedFlags: string[];
 		selectedEnvVars?: Record<string, string>;
 		loadDotenv?: boolean;
+		contextWindowTokens?: number;
 	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onCancel: () => void;
@@ -100,6 +101,7 @@ export function StartClaudeFlow({
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [query, setQuery] = useState("");
 	const [fetchError, setFetchError] = useState<ApiModelError | null>(null);
+	const [fallbackError, setFallbackError] = useState<ApiModelError | null>(null);
 	const [installations, setInstallations] = useState<Installation[]>([]);
 	const [selectedModel, setSelectedModel] = useState<string>("");
 	const [installationActiveIndex, setInstallationActiveIndex] = useState(0);
@@ -199,25 +201,35 @@ export function StartClaudeFlow({
 	const loadModelsForProvider = async (provider: ConfiguredProvider) => {
 		if (hasApiModelFetching(provider.templateId)) {
 			setStep("loading-models");
+			setFallbackError(null);
 			const result = await fetchApiModels(
 				provider.templateId,
 				provider.apiKey,
 				getProviderBaseUrl(provider),
 			);
 
+			const effective = getEffectiveModelsWithSource(provider);
+
 			if (!result.ok) {
+				// Falling back to the local list beats a dead-end error screen.
+				if (effective.length > 0) {
+					setFallbackError(result.error);
+					setModelItems(effective);
+					setStep("select-model");
+					return;
+				}
 				setFetchError(result.error);
 				setStep("error");
 				return;
 			}
 
-			const apiModels = result.models;
-			const effective = getEffectiveModelsWithSource(provider);
-			const effectiveNames = new Set(effective.map((m) => m.name));
-			const apiOnly = apiModels
-				.filter((meta) => !effectiveNames.has(meta.id))
-				.map((meta): ModelWithSource => ({ name: meta.id, source: "api", meta }));
-			const all = [...effective, ...apiOnly];
+			// The API list is canonical: it carries the real model id plus metadata.
+			const apiIds = new Set(result.models.map((m) => m.id.toLowerCase()));
+			const localOnly = effective.filter((m) => !apiIds.has(m.name.toLowerCase()));
+			const apiItems = result.models.map(
+				(meta): ModelWithSource => ({ name: meta.id, source: "api", meta }),
+			);
+			const all = [...localOnly, ...apiItems];
 
 			if (all.length === 0) {
 				setStep("no-models");
@@ -370,6 +382,8 @@ export function StartClaudeFlow({
 				}
 			}
 		}
+		const contextWindowTokens = modelItems.find((m) => m.name === selectedModel)?.meta
+			?.context_length;
 		onComplete({
 			provider: selectedProvider,
 			model: selectedModel,
@@ -377,7 +391,40 @@ export function StartClaudeFlow({
 			selectedFlags: flags,
 			selectedEnvVars: Object.keys(envVars).length > 0 ? envVars : undefined,
 			loadDotenv: loadDotenv || undefined,
+			contextWindowTokens,
 		});
+	};
+
+	// Ink re-subscribes useInput via an effect, so the handler can be the one from the
+	// previous render. These refs keep input handling on the current values instead.
+	const activeIndexRef = useRef(0);
+	const filteredItemsRef = useRef(filteredItems);
+	const installationActiveIndexRef = useRef(0);
+	const installationListItemsRef = useRef(installationListItems);
+	useLayoutEffect(() => {
+		activeIndexRef.current = activeIndex;
+		filteredItemsRef.current = filteredItems;
+		installationActiveIndexRef.current = installationActiveIndex;
+		installationListItemsRef.current = installationListItems;
+	});
+
+	const clampMove = (current: number, delta: number, count: number) =>
+		Math.max(0, Math.min(count - 1, current + delta));
+
+	const moveModelActive = (delta: number) => {
+		const next = clampMove(activeIndexRef.current, delta, filteredItemsRef.current.length);
+		activeIndexRef.current = next;
+		setActiveIndex(next);
+	};
+
+	const moveInstallationActive = (delta: number) => {
+		const next = clampMove(
+			installationActiveIndexRef.current,
+			delta,
+			installationListItemsRef.current.length,
+		);
+		installationActiveIndexRef.current = next;
+		setInstallationActiveIndex(next);
 	};
 
 	useInput((input, key) => {
@@ -409,11 +456,11 @@ export function StartClaudeFlow({
 		}
 		if (step === "select-installation") {
 			if (key.upArrow) {
-				setInstallationActiveIndex((prev) => Math.max(0, prev - 1));
+				moveInstallationActive(-1);
 			} else if (key.downArrow) {
-				setInstallationActiveIndex((prev) => Math.min(installationListItems.length - 1, prev + 1));
+				moveInstallationActive(1);
 			} else if (key.return && selectedProvider) {
-				const item = installationListItems[installationActiveIndex];
+				const item = installationListItemsRef.current[installationActiveIndexRef.current];
 				if (item) {
 					goToFlagsStep(selectedProvider, selectedModel, item.id);
 				}
@@ -421,11 +468,11 @@ export function StartClaudeFlow({
 			return;
 		}
 		if (key.upArrow) {
-			setActiveIndex((prev) => Math.max(0, prev - 1));
+			moveModelActive(-1);
 		} else if (key.downArrow) {
-			setActiveIndex((prev) => Math.min(filteredItems.length - 1, prev + 1));
+			moveModelActive(1);
 		} else if (key.return) {
-			const item = filteredItems[activeIndex];
+			const item = filteredItemsRef.current[activeIndexRef.current];
 			if (item && selectedProvider) {
 				goToInstallationOrComplete(selectedProvider, item.name);
 			}
@@ -434,6 +481,7 @@ export function StartClaudeFlow({
 
 	// Reset index when search query changes
 	useEffect(() => {
+		activeIndexRef.current = 0;
 		setActiveIndex(0);
 	}, [query]);
 
@@ -687,6 +735,11 @@ export function StartClaudeFlow({
 				<StatusMessage variant="info">
 					{t("selector.providerLabel")}: {selectedProvider.name}
 				</StatusMessage>
+				{fallbackError && (
+					<StatusMessage variant="warning">
+						{t("apiModels.fallbackNotice", { provider: providerLabel })}
+					</StatusMessage>
+				)}
 				<Text bold color="cyan">
 					{t("selector.selectModel")}
 				</Text>

@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import TextInput from "ink-text-input";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 export interface ChecklistItem {
 	label: string;
@@ -43,6 +43,15 @@ export function ChecklistSelect({
 }: ChecklistSelectProps) {
 	const allItems = groups.flatMap((g) => g.items);
 	const [activeIndex, setActiveIndex] = useState(0);
+
+	// Ink re-subscribes useInput via an effect, so the handler can be the one from the
+	// previous render. These refs keep input handling on the current values instead.
+	const activeIndexRef = useRef(0);
+	const allItemsRef = useRef(allItems);
+	useLayoutEffect(() => {
+		allItemsRef.current = allItems;
+		activeIndexRef.current = activeIndex;
+	});
 
 	// Build exclusion map: for each item with exclusiveGroup, map to its siblings
 	const exclusionMap = useMemo(() => {
@@ -100,6 +109,14 @@ export function ChecklistSelect({
 		}
 	});
 
+	const moveActive = (delta: number) => {
+		const count = allItemsRef.current.length;
+		if (count === 0) return;
+		const next = (activeIndexRef.current + delta + count) % count;
+		activeIndexRef.current = next;
+		setActiveIndex(next);
+	};
+
 	useInput((input, key) => {
 		if (editingValue) {
 			if (key.return) {
@@ -113,11 +130,11 @@ export function ChecklistSelect({
 		if (key.escape && onEscape) {
 			onEscape();
 		} else if (key.upArrow) {
-			setActiveIndex((prev) => (prev > 0 ? prev - 1 : allItems.length - 1));
+			moveActive(-1);
 		} else if (key.downArrow) {
-			setActiveIndex((prev) => (prev < allItems.length - 1 ? prev + 1 : 0));
+			moveActive(1);
 		} else if (input === " ") {
-			const item = allItems[activeIndex];
+			const item = allItemsRef.current[activeIndexRef.current];
 			if (item) {
 				setCheckedValues((prev) => {
 					const next = new Set(prev);

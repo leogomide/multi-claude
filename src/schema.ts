@@ -11,6 +11,11 @@ export interface ProviderTemplate {
 	nameKey?: string;
 	baseUrl: string;
 	defaultModels: string[];
+	/**
+	 * Static per-model metadata for providers whose API does not expose it.
+	 * Keys are lowercase model ids; the API always wins when it reports a value.
+	 */
+	modelSpecs?: Record<string, { context: number; maxOutput?: number }>;
 	env: Record<string, string>;
 	configureEnv?: EnvConfigurator;
 	defaultApiKey?: string;

@@ -294,6 +294,7 @@ if (result) {
 			selectedFlags: result.selectedFlags,
 			selectedEnvVars: result.selectedEnvVars,
 			loadDotenv: result.loadDotenv ?? false,
+			contextWindowTokens: result.contextWindowTokens,
 		};
 		await writeFile(SELECTION_FILE, JSON.stringify(selection), "utf-8");
 		log.info("selection written to " + SELECTION_FILE);

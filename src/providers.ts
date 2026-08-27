@@ -184,10 +184,24 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		// Coding Plan endpoint, distinct from the pay-as-you-go API (api.z.ai/api/paas/v4)
 		baseUrl: "https://api.z.ai/api/anthropic",
 		defaultModels: ["GLM-5.3", "GLM-5-Turbo", "GLM-4.7"],
+		// Z.AI's /v1/models does not report context length. Sourced from the OpenRouter
+		// model API (z-ai/*) and cross-checked against Z.AI's docs: GLM-5.3 and
+		// GLM-5.3-Flash are documented at 1M context / 128K output, GLM-5 at 200K.
+		modelSpecs: {
+			"glm-5.3": { context: 1_048_576, maxOutput: 131_072 },
+			"glm-5.3-flash": { context: 1_048_576, maxOutput: 131_072 },
+			"glm-5.2": { context: 1_048_576, maxOutput: 131_072 },
+			"glm-5.1": { context: 204_800, maxOutput: 131_072 },
+			"glm-5": { context: 204_800, maxOutput: 128_000 },
+			"glm-5-turbo": { context: 202_752, maxOutput: 131_072 },
+			"glm-4.7": { context: 204_800, maxOutput: 131_072 },
+			"glm-4.6": { context: 204_800, maxOutput: 16_384 },
+			"glm-4.5": { context: 131_072, maxOutput: 98_304 },
+			"glm-4.5-air": { context: 131_072, maxOutput: 98_304 },
+		},
 		env: {
 			API_TIMEOUT_MS: "3000000",
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
-			CLAUDE_CODE_AUTO_COMPACT_WINDOW: "1000000",
 		},
 	},
 	{
@@ -324,6 +338,8 @@ const PRESERVED_CLAUDE_CODE_VARS = new Set([
 	"CLAUDE_CODE_GIT_BASH_PATH", // Bash path on Windows
 	"CLAUDE_CODE_SHELL", // Shell override
 	"CLAUDE_CODE_TMPDIR", // Temp directory override
+	"CLAUDE_CODE_MAX_CONTEXT_TOKENS", // Context window hint for third-party models
+	"CLAUDE_CODE_AUTO_COMPACT_WINDOW", // Compaction budget, derived from the window below
 ]);
 
 /** Remove all CLAUDECODE/CLAUDE_CODE env vars except essential ones. */
@@ -358,10 +374,17 @@ function setModelEnvVars(env: Record<string, string>, model: string): void {
 	env["ANTHROPIC_DEFAULT_HAIKU_MODEL"] = model;
 }
 
+// Claude Code compacts as usage approaches this budget, so leave headroom for the
+// reply and for tool results already in flight. It only accepts 100k..1M.
+const AUTO_COMPACT_FRACTION = 0.8;
+const AUTO_COMPACT_MIN = 100_000;
+const AUTO_COMPACT_MAX = 1_000_000;
+
 export function buildClaudeEnv(
 	provider: ConfiguredProvider,
 	model: string,
 	installationId?: string,
+	contextWindowTokens?: number,
 ): Record<string, string> | null {
 	const template = getTemplate(provider.templateId);
 	if (!template) return null;
@@ -425,6 +448,18 @@ export function buildClaudeEnv(
 	// Common: set model env vars (must come AFTER cleanup + re-apply)
 	setModelEnvVars(env, model);
 
+	// Claude Code defaults unknown models to a 200k context window; pass the real one when known.
+	if (contextWindowTokens && contextWindowTokens > 0 && !env["CLAUDE_CODE_MAX_CONTEXT_TOKENS"]) {
+		env["CLAUDE_CODE_MAX_CONTEXT_TOKENS"] = String(contextWindowTokens);
+	}
+
+	// Derive the compaction budget from the window instead of hardcoding it per template.
+	if (contextWindowTokens && contextWindowTokens > 0 && !env["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]) {
+		const derived = Math.round(contextWindowTokens * AUTO_COMPACT_FRACTION);
+		const clamped = Math.min(AUTO_COMPACT_MAX, Math.max(AUTO_COMPACT_MIN, derived));
+		env["CLAUDE_CODE_AUTO_COMPACT_WINDOW"] = String(clamped);
+	}
+
 	// Set installation dir for custom installations
 	if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
 		env["CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
@@ -450,19 +485,40 @@ export function getEffectiveModels(provider: ConfiguredProvider): string[] {
 	return [...provider.models, ...extra];
 }
 
+export function getModelSpec(
+	templateId: string,
+	model: string,
+): { context: number; maxOutput?: number } | undefined {
+	const specs = getTemplate(templateId)?.modelSpecs;
+	if (!specs) return undefined;
+	// Default lists use "GLM-5.3" while the API returns "glm-5.3".
+	return specs[model.toLowerCase()];
+}
+
 export function getEffectiveModelsWithSource(provider: ConfiguredProvider): ModelWithSource[] {
 	if (provider.type === "oauth") return [];
 	const template = getTemplate(provider.templateId);
 	const defaultSet = new Set(template?.defaultModels ?? []);
 	const userSet = new Set(provider.models);
+
+	const withSpec = (name: string, source: ModelWithSource["source"]): ModelWithSource => {
+		const spec = getModelSpec(provider.templateId, name);
+		if (!spec) return { name, source };
+		return {
+			name,
+			source,
+			meta: { id: name, context_length: spec.context, max_output_tokens: spec.maxOutput },
+		};
+	};
+
 	const result: ModelWithSource[] = [];
 	for (const m of provider.models) {
-		result.push({ name: m, source: defaultSet.has(m) ? "default" : "user" });
+		result.push(withSpec(m, defaultSet.has(m) ? "default" : "user"));
 	}
 	if (template) {
 		for (const m of template.defaultModels) {
 			if (!userSet.has(m)) {
-				result.push({ name: m, source: "default" });
+				result.push(withSpec(m, "default"));
 			}
 		}
 	}

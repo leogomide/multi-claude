@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 
 export interface GroupedSelectItem {
@@ -38,6 +38,17 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 	const prevItemsKey = useRef("");
 	const { rows } = useTerminalSize();
 
+	// Ink re-subscribes useInput via an effect, so the handler can still be the one
+	// from the previous render when a key arrives. Reading state from its closure
+	// then acts on a stale index — Enter would select the item above the highlight.
+	// These refs are the authority for input handling instead.
+	const activeIndexRef = useRef(0);
+	const allItemsRef = useRef(allItems);
+	useLayoutEffect(() => {
+		allItemsRef.current = allItems;
+		activeIndexRef.current = activeIndex;
+	});
+
 	useEffect(() => {
 		const item = allItems[activeIndex];
 		if (item && onHighlight) {
@@ -57,15 +68,23 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 		}
 	});
 
+	const moveActive = (delta: number) => {
+		const count = allItemsRef.current.length;
+		if (count === 0) return;
+		const next = (activeIndexRef.current + delta + count) % count;
+		activeIndexRef.current = next;
+		setActiveIndex(next);
+	};
+
 	useInput((input, key) => {
 		if (key.escape && onEscape) {
 			onEscape();
 		} else if (key.upArrow) {
-			setActiveIndex((prev) => (prev > 0 ? prev - 1 : allItems.length - 1));
+			moveActive(-1);
 		} else if (key.downArrow) {
-			setActiveIndex((prev) => (prev < allItems.length - 1 ? prev + 1 : 0));
+			moveActive(1);
 		} else if (key.return) {
-			const item = allItems[activeIndex];
+			const item = allItemsRef.current[activeIndexRef.current];
 			if (item) {
 				onSelect(item);
 			}

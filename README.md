@@ -325,7 +325,8 @@ OpenRouter validates your API key when you add or edit a provider.
 - **Docs:** [Z.AI Claude Code manual configuration](https://docs.z.ai/devpack/tool/claude#manual-configuration)
 - **Base URL:** `https://api.z.ai/api/anthropic` — the Coding Plan endpoint, not the pay-as-you-go API (`https://api.z.ai/api/paas/v4`)
 - **API key:** Get one at [z.ai](https://z.ai)
-- **Default models:** `GLM-5.3`, `GLM-5-Turbo`, `GLM-4.7`
+- **Models:** Fetched from `/v1/models` on the configured base URL — falls back to `GLM-5.3`, `GLM-5-Turbo`, `GLM-4.7` if the API is unreachable
+- **Context window:** Z.AI does not report it over the API, so multi-claude ships a per-model table (GLM-5.3 / 5.3-Flash / 5.2 at 1M, GLM-5 / 5.1 / 4.7 / 4.6 at 200K, GLM-4.5 / 4.5-Air at 128K) and passes it to Claude Code, which would otherwise assume 200k for every GLM model
 
 **Coding Plan:** Subscription tiers with a rolling 5-hour window and weekly limits. All tiers include GLM-5.3, GLM-5-Turbo and GLM-4.7 — requests for previous models (GLM-5.2 / GLM-5.1) are automatically routed to GLM-5.3. Quarterly saves 10%, yearly saves 30%.
 
@@ -586,6 +587,11 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ### v1.0.35
 
+- **feat:** third-party models now report their real context window to Claude Code, which previously assumed 200k for every unrecognized model — sourced from the provider API when available, from a built-in per-model table otherwise
+- **feat:** the auto-compact budget is now derived from the model context window instead of being hardcoded per provider
+- **feat:** the Z.AI provider now fetches its model list from the provider API, falling back to the built-in list when the API is unreachable
+- **fix:** a failed model fetch no longer dead-ends on an error screen when a saved model list is available
+- **fix:** confirming with Enter right after an arrow key no longer selects the item above the highlighted one, in the main menu, the model list and the launch options
 - **fix:** updated the Z.AI provider to the current GLM Coding Plan lineup — `GLM-5.3`, `GLM-5-Turbo` and `GLM-4.7`, dropping the discontinued GLM-4.5/4.6 models
 - **fix:** the Z.AI provider now sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` and `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, as recommended by Z.AI's official configuration
 - **refactor:** renamed the Z.AI provider to `Z.AI Coding Plan`, making it explicit that it targets the Coding Plan endpoint rather than the pay-as-you-go API
