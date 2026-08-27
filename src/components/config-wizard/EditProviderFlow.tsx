@@ -3,9 +3,10 @@ import { Box, Text, useInput } from "ink";
 import React, { useEffect, useState } from "react";
 import { loadConfig, removeAccountDir, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
-import { getTemplate } from "../../providers.ts";
-import type { ConfiguredProvider } from "../../schema.ts";
+import { getProviderBaseUrl, getTemplate, getTemplateLabel } from "../../providers.ts";
+import type { AuthVar, ConfiguredProvider } from "../../schema.ts";
 import { hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
+import { normalizeBaseUrl, validateBaseUrl } from "../../utils/validate-url.ts";
 import { ConfirmPrompt } from "../common/ConfirmPrompt.tsx";
 import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
@@ -19,6 +20,7 @@ type Step =
 	| "edit-name"
 	| "edit-key"
 	| "edit-url"
+	| "edit-auth"
 	| "validating-key"
 	| "confirm-remove";
 
@@ -54,6 +56,7 @@ export function EditProviderFlow({
 				step === "edit-name" ||
 				step === "edit-key" ||
 				step === "edit-url" ||
+				step === "edit-auth" ||
 				step === "confirm-remove"
 			) {
 				setStep("menu");
@@ -67,7 +70,11 @@ export function EditProviderFlow({
 		if (step !== "validating-key") return;
 		let cancelled = false;
 
-		validateApiKey(provider?.templateId ?? "", pendingApiKey).then((result) => {
+		validateApiKey(
+			provider?.templateId ?? "",
+			pendingApiKey,
+			provider ? getProviderBaseUrl(provider) : undefined,
+		).then((result) => {
 			if (cancelled) return;
 			if (result.valid) {
 				loadConfig().then((config) => {
@@ -88,7 +95,9 @@ export function EditProviderFlow({
 				});
 			} else {
 				const template = getTemplate(provider?.templateId ?? "");
-				const providerLabel = template?.description ?? provider?.templateId ?? "";
+				const providerLabel = template
+					? getTemplateLabel(template, t)
+					: (provider?.templateId ?? "");
 				const errorMsg =
 					result.error === "auth"
 						? t("apiModels.keyInvalid")
@@ -151,6 +160,9 @@ export function EditProviderFlow({
 					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
 					{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" },
 					{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" },
+					...(template?.promptAuthVar
+						? [{ label: `🔐 ${t("editProvider.editAuthVar")}`, value: "edit-auth" }]
+						: []),
 					{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
 					{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
 					{ label: `↩ ${t("editProvider.back")}`, value: "back" },
@@ -159,7 +171,7 @@ export function EditProviderFlow({
 		return (
 			<AppShell footerItems={footerItems}>
 				<StatusMessage variant="info">
-					{provider.name} ({template?.description ?? provider.templateId})
+					{provider.name} ({template ? getTemplateLabel(template, t) : provider.templateId})
 				</StatusMessage>
 				{message && <StatusMessage variant={message.variant}>{message.text}</StatusMessage>}
 				<Box marginTop={1} flexDirection="column">
@@ -174,6 +186,8 @@ export function EditProviderFlow({
 								setStep("edit-name");
 							} else if (item.value === "edit-url") {
 								setStep("edit-url");
+							} else if (item.value === "edit-auth") {
+								setStep("edit-auth");
 							} else if (item.value === "edit-key") {
 								setStep("edit-key");
 							} else if (item.value === "manage-models") {
@@ -242,21 +256,9 @@ export function EditProviderFlow({
 				<TextPrompt
 					label={t("editFlow.urlLabel")}
 					initialValue={currentUrl}
-					validate={(val) => {
-						const trimmed = val.trim();
-						if (!trimmed) return t("validation.urlInvalid");
-						if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
-							return t("validation.urlMustBeHttp");
-						}
-						try {
-							new URL(trimmed);
-						} catch {
-							return t("validation.urlInvalid");
-						}
-						return undefined;
-					}}
+					validate={(val) => validateBaseUrl(val, t)}
 					onSubmit={(url) => {
-						const trimmedUrl = url.trim().replace(/\/+$/, "");
+						const trimmedUrl = normalizeBaseUrl(url);
 						loadConfig().then((config) => {
 							const prov = config.providers.find((p) => p.id === providerId);
 							if (prov) {
@@ -267,6 +269,39 @@ export function EditProviderFlow({
 								refreshProvider().then(() => {
 									setMessage({
 										text: t("editProvider.urlUpdated", { url: trimmedUrl }),
+										variant: "success",
+									});
+									setStep("menu");
+								});
+							});
+						});
+					}}
+				/>
+			</AppShell>
+		);
+	}
+
+	if (step === "edit-auth" && provider) {
+		const authVarItems = [
+			{ label: t("addFlow.authVarBearer"), value: "ANTHROPIC_AUTH_TOKEN" },
+			{ label: t("addFlow.authVarApiKey"), value: "ANTHROPIC_API_KEY" },
+		];
+		return (
+			<AppShell footerItems={footerItems}>
+				<Text bold color="cyan">
+					{t("editFlow.authVarLabel")}
+				</Text>
+				<CyanSelectInput
+					items={authVarItems}
+					onSelect={(item) => {
+						const nextAuthVar = item.value as AuthVar;
+						loadConfig().then((config) => {
+							const prov = config.providers.find((p) => p.id === providerId);
+							if (prov) prov.authVar = nextAuthVar;
+							saveConfig(config).then(() => {
+								refreshProvider().then(() => {
+									setMessage({
+										text: t("editProvider.authVarUpdated", { authVar: nextAuthVar }),
 										variant: "success",
 									});
 									setStep("menu");

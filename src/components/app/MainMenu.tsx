@@ -7,7 +7,12 @@ import { isAccountAuthenticated, loadConfig } from "../../config.ts";
 import { getCliId } from "../../headless.ts";
 import { useUpdateCheck } from "../../hooks/useUpdateCheck.ts";
 import { useTranslation } from "../../i18n/context.tsx";
-import { getEffectiveModels, getTemplate } from "../../providers.ts";
+import {
+	getEffectiveModels,
+	getProviderBaseUrl,
+	getTemplate,
+	getTemplateLabel,
+} from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
 import { hasApiModelFetching } from "../../services/api-models.ts";
 import type { GroupedSelectGroup, GroupedSelectItem } from "../common/GroupedSelect.tsx";
@@ -158,7 +163,10 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 				const items: SidebarItem[] = [
 					{ label: t("sidebar.name"), value: provider.name },
 					{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
-					{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
+					{
+						label: t("sidebar.template"),
+						value: template ? getTemplateLabel(template, t) : provider.templateId,
+					},
 					{
 						label: t("sidebar.authStatus"),
 						value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"),
@@ -176,13 +184,17 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: provider.name },
 				{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
-				{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
+				{
+					label: t("sidebar.template"),
+					value: template ? getTemplateLabel(template, t) : provider.templateId,
+				},
 				{ label: t("sidebar.models"), value: modelsValue },
 			];
-			if (template?.baseUrl) {
+			const effectiveUrl = getProviderBaseUrl(provider);
+			if (effectiveUrl) {
 				items.push({
 					label: t("sidebar.baseUrl"),
-					value: template.baseUrl.replace("https://", ""),
+					value: effectiveUrl.replace(/^https?:\/\//, ""),
 				});
 			}
 			if (provider.apiKeyValid === false) {

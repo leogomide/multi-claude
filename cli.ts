@@ -12,7 +12,7 @@ import { es } from "./src/i18n/locales/es.ts";
 import { ptBR } from "./src/i18n/locales/pt-BR.ts";
 import type { TranslationDictionary } from "./src/i18n/types.ts";
 import { initKeystore } from "./src/keystore.ts";
-import type { ConfiguredProvider } from "./src/schema.ts";
+import type { AuthVar, ConfiguredProvider } from "./src/schema.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
 
 function getLocaleDict(): TranslationDictionary {
@@ -34,6 +34,8 @@ interface TuiSelection {
 	apiKey: string;
 	models: string[];
 	model: string;
+	baseUrl?: string;
+	authVar?: AuthVar;
 	installationId?: string;
 	selectedFlags?: string[];
 	selectedEnvVars?: Record<string, string>;
@@ -333,6 +335,8 @@ while (true) {
 		apiKey: selection.apiKey ?? "",
 		apiKeyValid: true,
 		models: selection.models,
+		baseUrl: selection.baseUrl,
+		authVar: selection.authVar,
 	};
 
 	// Merge TUI-selected flags with original CLI args

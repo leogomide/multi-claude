@@ -3,7 +3,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { isAccountAuthenticated, loadConfig } from "../../config.ts";
 import { getCliId } from "../../headless.ts";
 import { useTranslation } from "../../i18n/context.tsx";
-import { getEffectiveModels, getProviderBaseUrl, getTemplate } from "../../providers.ts";
+import {
+	getEffectiveModels,
+	getProviderBaseUrl,
+	getTemplate,
+	getTemplateLabel,
+} from "../../providers.ts";
 import type { ConfiguredProvider } from "../../schema.ts";
 import { hasApiModelFetching } from "../../services/api-models.ts";
 import type { GroupedSelectItem } from "../common/GroupedSelect.tsx";
@@ -92,7 +97,10 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 				const items: SidebarItem[] = [
 					{ label: t("sidebar.name"), value: provider.name },
 					{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
-					{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
+					{
+						label: t("sidebar.template"),
+						value: template ? getTemplateLabel(template, t) : provider.templateId,
+					},
 					{
 						label: t("sidebar.authStatus"),
 						value: authenticated ? t("anthropic.authenticated") : t("anthropic.notAuthenticated"),
@@ -110,7 +118,10 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 			const items: SidebarItem[] = [
 				{ label: t("sidebar.name"), value: provider.name },
 				{ label: t("sidebar.cliId"), value: getCliId(provider, providers) },
-				{ label: t("sidebar.template"), value: template?.description ?? provider.templateId },
+				{
+					label: t("sidebar.template"),
+					value: template ? getTemplateLabel(template, t) : provider.templateId,
+				},
 				{ label: t("sidebar.models"), value: modelsValue },
 			];
 			const effectiveUrl = getProviderBaseUrl(provider);

@@ -2,14 +2,21 @@ import { z } from "zod";
 
 export type EnvConfigurator = (env: Record<string, string>, apiKey: string, model: string) => void;
 
+export const AUTH_VARS = ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"] as const;
+export type AuthVar = (typeof AUTH_VARS)[number];
+
 export interface ProviderTemplate {
 	id: string;
 	description: string;
+	nameKey?: string;
 	baseUrl: string;
 	defaultModels: string[];
 	env: Record<string, string>;
 	configureEnv?: EnvConfigurator;
 	defaultApiKey?: string;
+	promptBaseUrl?: boolean;
+	promptAuthVar?: boolean;
+	promptModel?: boolean;
 }
 
 export const configuredProviderSchema = z.object({
@@ -21,6 +28,7 @@ export const configuredProviderSchema = z.object({
 	apiKeyValid: z.boolean().default(true),
 	models: z.array(z.string()).default([]),
 	baseUrl: z.string().optional(),
+	authVar: z.enum(AUTH_VARS).optional(),
 });
 
 export const installationSchema = z.object({

@@ -214,6 +214,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		baseUrl: "http://localhost:4000",
 		defaultModels: [],
 		defaultApiKey: "litellm",
+		promptBaseUrl: true,
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
@@ -225,6 +226,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		baseUrl: "http://127.0.0.1:8080",
 		defaultModels: [],
 		defaultApiKey: "llamacpp",
+		promptBaseUrl: true,
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 			API_TIMEOUT_MS: "600000",
@@ -237,6 +239,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		baseUrl: "http://localhost:1234",
 		defaultModels: [],
 		defaultApiKey: "lmstudio",
+		promptBaseUrl: true,
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 			API_TIMEOUT_MS: "600000",
@@ -249,6 +252,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		baseUrl: "http://localhost:11434",
 		defaultModels: [],
 		defaultApiKey: "ollama",
+		promptBaseUrl: true,
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 			API_TIMEOUT_MS: "600000",
@@ -261,6 +265,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		baseUrl: "http://localhost:20128/v1",
 		defaultModels: [],
 		defaultApiKey: "omniroute",
+		promptBaseUrl: true,
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
@@ -272,9 +277,22 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		baseUrl: "http://localhost:20128/v1",
 		defaultModels: [],
 		defaultApiKey: "9router",
+		promptBaseUrl: true,
 		env: {
 			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
 		},
+	},
+	{
+		id: "custom",
+		description: "Custom Provider",
+		nameKey: "templates.custom",
+		baseUrl: "",
+		defaultModels: [],
+		defaultApiKey: "custom",
+		promptBaseUrl: true,
+		promptAuthVar: true,
+		promptModel: true,
+		env: {},
 	},
 ];
 
@@ -284,6 +302,10 @@ export function getTemplate(id: string): ProviderTemplate | undefined {
 
 export function getProviderBaseUrl(provider: ConfiguredProvider): string | undefined {
 	return provider.baseUrl || getTemplate(provider.templateId)?.baseUrl;
+}
+
+export function getTemplateLabel(tmpl: ProviderTemplate, t: (key: string) => string): string {
+	return tmpl.nameKey ? t(tmpl.nameKey) : tmpl.description;
 }
 
 function defaultEnvConfigurator(
@@ -391,6 +413,11 @@ export function buildClaudeEnv(
 	const templateWithUrl = { ...template, baseUrl: effectiveBaseUrl };
 	const configurator: EnvConfigurator = template.configureEnv ?? defaultEnvConfigurator;
 	configurator.call(templateWithUrl, env, provider.apiKey, model);
+
+	if (provider.authVar === "ANTHROPIC_API_KEY") {
+		env["ANTHROPIC_API_KEY"] = provider.apiKey;
+		delete env["ANTHROPIC_AUTH_TOKEN"];
+	}
 
 	// Common: cleanup CLAUDE_CODE vars and re-apply template env
 	cleanupAndApplyTemplateEnv(env, template);

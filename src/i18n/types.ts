@@ -34,12 +34,19 @@ export interface TranslationDictionary {
 		changeLanguage: string;
 		exit: string;
 	};
+	templates: {
+		custom: string;
+	};
 	addFlow: {
 		selectTemplate: string;
 		nameLabel: string;
 		apiKeyLabel: string;
 		apiKeyLabelOptional: string;
 		urlLabel: string;
+		modelLabel: string;
+		authVarLabel: string;
+		authVarBearer: string;
+		authVarApiKey: string;
 		success: string;
 		defaultModels: string;
 	};
@@ -48,6 +55,7 @@ export interface TranslationDictionary {
 		nameLabel: string;
 		apiKeyLabel: string;
 		urlLabel: string;
+		authVarLabel: string;
 		noProviders: string;
 		success: string;
 	};
@@ -89,12 +97,14 @@ export interface TranslationDictionary {
 		editName: string;
 		editApiKey: string;
 		editUrl: string;
+		editAuthVar: string;
 		manageModels: string;
 		removeProvider: string;
 		back: string;
 		nameUpdated: string;
 		apiKeyUpdated: string;
 		urlUpdated: string;
+		authVarUpdated: string;
 	};
 	settings: {
 		title: string;
@@ -233,6 +243,8 @@ export interface TranslationDictionary {
 		template: string;
 		models: string;
 		baseUrl: string;
+		baseUrlUserDefined: string;
+		modelsUserDefined: string;
 		source: string;
 		sourceDefault: string;
 		sourceUser: string;

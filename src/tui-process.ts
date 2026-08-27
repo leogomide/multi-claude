@@ -287,6 +287,8 @@ if (result) {
 			type: result.provider.type ?? "api",
 			apiKey: encryptedApiKey,
 			models: result.provider.models,
+			baseUrl: result.provider.baseUrl,
+			authVar: result.provider.authVar,
 			model: result.model,
 			installationId: result.installationId,
 			selectedFlags: result.selectedFlags,

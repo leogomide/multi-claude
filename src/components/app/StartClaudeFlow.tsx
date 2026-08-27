@@ -13,7 +13,12 @@ import {
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import type { ModelWithSource } from "../../providers.ts";
-import { getEffectiveModelsWithSource, getProviderBaseUrl, getTemplate } from "../../providers.ts";
+import {
+	getEffectiveModelsWithSource,
+	getProviderBaseUrl,
+	getTemplate,
+	getTemplateLabel,
+} from "../../providers.ts";
 import type { ConfiguredProvider, Installation } from "../../schema.ts";
 import { DEFAULT_INSTALLATION_ID, DEFAULT_LAUNCH_TEMPLATE_ID } from "../../schema.ts";
 import type { ApiModelError } from "../../services/api-models.ts";
@@ -437,7 +442,7 @@ export function StartClaudeFlow({
 	const providerLabel = useMemo(() => {
 		if (!selectedProvider) return "";
 		const tmpl = getTemplate(selectedProvider.templateId);
-		return tmpl?.description ?? selectedProvider.templateId;
+		return tmpl ? getTemplateLabel(tmpl, t) : selectedProvider.templateId;
 	}, [selectedProvider]);
 
 	const sidebarContent = useMemo(() => {
