@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.36-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.37-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -578,7 +578,16 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.36 (current)
+### v1.0.37 (current)
+
+- **feat:** third-party models now report their real context window to Claude Code, which previously assumed 200k for every unrecognized model — sourced from the provider API when available, from a built-in per-model table otherwise
+- **feat:** the auto-compact budget is now derived from the model context window instead of being hardcoded per provider
+- **feat:** the Z.AI provider now fetches its model list from the provider API, falling back to the built-in list when the API is unreachable
+- **fix:** a failed model fetch no longer dead-ends on an error screen when a saved model list is available
+- **fix:** confirming with Enter right after an arrow key no longer selects the item above the highlighted one, in the main menu, the model list and the launch options
+- **fix:** headless launches (`--provider` / `--model`) did not pass the model context window, so only the TUI benefited from it
+
+### v1.0.36
 
 - **feat:** added a Custom Provider template — set your own base URL, token and model for any Anthropic-compatible gateway, and pick whether the token is sent as `ANTHROPIC_AUTH_TOKEN` or `ANTHROPIC_API_KEY`
 - **fix:** custom base URLs were ignored when launching from the TUI, so providers like Ollama, LM Studio, llama.cpp, LiteLLM, OmniRoute and 9Router fell back to the template default unless launched with `--provider`
@@ -587,11 +596,6 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ### v1.0.35
 
-- **feat:** third-party models now report their real context window to Claude Code, which previously assumed 200k for every unrecognized model — sourced from the provider API when available, from a built-in per-model table otherwise
-- **feat:** the auto-compact budget is now derived from the model context window instead of being hardcoded per provider
-- **feat:** the Z.AI provider now fetches its model list from the provider API, falling back to the built-in list when the API is unreachable
-- **fix:** a failed model fetch no longer dead-ends on an error screen when a saved model list is available
-- **fix:** confirming with Enter right after an arrow key no longer selects the item above the highlighted one, in the main menu, the model list and the launch options
 - **fix:** updated the Z.AI provider to the current GLM Coding Plan lineup — `GLM-5.3`, `GLM-5-Turbo` and `GLM-4.7`, dropping the discontinued GLM-4.5/4.6 models
 - **fix:** the Z.AI provider now sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` and `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, as recommended by Z.AI's official configuration
 - **refactor:** renamed the Z.AI provider to `Z.AI Coding Plan`, making it explicit that it targets the Coding Plan endpoint rather than the pay-as-you-go API
