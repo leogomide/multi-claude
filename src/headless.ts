@@ -22,7 +22,7 @@ import {
 	verifyMasterPassword,
 } from "./credential-store.ts";
 import { initKeystore, migrateKeyWrapping } from "./keystore.ts";
-import { getEffectiveModels } from "./providers.ts";
+import { getEffectiveModels, getModelSpec } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 
@@ -353,8 +353,20 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 		`resolved provider="${provider.name}" model="${model}" installation="${installationId}"`,
 	);
 
+	// Same context window the TUI resolves, so headless launches are not stuck on
+	// the 200k Claude Code assumes for every model it does not recognize.
+	const contextWindowTokens = getModelSpec(provider.templateId, model)?.context;
+
 	const { runClaude } = await import("./runner.ts");
-	const exitCode = await runClaude(provider, model, args.claudeArgs, installationId);
+	const exitCode = await runClaude(
+		provider,
+		model,
+		args.claudeArgs,
+		installationId,
+		undefined,
+		undefined,
+		contextWindowTokens,
+	);
 
 	const providerInfo = provider.type === "oauth" ? provider.name : `${provider.name} (${model})`;
 
