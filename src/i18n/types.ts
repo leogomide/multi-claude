@@ -23,6 +23,7 @@ export interface TranslationDictionary {
 		selectModel: string;
 		noProviders: string;
 		noModels: string;
+		noModelsAvailable: string;
 		providerLabel: string;
 	};
 	menu: {
@@ -46,6 +47,7 @@ export interface TranslationDictionary {
 		apiKeyLabelOptional: string;
 		urlLabel: string;
 		modelLabel: string;
+		modelLabelOptional: string;
 		authVarLabel: string;
 		authVarBearer: string;
 		authVarApiKey: string;
@@ -211,6 +213,7 @@ export interface TranslationDictionary {
 		fallbackNotice: string;
 		validatingKey: string;
 		keyInvalid: string;
+		noSavedModels: string;
 	};
 	anthropic: {
 		loginInProgress: string;

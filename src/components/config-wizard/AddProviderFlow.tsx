@@ -12,7 +12,11 @@ import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import { getTemplateLabel, PROVIDER_TEMPLATES } from "../../providers.ts";
 import type { AuthVar, ConfiguredProvider } from "../../schema.ts";
-import { hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
+import {
+	hasApiKeyValidation,
+	hasApiModelFetching,
+	validateApiKey,
+} from "../../services/api-models.ts";
 import {
 	ignoresContextWindow,
 	parseContextWindow,
@@ -51,7 +55,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const [authVar, setAuthVar] = useState<AuthVar>("ANTHROPIC_AUTH_TOKEN");
 	const [pendingModels, setPendingModels] = useState<string[]>([]);
 	const [pendingSpecs, setPendingSpecs] = useState<ConfiguredProvider["modelSpecs"]>(undefined);
-	const [pendingModel, setPendingModel] = useState("");
+	const [modelDraft, setModelDraft] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [existingNames, setExistingNames] = useState<string[]>([]);
 
@@ -62,6 +66,10 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	}, []);
 
 	const template = PROVIDER_TEMPLATES.find((tmpl) => tmpl.id === templateId);
+
+	// A template that can list its models over the API does not need one typed by hand.
+	const modelIsOptional = hasApiModelFetching(templateId);
+	const modelId = modelDraft.trim();
 
 	const persistProvider = async (
 		effectiveKey: string,
@@ -120,7 +128,9 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			if (result.valid) {
 				persistProvider(apiKey, pendingModels, pendingSpecs).catch(() => {});
 			} else {
-				const providerLabel = template ? getTemplateLabel(template, t) : templateId;
+				// The name the user just typed beats the template label, which is identical
+				// for every provider created from the same template.
+				const providerLabel = name || (template ? getTemplateLabel(template, t) : templateId);
 				const errorMsg =
 					result.error === "auth"
 						? t("apiModels.keyInvalid")
@@ -327,7 +337,9 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		);
 	}
 
-	const lastField: Field = template?.promptModel ? "context" : "key";
+	// Without a model id there is nothing to attach a context window to, so the model
+	// field itself becomes the last one and the footer must say "confirm" there.
+	const lastField: Field = template?.promptModel ? (modelId ? "context" : "model") : "key";
 
 	const detailsFooterItems = [
 		{
@@ -483,14 +495,19 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			{template?.promptModel && (
 				<Box marginTop={1}>
 					<TextPrompt
-						label={t("addFlow.modelLabel")}
+						label={modelIsOptional ? t("addFlow.modelLabelOptional") : t("addFlow.modelLabel")}
 						focus={activeField === "model"}
 						validate={(val) => {
-							if (!val.trim()) return t("validation.modelNameRequired");
+							if (!modelIsOptional && !val.trim()) return t("validation.modelNameRequired");
 							return undefined;
 						}}
+						onChange={setModelDraft}
 						onSubmit={(model) => {
-							setPendingModel(model.trim());
+							// Skipped: the model list comes from the API, so there is nothing to persist.
+							if (!model.trim()) {
+								finishWithModels([]);
+								return;
+							}
 							setActiveField("context");
 						}}
 						onCancel={() => {
@@ -499,7 +516,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 					/>
 				</Box>
 			)}
-			{template?.promptModel && (
+			{template?.promptModel && modelId && (
 				<Box marginTop={1} flexDirection="column">
 					<TextPrompt
 						label={t("addFlow.contextLabel")}
@@ -508,15 +525,15 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 						onSubmit={(val) => {
 							const tokens = parseContextWindow(val);
 							finishWithModels(
-								[pendingModel],
-								tokens ? { [pendingModel.toLowerCase()]: { context: tokens } } : undefined,
+								[modelId],
+								tokens ? { [modelId.toLowerCase()]: { context: tokens } } : undefined,
 							);
 						}}
 						onCancel={() => {
 							setActiveField("model");
 						}}
 					/>
-					{activeField === "context" && ignoresContextWindow(pendingModel) && (
+					{activeField === "context" && ignoresContextWindow(modelId) && (
 						<StatusMessage variant="warning">{t("addFlow.contextClaudeWarning")}</StatusMessage>
 					)}
 				</Box>

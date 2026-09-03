@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
 	buildClaudeEnv,
+	getEffectiveModels,
 	getEffectiveModelsWithSource,
 	getModelSpec,
 	resolveModelSpec,
 } from "./providers.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 import { configuredProviderSchema } from "./schema.ts";
+import { hasApiKeyValidation, hasApiModelFetching } from "./services/api-models.ts";
 import { fetchCustomModels } from "./services/custom.ts";
 import { ignoresContextWindow, parseContextWindow } from "./utils/validate-context.ts";
 
@@ -157,6 +159,29 @@ describe("getEffectiveModelsWithSource", () => {
 		const item = getEffectiveModelsWithSource(custom).find((m) => m.name === "my-model");
 		expect(item?.source).toBe("user");
 		expect(item?.meta?.context_length).toBe(262_144);
+	});
+});
+
+// ── custom provider registration ─────────────────────────────────────
+
+describe("custom provider registration", () => {
+	test("the custom template fetches its models over the API", () => {
+		// The add-provider wizard only makes the model id optional because of this.
+		// Drop "custom" from MODEL_FETCHING_PROVIDERS and the wizard would let a user
+		// save a provider with no models and no way to discover any.
+		expect(hasApiModelFetching("custom")).toBe(true);
+	});
+
+	test("the custom template never validates the key", () => {
+		// Registration must not be blocked by an arbitrary gateway's error semantics.
+		expect(hasApiKeyValidation("custom")).toBe(false);
+	});
+
+	test("a custom provider with no models resolves to an empty list", () => {
+		// This is the precondition the launch flow checks before refusing to advance.
+		const empty: ConfiguredProvider = { ...base, templateId: "custom", models: [] };
+		expect(getEffectiveModels(empty)).toEqual([]);
+		expect(getEffectiveModelsWithSource(empty)).toEqual([]);
 	});
 });
 

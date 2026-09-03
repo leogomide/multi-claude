@@ -26,6 +26,8 @@ export const ptBR: TranslationDictionary = {
 		noProviders: "Nenhum provedor configurado. Use 'Gerenciar provedores' para adicionar.",
 		noModels:
 			"Nenhum modelo configurado para este provedor. Adicione modelos em 'Gerenciar modelos'.",
+		noModelsAvailable:
+			"Nenhum modelo disponível: a API do provedor não retornou nenhum e nenhum foi cadastrado manualmente. Adicione um em 'Gerenciar modelos'.",
 		providerLabel: "Provedor",
 	},
 	menu: {
@@ -49,6 +51,7 @@ export const ptBR: TranslationDictionary = {
 		apiKeyLabelOptional: "Chave de API (opcional - Enter para pular)",
 		urlLabel: "URL do servidor",
 		modelLabel: "ID do modelo",
+		modelLabelOptional: "ID do modelo (opcional - Enter para buscar na API)",
 		authVarLabel: "Cabeçalho de autenticação",
 		authVarBearer: "Token Bearer (ANTHROPIC_AUTH_TOKEN)",
 		authVarApiKey: "Cabeçalho x-api-key (ANTHROPIC_API_KEY)",
@@ -213,16 +216,18 @@ export const ptBR: TranslationDictionary = {
 		resultCount: ({ filtered, total }) => `${filtered}/${total} resultados`,
 	},
 	apiModels: {
-		fetching: "Buscando modelos do {{provider}}...",
-		fetchError: "Falha ao buscar modelos do {{provider}}.",
+		fetching: "Buscando modelos de {{provider}}...",
+		fetchError: "Falha ao buscar modelos de {{provider}}.",
 		fetchSuccess: ({ count }) =>
 			`${count} modelo${count === 1 ? "" : "s"} buscado${count === 1 ? "" : "s"} da API.`,
 		fetchModels: "Buscar modelos da API",
-		authError: "Chave de API inválida. Verifique sua chave de API do {{provider}}.",
-		networkError: "Erro de rede. Não foi possível conectar ao {{provider}}.",
+		authError: "Chave de API inválida. Verifique sua chave de API de {{provider}}.",
+		networkError: "Erro de rede. Não foi possível conectar a {{provider}}.",
 		fallbackNotice: "Não foi possível acessar {{provider}} — exibindo a lista de modelos salva.",
 		validatingKey: "Validando chave de API...",
 		keyInvalid: "A chave de API é inválida ou expirou.",
+		noSavedModels:
+			"Não há modelos salvos para usar como alternativa. Adicione um em 'Gerenciar modelos'.",
 	},
 	anthropic: {
 		loginInProgress: "Abrindo navegador para autenticação...",

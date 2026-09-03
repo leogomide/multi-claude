@@ -472,6 +472,10 @@ export function StartClaudeFlow({
 
 	const providerLabel = useMemo(() => {
 		if (!selectedProvider) return "";
+		// The configured name is what the user recognizes. The template label is the same
+		// string for every provider built from it, so two custom gateways would be
+		// indistinguishable in "fetching models from ...".
+		if (selectedProvider.name) return selectedProvider.name;
 		const tmpl = getTemplate(selectedProvider.templateId);
 		return tmpl ? getTemplateLabel(tmpl, t) : selectedProvider.templateId;
 	}, [selectedProvider]);
@@ -594,9 +598,15 @@ export function StartClaudeFlow({
 	}
 
 	if (step === "no-models") {
+		// A provider that lists models over the API can legitimately have none saved,
+		// so say that both sources came back empty instead of blaming the local list.
+		const message =
+			selectedProvider && hasApiModelFetching(selectedProvider.templateId)
+				? t("selector.noModelsAvailable")
+				: t("selector.noModels");
 		return (
 			<AppShell footerItems={[{ key: "esc", label: t("footer.back") }]}>
-				<StatusMessage variant="error">{t("selector.noModels")}</StatusMessage>
+				<StatusMessage variant="error">{message}</StatusMessage>
 			</AppShell>
 		);
 	}
@@ -612,6 +622,8 @@ export function StartClaudeFlow({
 		return (
 			<AppShell footerItems={[{ key: "esc", label: t("footer.back") }]}>
 				<StatusMessage variant="error">{errorMessage}</StatusMessage>
+				{/* This step is only reached with an empty local list, so the hint always applies. */}
+				<StatusMessage variant="info">{t("apiModels.noSavedModels")}</StatusMessage>
 			</AppShell>
 		);
 	}

@@ -26,6 +26,8 @@ export const es: TranslationDictionary = {
 		noProviders: "No hay proveedores configurados. Use 'Gestionar proveedores' para agregar uno.",
 		noModels:
 			"No hay modelos configurados para este proveedor. Agregue modelos en 'Gestionar modelos'.",
+		noModelsAvailable:
+			"No hay modelos disponibles: la API del proveedor no devolvió ninguno y no hay ninguno configurado manualmente. Agregue uno en 'Gestionar modelos'.",
 		providerLabel: "Proveedor",
 	},
 	menu: {
@@ -49,6 +51,7 @@ export const es: TranslationDictionary = {
 		apiKeyLabelOptional: "Clave de API (opcional - Enter para omitir)",
 		urlLabel: "URL del servidor",
 		modelLabel: "ID del modelo",
+		modelLabelOptional: "ID del modelo (opcional - Enter para buscarlos en la API)",
 		authVarLabel: "Cabecera de autenticación",
 		authVarBearer: "Token Bearer (ANTHROPIC_AUTH_TOKEN)",
 		authVarApiKey: "Cabecera x-api-key (ANTHROPIC_API_KEY)",
@@ -226,6 +229,8 @@ export const es: TranslationDictionary = {
 		fallbackNotice: "No se pudo acceder a {{provider}} — mostrando la lista de modelos guardada.",
 		validatingKey: "Validando clave de API...",
 		keyInvalid: "La clave de API es inválida o ha expirado.",
+		noSavedModels:
+			"No hay modelos guardados para usar como alternativa. Agregue uno en 'Gestionar modelos'.",
 	},
 	anthropic: {
 		loginInProgress: "Abriendo navegador para autenticación...",

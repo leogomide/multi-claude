@@ -9,6 +9,8 @@ interface TextPromptProps {
 	mask?: string;
 	focus?: boolean;
 	validate?: (value: string) => string | undefined;
+	/** Fires on every keystroke. Lets a parent react to the draft before it is submitted. */
+	onChange?: (value: string) => void;
 	onSubmit: (value: string) => void;
 	onCancel?: () => void;
 }
@@ -20,6 +22,7 @@ export function TextPrompt({
 	mask,
 	focus = true,
 	validate,
+	onChange,
 	onSubmit,
 	onCancel,
 }: TextPromptProps) {
@@ -46,6 +49,7 @@ export function TextPrompt({
 
 	const handleChange = (newValue: string) => {
 		setValue(newValue);
+		onChange?.(newValue);
 		if (error) setError(undefined);
 	};
 

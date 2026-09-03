@@ -25,6 +25,8 @@ export const en: TranslationDictionary = {
 		selectModel: "Select a model",
 		noProviders: "No providers configured. Use 'Manage providers' to add one.",
 		noModels: "No models configured for this provider. Add models in 'Manage models'.",
+		noModelsAvailable:
+			"No models available: the provider API returned none and none are configured manually. Add one in 'Manage models'.",
 		providerLabel: "Provider",
 	},
 	menu: {
@@ -48,6 +50,7 @@ export const en: TranslationDictionary = {
 		apiKeyLabelOptional: "API key (optional - Enter to skip)",
 		urlLabel: "Server URL",
 		modelLabel: "Model ID",
+		modelLabelOptional: "Model ID (optional - Enter to fetch them from the API)",
 		authVarLabel: "Authentication header",
 		authVarBearer: "Bearer token (ANTHROPIC_AUTH_TOKEN)",
 		authVarApiKey: "API key header (ANTHROPIC_API_KEY)",
@@ -219,6 +222,7 @@ export const en: TranslationDictionary = {
 		fallbackNotice: "Could not reach {{provider}} — showing the saved model list.",
 		validatingKey: "Validating API key...",
 		keyInvalid: "The API key is invalid or expired.",
+		noSavedModels: "There are no saved models to fall back on. Add one in 'Manage models'.",
 	},
 	anthropic: {
 		loginInProgress: "Opening browser for authentication...",
