@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.37-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.38-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -351,6 +351,8 @@ LiteLLM acts as a unified proxy for 100+ LLM providers (Anthropic, AWS Bedrock, 
 
 These providers run locally on your machine — no API key is required (a placeholder is used automatically).
 
+llama.cpp and LM Studio report the context window of the loaded model, so multi-claude passes it straight through. Ollama, OmniRoute and 9Router do not report it — set it yourself per model in **Manage models**, otherwise Claude Code assumes 200k.
+
 #### llama.cpp
 
 - **Docs:** [llama.cpp on GitHub](https://github.com/ggml-org/llama.cpp)
@@ -392,11 +394,12 @@ Local proxy that routes requests to 40+ AI providers with automatic fallback, Op
 
 - **Base URL:** None — you enter it when adding the provider
 - **API key:** Optional — press Enter to skip it if your gateway does not require authentication
-- **Default models:** None — you enter one model ID when adding the provider, and can add more later in **Manage models**
+- **Models:** Fetched from `/v1/models` on the configured base URL (and from `/models` when that answers 404) — falls back to the model ID you typed in the wizard when the endpoint does not answer
+- **Context window:** Most gateways do not report it, so the wizard asks for it right after the model ID, and you can change it later in **Manage models**. Leave it empty to let Claude Code decide.
 
 Use this for any Anthropic-compatible endpoint that does not have its own template: a corporate proxy, a self-hosted gateway, a cloud AI gateway, or a provider that multi-claude does not ship yet.
 
-The wizard asks for a name, the base URL, the authentication header, the token and one model ID. The authentication step matters because gateways disagree on how the token should be sent:
+The wizard asks for a name, the base URL, the authentication header, the token, one model ID and the context window. The authentication step matters because gateways disagree on how the token should be sent:
 
 | Choice | Env var set | Header sent |
 |--------|-------------|-------------|
@@ -404,6 +407,8 @@ The wizard asks for a name, the base URL, the authentication header, the token a
 | API key header | `ANTHROPIC_API_KEY` | `x-api-key: <token>` |
 
 Pick Bearer first — it is what most Anthropic-compatible gateways expect. If requests come back unauthorized, edit the provider and choose **Edit authentication** to switch to the other one. The base URL, token and models can all be changed later from **Manage providers**.
+
+> Claude Code ignores `CLAUDE_CODE_MAX_CONTEXT_TOKENS` for model ids that start with `claude-`. If your gateway serves Anthropic models under their original ids, the context window you enter has no effect and the session stays on 200k. The wizard warns you when it sees such an id, but still lets you save it — the id may be just an alias on your gateway.
 
 You can add several custom providers, each with its own URL and token — just give them different names.
 
@@ -413,7 +418,7 @@ All provider management is done inside the TUI. From the main menu, select **Man
 
 - **Add a provider** — pick a provider template, enter a name and API key (or complete OAuth login for Anthropic)
 - **Edit a provider** — change name, API key, re-authenticate OAuth, or remove it
-- **Manage models** — add custom model IDs or remove models from a provider. Custom models appear alongside the provider's default models.
+- **Manage models** — add custom model IDs or remove models from a provider. Custom models appear alongside the provider's default models. **Set context window** lets you enter the window in tokens per model, for any provider — including the provider's default models, so a built-in value can be corrected. It accepts `128000`, `128k` or `1M`; an empty value clears the override and falls back to whatever the provider API or the built-in table reports. Your value wins over both.
 
 ## Installation Management
 
@@ -578,7 +583,13 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.37 (current)
+### v1.0.38 (current)
+
+- **feat:** the context window can now be set by hand per model, for any provider — gateways whose API does not report it no longer fall back to the 200k Claude Code assumes for unknown models
+- **feat:** the Custom Provider now fetches its model list from `/v1/models`, reading the context window from any of the field names gateways use, and falls back to the model you typed when the endpoint does not answer
+- **fix:** headless launches resolved the context window from the built-in table only, so OpenRouter, Requesty, LiteLLM, LM Studio and llama.cpp got no window outside the TUI
+
+### v1.0.37
 
 - **feat:** third-party models now report their real context window to Claude Code, which previously assumed 200k for every unrecognized model — sourced from the provider API when available, from a built-in per-model table otherwise
 - **feat:** the auto-compact budget is now derived from the model context window instead of being hardcoded per provider

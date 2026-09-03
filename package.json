@@ -1,6 +1,6 @@
 {
 	"name": "@leogomide/multi-claude",
-	"version": "1.0.37",
+	"version": "1.0.38",
 	"description": "CLI tool to manage multiple API providers and launch Claude Code with the correct environment variables",
 	"license": "MIT",
 	"author": "Leonardo Gomide",
@@ -31,7 +31,7 @@
 		"lint": "biome check --fix .",
 		"link": "bun link",
 		"prepare": "bun link",
-		"test": "bun test src/smoke.test.tsx",
+		"test": "bun test src/smoke.test.tsx src/context-window.test.ts",
 		"publish": "npm publish"
 	},
 	"peerDependencies": {
