@@ -211,4 +211,20 @@ Com um provider `zai` cujo `modelSpecs` seja `{ "glm-4.7": { context: 500_000 } 
 
 ## Resumo de Implementacao
 
-(preencher apos a execucao)
+Concluido conforme planejado, sem desvios.
+
+- **`src/schema.ts`**: `modelSpecs` opcional em `configuredProviderSchema`, entre `models` e `baseUrl`. `.optional()` como planejado — `JSON.stringify` do `saveConfig` (`config.ts:76`) descarta `undefined`, entao a chave nunca chega ao `config.json` quando nao ha override (RN-04/RN-10 confirmados por teste).
+- **`src/providers.ts`**: `resolveModelSpec` exportada logo apos `getModelSpec`; `withSpec` passou a chama-la. `getModelSpec` continua exportada e ainda e a camada de template usada pelo `api-models.ts`.
+- **`src/services/api-models.ts`**: `fillFromTemplate` -> `applyModelSpecs(provider, result)` com as tres camadas; `fetchApiModels(provider)` deriva os tres primitivos via `getProviderBaseUrl`. `fetchRaw` e `validateApiKey` intactos.
+- **`src/components/app/StartClaudeFlow.tsx`**: chamada reduzida a um argumento; `getProviderBaseUrl` removido do import (ficou orfao, como o plano previa).
+- **`src/headless.ts`**: `resolveContextWindow` adicionada entre `getCliId` e o bloco de arg parsing; imports de `resolveModelSpec` e de `./services/api-models.ts` ajustados; `getModelSpec` removido do arquivo.
+
+### Desvio unico (cosmetico)
+
+`if (!result || !result.ok)` virou `if (!result?.ok)` — o `biome` acusa `lint/complexity/useOptionalChain` na forma do plano, e essa era a **unica** diagnostic nova em relacao ao HEAD nos arquivos tocados. A narrowing do TS e identica.
+
+### Contrato verificado
+
+Coberto por `src/context-window.test.ts` (005-D): override vence tabela, case-insensitive nos dois sentidos, cascata sem override, override nao vaza para outro modelo, `deepseek` sem fonte, override em provider sem tabela (`custom`), RN-06 via `getEffectiveModelsWithSource`, e config antigo sem `modelSpecs` parseando.
+
+R-04 medido fora do teste, contra `http://10.255.255.1:1234` (IP nao roteavel): a mesma logica de `resolveContextWindow` retorna `undefined` em **2997 ms**; com override presente retorna em **0 ms**, sem tocar a rede.

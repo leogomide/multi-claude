@@ -2,6 +2,30 @@
 
 > Preencher os resultados apos executar manualmente. Este arquivo permanece em `plans/` ate a execucao; INDEX + steps A/B/C/D seguem para `plans/done`.
 
+## Status (005-A..D concluidos em 2026-09-03)
+
+Nenhum TC abaixo foi executado — todos dependem de TUI, de um gateway no ar ou de um launch real do Claude Code.
+
+O que **ja foi verificado automaticamente** e nao precisa ser reprovado aqui (`bun test`, 64 pass):
+
+| Coberto por teste | Onde |
+|-------------------|------|
+| RN-01 override vence tabela e API | `resolveModelSpec`, `getEffectiveModelsWithSource` |
+| RN-02 cascata sem override | idem |
+| RN-03 lookup case-insensitive | idem |
+| RN-06 override em modelo default do template | `getEffectiveModelsWithSource` |
+| RN-07 auto-compact derivado + clamps | `buildClaudeEnv` (838861 / clamp 100k / clamp 1M) |
+| RN-08 valor manual de `.env` vence | `buildClaudeEnv` |
+| RN-10 config antigo sem `modelSpecs` | `configuredProviderSchema` |
+| RN-11 deteccao do prefixo `claude-` | `ignoresContextWindow` |
+| Fetch do custom: aliases, 404 -> `/models`, auth, HTML, 500, chave vazia | `fetchCustomModels` (15 testes) |
+
+**R-04 (TC-10) medido fora da TUI:** a mesma logica do `resolveContextWindow` contra `http://10.255.255.1:1234` (IP nao roteavel) devolveu `undefined` em **2997 ms**; com override presente, **0 ms** e sem tocar a rede. O TC-10 continua valendo para confirmar o comportamento no launch real.
+
+O que **so o TC manual cobre**: as telas do wizard e de "Gerenciar modelos", o conteudo real do `config.json`, a linha `env=` do log do `runner`, a status line e o `/context` dentro da sessao.
+
+---
+
 ## Pre-requisitos
 
 - `bun install` na raiz e `bun link` refeito

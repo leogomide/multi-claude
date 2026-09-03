@@ -495,6 +495,18 @@ export function getModelSpec(
 	return specs[model.toLowerCase()];
 }
 
+/**
+ * Single resolution point for a model context window.
+ * The user override wins over the provider API and over the template table:
+ * typing a number is a deliberate act, so nothing may overwrite it.
+ */
+export function resolveModelSpec(
+	provider: ConfiguredProvider,
+	model: string,
+): { context: number; maxOutput?: number } | undefined {
+	return provider.modelSpecs?.[model.toLowerCase()] ?? getModelSpec(provider.templateId, model);
+}
+
 export function getEffectiveModelsWithSource(provider: ConfiguredProvider): ModelWithSource[] {
 	if (provider.type === "oauth") return [];
 	const template = getTemplate(provider.templateId);
@@ -502,7 +514,7 @@ export function getEffectiveModelsWithSource(provider: ConfiguredProvider): Mode
 	const userSet = new Set(provider.models);
 
 	const withSpec = (name: string, source: ModelWithSource["source"]): ModelWithSource => {
-		const spec = getModelSpec(provider.templateId, name);
+		const spec = resolveModelSpec(provider, name);
 		if (!spec) return { name, source };
 		return {
 			name,

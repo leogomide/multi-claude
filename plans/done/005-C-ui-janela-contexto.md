@@ -495,4 +495,26 @@ Nao ha chave para a etiqueta na lista: o sufixo e renderizado como `— 128K ctx
 
 ## Resumo de Implementacao
 
-(preencher apos a execucao)
+Concluido conforme planejado, com um ajuste de reconciliacao do React (abaixo).
+
+- **`src/utils/format-tokens.ts`** (novo): `formatContextLength` movida sem alterar o corpo; `StartClaudeFlow` importa e perdeu a copia local. `formatPricePerMillion` ficou onde estava.
+- **`src/utils/validate-context.ts`** (novo): `parseContextWindow`, `validateContextWindow`, `ignoresContextWindow`.
+- **i18n**: as 11 chaves nos quatro arquivos, na mesma posicao relativa.
+- **`AddProviderFlow.tsx`**: campo `context` em `Field`, estados `pendingModel`/`pendingSpecs`, terceiro parametro em `persistProvider`, `finishWithModels`, `lastField` -> `"context"`, resumo do `authVar` estendido ao campo novo, aviso da RN-11.
+- **`ManageModelsFlow.tsx`**: tres steps novos, `mutateProvider`, `withoutOverride`, etiqueta `— NNNK ctx` na lista do menu e no seletor, escape generico.
+
+### Ajuste sobre o plano: `key` nos `TextPrompt` encadeados
+
+Cada step do `ManageModelsFlow` retorna `<AppShell>` na raiz. Quando dois steps consecutivos renderizam um `TextPrompt` na mesma posicao da arvore — `add-model` -> `add-model-context` — o React reconcilia em vez de remontar, e o `useState(initialValue)` do `TextPrompt` (`TextPrompt.tsx:26`) **mantem o valor digitado no step anterior**: o campo da janela abriria ja preenchido com o nome do modelo. Resolvido com `key` distinta em cada `TextPrompt`. O `set-context-value` recebe uma `key` derivada do `pendingModel` pelo mesmo motivo, para o `initialValue` pre-preenchido valer a cada modelo escolhido.
+
+Isso nao acontecia antes do plano porque todo step de `TextPrompt` era seguido por um step com filho de tipo diferente (`Note`/`CyanSelectInput`).
+
+### Refatoracao alem do checklist
+
+O plano pedia `mutateProvider` para nao repetir a cadeia de escrita quatro vezes. Como dois dos call sites tambem precisavam remover uma chave de `modelSpecs` sem deixar `{}` para tras, o mesmo bloco virou `withoutOverride(prov, model)`, usado pelo `remove-model` (RN-05) e pelo `set-context-value` quando o campo vem vazio.
+
+### Contrato verificado
+
+`parseContextWindow` e `ignoresContextWindow` cobertos por 20 testes em `src/context-window.test.ts`. Um caso do contrato mudou de lado: `"1.5.2k"` **nao** e rejeitado — a remocao dos separadores acontece antes do regex, entao vira `152k` -> `152000`. E a mesma mecanica que faz `"1.048.576"` funcionar e que o proprio plano ja registrava para `1.5M`; virou um teste explicito documentando o comportamento, em vez de uma expectativa de rejeicao.
+
+Os itens de wizard e de "Gerenciar modelos" sao de execucao manual (005-E).

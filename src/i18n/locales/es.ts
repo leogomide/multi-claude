@@ -17,6 +17,8 @@ export const es: TranslationDictionary = {
 		urlInvalid: "Formato de URL inválido.",
 		urlMustBeHttp: "La URL debe comenzar con http:// o https://",
 		nameDuplicate: "Ya existe un proveedor con este nombre.",
+		contextInvalid: "La ventana de contexto debe ser un número (ej.: 128000, 128k, 1M).",
+		contextRange: "La ventana de contexto debe estar entre 1024 y 10000000 tokens.",
 	},
 	selector: {
 		selectProvider: "Seleccione un proveedor",
@@ -52,6 +54,9 @@ export const es: TranslationDictionary = {
 		authVarApiKey: "Cabecera x-api-key (ANTHROPIC_API_KEY)",
 		success: '¡Proveedor "{{name}}" agregado exitosamente!',
 		defaultModels: "Modelos predeterminados",
+		contextLabel: "Ventana de contexto en tokens (opcional - Enter para omitir)",
+		contextClaudeWarning:
+			'Claude Code ignora este valor para ids de modelo que comienzan con "claude-".',
 	},
 	editFlow: {
 		selectProvider: "Seleccione un proveedor para editar",
@@ -83,6 +88,13 @@ export const es: TranslationDictionary = {
 		modelRemoved: 'Modelo "{{name}}" eliminado.',
 		modelCount: ({ count }) => `${count} modelo${count === 1 ? "" : "s"}`,
 		defaultTag: "(predeterminado)",
+		setContext: "Definir ventana de contexto",
+		selectModelForContext: "Seleccione un modelo para definir la ventana de contexto",
+		noModelsForContext: "No hay modelos para configurar.",
+		contextLabel: "Ventana de contexto en tokens (opcional - Enter para omitir)",
+		contextEditLabel: "Ventana de contexto en tokens (vacío para limpiar)",
+		contextUpdated: 'Ventana de contexto de "{{name}}" definida en {{value}}.',
+		contextCleared: 'Ventana de contexto de "{{name}}" eliminada.',
 	},
 	listFlow: {
 		title: "Proveedores configurados",

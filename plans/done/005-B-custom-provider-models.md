@@ -221,4 +221,21 @@ const modelsValue =
 
 ## Resumo de Implementacao
 
-(preencher apos a execucao)
+Concluido conforme planejado, sem desvios funcionais.
+
+- **`src/services/custom.ts`** (novo, 113 linhas): headers duplos condicionados a `apiKey` nao-vazio, `classifyErrorCode` para o erro-no-corpo, `firstPositive` + `readContextLength`/`readMaxOutput` cobrindo os oito aliases, `requestModels` com fallback de rota `/v1/models` -> `/models` no 404.
+- **`src/services/api-models.ts`**: import de `fetchCustomModels`, `"custom"` em `MODEL_FETCHING_PROVIDERS` (e **nao** em `API_KEY_VALIDATION_PROVIDERS`), `case "custom"` sem fallback de template.
+
+### Desvio unico
+
+`ApiKeyValidation` **nao** foi importado no `custom.ts`. O plano o listava no bloco de tipos, mas nada no arquivo o usa (a decisao foi justamente nao expor `validateCustomApiKey`), e o `biome` marca `lint/correctness/noUnusedImports`.
+
+### Efeito colateral conferido (item 3)
+
+`MainMenu.tsx:181` e `ManageProvidersPage.tsx:115` usam o mesmo `hasApiModelFetching(...) && modelCount === 0`. Um Custom Provider sempre sai do wizard com 1 modelo, entao a sidebar segue mostrando o numero; se o usuario remover todos em "Gerenciar modelos", passa a mostrar "via API" — o que agora e verdade. Sem regressao nos dois arquivos.
+
+`AddProviderFlow`, na sidebar do template `custom`, continua mostrando `sidebar.modelsUserDefined` porque o ramo e decidido por `promptModel`, nao por `hasApiModelFetching` — segue correto, o wizard ainda pede um id.
+
+### Contrato verificado
+
+15 testes em `src/context-window.test.ts` com `globalThis.fetch` stubado: os oito aliases de contexto na ordem de precedencia, os cinco de saida, modelo sem alias nenhum (fica na lista com `context_length: undefined`), valor `0`/negativo tratado como ausente, ordenacao por id e descarte de entradas sem id, headers com e sem chave, barra final duplicada, fallback de rota no 404, host inalcancavel (`network`), HTTP 401 (`auth`), `{code:401}` em HTTP 200 (`auth`), HTML (`unknown`) e HTTP 500 (`unknown`).

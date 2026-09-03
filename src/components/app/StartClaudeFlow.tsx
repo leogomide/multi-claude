@@ -13,16 +13,12 @@ import {
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import type { ModelWithSource } from "../../providers.ts";
-import {
-	getEffectiveModelsWithSource,
-	getProviderBaseUrl,
-	getTemplate,
-	getTemplateLabel,
-} from "../../providers.ts";
+import { getEffectiveModelsWithSource, getTemplate, getTemplateLabel } from "../../providers.ts";
 import type { ConfiguredProvider, Installation } from "../../schema.ts";
 import { DEFAULT_INSTALLATION_ID, DEFAULT_LAUNCH_TEMPLATE_ID } from "../../schema.ts";
 import type { ApiModelError } from "../../services/api-models.ts";
 import { fetchApiModels, hasApiModelFetching } from "../../services/api-models.ts";
+import { formatContextLength } from "../../utils/format-tokens.ts";
 import type { ChecklistItem, ChecklistResult } from "../common/ChecklistSelect.tsx";
 import { ChecklistSelect } from "../common/ChecklistSelect.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
@@ -64,15 +60,6 @@ interface StartClaudeFlowProps {
 	}) => void;
 	onOAuthLogin: (result: { providerId: string; providerName: string; isNew: boolean }) => void;
 	onCancel: () => void;
-}
-
-function formatContextLength(tokens: number): string {
-	if (tokens >= 1_000_000) {
-		const m = tokens / 1_000_000;
-		return `${Number.isInteger(m) ? m : m.toFixed(1)}M`;
-	}
-	const k = tokens / 1_000;
-	return `${Number.isInteger(k) ? k : k.toFixed(0)}K`;
 }
 
 function formatPricePerMillion(pricePerToken: string): string {
@@ -202,11 +189,7 @@ export function StartClaudeFlow({
 		if (hasApiModelFetching(provider.templateId)) {
 			setStep("loading-models");
 			setFallbackError(null);
-			const result = await fetchApiModels(
-				provider.templateId,
-				provider.apiKey,
-				getProviderBaseUrl(provider),
-			);
+			const result = await fetchApiModels(provider);
 
 			const effective = getEffectiveModelsWithSource(provider);
 

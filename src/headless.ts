@@ -22,9 +22,10 @@ import {
 	verifyMasterPassword,
 } from "./credential-store.ts";
 import { initKeystore, migrateKeyWrapping } from "./keystore.ts";
-import { getEffectiveModels, getModelSpec } from "./providers.ts";
+import { getEffectiveModels, resolveModelSpec } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
+import { fetchApiModels, hasApiModelFetching } from "./services/api-models.ts";
 
 // --- Types ---
 
@@ -43,6 +44,30 @@ type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 export function getCliId(provider: ConfiguredProvider, allProviders: ConfiguredProvider[]): string {
 	const sameTemplate = allProviders.filter((p) => p.templateId === provider.templateId);
 	return sameTemplate.length === 1 ? provider.templateId : slugify(provider.name);
+}
+
+// --- Context window ---
+
+// Same window the TUI resolves: user override, then the template table, then the
+// provider API. Headless used to read the static table only, so every provider whose
+// API reports a context length was stuck on the 200k Claude Code assumes.
+async function resolveContextWindow(
+	provider: ConfiguredProvider,
+	model: string,
+): Promise<number | undefined> {
+	const spec = resolveModelSpec(provider, model);
+	if (spec) return spec.context;
+	if (!model || !hasApiModelFetching(provider.templateId)) return undefined;
+
+	// A hung gateway must not hold the launch. The dangling fetch is harmless:
+	// runClaude outlives it, and the timer is unref'd so it never keeps the loop alive.
+	const timeout = new Promise<null>((resolve) => {
+		const timer = setTimeout(() => resolve(null), 3000);
+		timer.unref?.();
+	});
+	const result = await Promise.race([fetchApiModels(provider).catch(() => null), timeout]);
+	if (!result?.ok) return undefined;
+	return result.models.find((m) => m.id.toLowerCase() === model.toLowerCase())?.context_length;
 }
 
 // --- Arg parsing ---
@@ -355,7 +380,7 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 
 	// Same context window the TUI resolves, so headless launches are not stuck on
 	// the 200k Claude Code assumes for every model it does not recognize.
-	const contextWindowTokens = getModelSpec(provider.templateId, model)?.context;
+	const contextWindowTokens = await resolveContextWindow(provider, model);
 
 	const { runClaude } = await import("./runner.ts");
 	const exitCode = await runClaude(

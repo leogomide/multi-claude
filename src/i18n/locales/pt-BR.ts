@@ -17,6 +17,8 @@ export const ptBR: TranslationDictionary = {
 		urlInvalid: "Formato de URL inválido.",
 		urlMustBeHttp: "A URL deve começar com http:// ou https://",
 		nameDuplicate: "Já existe um provedor com este nome.",
+		contextInvalid: "A janela de contexto deve ser um número (ex.: 128000, 128k, 1M).",
+		contextRange: "A janela de contexto deve estar entre 1024 e 10000000 tokens.",
 	},
 	selector: {
 		selectProvider: "Selecione um provedor",
@@ -52,6 +54,9 @@ export const ptBR: TranslationDictionary = {
 		authVarApiKey: "Cabeçalho x-api-key (ANTHROPIC_API_KEY)",
 		success: 'Provedor "{{name}}" adicionado com sucesso!',
 		defaultModels: "Modelos padrão",
+		contextLabel: "Janela de contexto em tokens (opcional - Enter para pular)",
+		contextClaudeWarning:
+			'O Claude Code ignora este valor para ids de modelo que começam com "claude-".',
 	},
 	editFlow: {
 		selectProvider: "Selecione um provedor para editar",
@@ -83,6 +88,13 @@ export const ptBR: TranslationDictionary = {
 		modelRemoved: 'Modelo "{{name}}" removido.',
 		modelCount: ({ count }) => `${count} modelo${count === 1 ? "" : "s"}`,
 		defaultTag: "(padrão)",
+		setContext: "Definir janela de contexto",
+		selectModelForContext: "Selecione um modelo para definir a janela de contexto",
+		noModelsForContext: "Nenhum modelo para configurar.",
+		contextLabel: "Janela de contexto em tokens (opcional - Enter para pular)",
+		contextEditLabel: "Janela de contexto em tokens (vazio para limpar)",
+		contextUpdated: 'Janela de contexto de "{{name}}" definida em {{value}}.',
+		contextCleared: 'Janela de contexto de "{{name}}" removida.',
 	},
 	listFlow: {
 		title: "Provedores configurados",

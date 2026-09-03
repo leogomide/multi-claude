@@ -130,4 +130,20 @@ Teste puro de funcao, sem Ink. Nao precisa mockar `config.ts` — todas as funco
 
 ## Resumo de Implementacao
 
-(preencher apos a execucao)
+Concluido, com o escopo de teste ampliado.
+
+- **`src/context-window.test.ts`** (novo): **57 testes**, contra os ~30 do checklist. Alem de `parseContextWindow`, `resolveModelSpec`, `buildClaudeEnv` e `ignoresContextWindow`, cobre tambem `getEffectiveModelsWithSource` (RN-06, o caminho que leva o override ate a lista da TUI), `configuredProviderSchema` (RN-10 e rejeicao de `context: 0`) e os 15 testes de `fetchCustomModels` do 005-B, com `globalThis.fetch` stubado e restaurado no `afterEach`.
+- **`src/smoke.test.tsx`**: sem alteracao, como previsto — o mock de `fetchApiModels` e `async () => (...)` e nao declara parametros. 7 pass.
+- **`package.json`**: script `test` com os dois arquivos; `version` 1.0.37 -> 1.0.38; `bun install` nao mexeu no `bun.lock` (nenhuma dependencia mudou).
+- **`README.md`**: badge, Custom Provider (modelos via `/v1/models` + janela no wizard), a ressalva `claude-` como bloco de citacao, Provider Management (janela por modelo em qualquer provider, formatos aceitos e semantica do valor vazio), Local Providers (quem reporta e quem nao reporta) e o changelog da v1.0.38.
+
+### Sobre `fetchCustomModels` morar no mesmo arquivo de teste
+
+`custom.ts` importa de `api-models.ts` **so tipos**, entao nao ha dependencia em runtime. Isso importa porque `smoke.test.tsx` faz `mock.module("./services/api-models.ts", ...)` e os module mocks do Bun sao globais entre arquivos: manter o teste novo sem import de runtime de `api-models.ts` o torna imune a ordem de execucao. Verificado rodando os dois na ordem do script.
+
+### Contrato verificado
+
+- `bunx tsc --noEmit` limpo
+- `bun test`: **64 pass / 0 fail** (7 do smoke + 57 novos)
+- `biome check` nos arquivos tocados: nenhuma diagnostic nova em relacao ao HEAD (comparado via `git stash`); as que restam — `useLiteralKeys`, `useTemplate`, `noUnusedImports` do `React`, `useExhaustiveDependencies` — ja existiam
+- README com um unico `(current)` e a badge batendo com o `package.json`

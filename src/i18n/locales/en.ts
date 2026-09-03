@@ -17,6 +17,8 @@ export const en: TranslationDictionary = {
 		urlInvalid: "Invalid URL format.",
 		urlMustBeHttp: "URL must start with http:// or https://",
 		nameDuplicate: "A provider with this name already exists.",
+		contextInvalid: "Context window must be a number (e.g. 128000, 128k, 1M).",
+		contextRange: "Context window must be between 1024 and 10000000 tokens.",
 	},
 	selector: {
 		selectProvider: "Select a provider",
@@ -51,6 +53,8 @@ export const en: TranslationDictionary = {
 		authVarApiKey: "API key header (ANTHROPIC_API_KEY)",
 		success: 'Provider "{{name}}" added successfully!',
 		defaultModels: "Default models",
+		contextLabel: "Context window in tokens (optional - Enter to skip)",
+		contextClaudeWarning: 'Claude Code ignores this value for model ids starting with "claude-".',
 	},
 	editFlow: {
 		selectProvider: "Select a provider to edit",
@@ -82,6 +86,13 @@ export const en: TranslationDictionary = {
 		modelRemoved: 'Model "{{name}}" removed.',
 		modelCount: ({ count }) => `${count} model${count === 1 ? "" : "s"}`,
 		defaultTag: "(default)",
+		setContext: "Set context window",
+		selectModelForContext: "Select a model to set the context window",
+		noModelsForContext: "No models to configure.",
+		contextLabel: "Context window in tokens (optional - Enter to skip)",
+		contextEditLabel: "Context window in tokens (empty to clear)",
+		contextUpdated: 'Context window for "{{name}}" set to {{value}}.',
+		contextCleared: 'Context window for "{{name}}" cleared.',
 	},
 	listFlow: {
 		title: "Configured providers",

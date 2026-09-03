@@ -15,6 +15,8 @@ export interface TranslationDictionary {
 		urlInvalid: string;
 		urlMustBeHttp: string;
 		nameDuplicate: string;
+		contextInvalid: string;
+		contextRange: string;
 	};
 	selector: {
 		selectProvider: string;
@@ -49,6 +51,8 @@ export interface TranslationDictionary {
 		authVarApiKey: string;
 		success: string;
 		defaultModels: string;
+		contextLabel: string;
+		contextClaudeWarning: string;
 	};
 	editFlow: {
 		selectProvider: string;
@@ -80,6 +84,13 @@ export interface TranslationDictionary {
 		modelRemoved: string;
 		modelCount: (params: { count: number }) => string;
 		defaultTag: string;
+		setContext: string;
+		selectModelForContext: string;
+		noModelsForContext: string;
+		contextLabel: string;
+		contextEditLabel: string;
+		contextUpdated: string;
+		contextCleared: string;
 	};
 	listFlow: {
 		title: string;

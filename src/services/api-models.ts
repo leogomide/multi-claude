@@ -1,4 +1,6 @@
-import { getModelSpec, getTemplate } from "../providers.ts";
+import { getModelSpec, getProviderBaseUrl, getTemplate } from "../providers.ts";
+import type { ConfiguredProvider } from "../schema.ts";
+import { fetchCustomModels } from "./custom.ts";
 import { fetchLiteLLMModels, validateLiteLLMApiKey } from "./litellm.ts";
 import { fetchLlamaCppModels } from "./llamacpp.ts";
 import { fetchLMStudioModels } from "./lmstudio.ts";
@@ -47,6 +49,7 @@ const API_KEY_VALIDATION_PROVIDERS = new Set([
 	"zai",
 ]);
 const MODEL_FETCHING_PROVIDERS = new Set([
+	"custom",
 	"openrouter",
 	"requesty",
 	"nanogpt",
@@ -80,14 +83,23 @@ function mapOpenRouterModel(m: OpenRouterModelMeta): ApiModelMeta {
 	};
 }
 
-function fillFromTemplate(templateId: string, result: ApiFetchResult): ApiFetchResult {
+function applyModelSpecs(provider: ConfiguredProvider, result: ApiFetchResult): ApiFetchResult {
 	if (!result.ok) return result;
 	return {
 		ok: true,
 		models: result.models.map((m) => {
-			// The API is authoritative; the table only fills what it left out.
+			// The user override wins over everything, including a value the API reported.
+			const override = provider.modelSpecs?.[m.id.toLowerCase()];
+			if (override) {
+				return {
+					...m,
+					context_length: override.context,
+					max_output_tokens: override.maxOutput ?? m.max_output_tokens,
+				};
+			}
+			// Between API and table the API is authoritative; the table only fills gaps.
 			if (m.context_length !== undefined) return m;
-			const spec = getModelSpec(templateId, m.id);
+			const spec = getModelSpec(provider.templateId, m.id);
 			if (!spec) return m;
 			return {
 				...m,
@@ -98,12 +110,11 @@ function fillFromTemplate(templateId: string, result: ApiFetchResult): ApiFetchR
 	};
 }
 
-export async function fetchApiModels(
-	templateId: string,
-	apiKey: string,
-	customBaseUrl?: string,
-): Promise<ApiFetchResult> {
-	return fillFromTemplate(templateId, await fetchRaw(templateId, apiKey, customBaseUrl));
+export async function fetchApiModels(provider: ConfiguredProvider): Promise<ApiFetchResult> {
+	return applyModelSpecs(
+		provider,
+		await fetchRaw(provider.templateId, provider.apiKey, getProviderBaseUrl(provider)),
+	);
 }
 
 async function fetchRaw(
@@ -121,6 +132,11 @@ async function fetchRaw(
 			return fetchRequestyModels(apiKey);
 		case "nanogpt":
 			return fetchNanoGPTModels(apiKey);
+		case "custom": {
+			// No template fallback: the custom template's baseUrl is "" by design.
+			if (!customBaseUrl) return { ok: false, error: "unknown" };
+			return fetchCustomModels(customBaseUrl, apiKey);
+		}
 		case "litellm": {
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
 			if (!baseUrl) return { ok: false, error: "unknown" };

@@ -13,6 +13,11 @@ import { useTranslation } from "../../i18n/context.tsx";
 import { getTemplateLabel, PROVIDER_TEMPLATES } from "../../providers.ts";
 import type { AuthVar, ConfiguredProvider } from "../../schema.ts";
 import { hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
+import {
+	ignoresContextWindow,
+	parseContextWindow,
+	validateContextWindow,
+} from "../../utils/validate-context.ts";
 import { normalizeBaseUrl, validateBaseUrl } from "../../utils/validate-url.ts";
 import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
@@ -23,7 +28,7 @@ import { Sidebar } from "../layout/Sidebar.tsx";
 import type { FlowMessage } from "../types.ts";
 
 type Step = "template" | "details" | "validating-key" | "oauth-name" | "create-installation";
-type Field = "name" | "url" | "auth" | "key" | "model";
+type Field = "name" | "url" | "auth" | "key" | "model" | "context";
 
 interface AddProviderFlowProps {
 	onDone: (message?: FlowMessage) => void;
@@ -45,6 +50,8 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const [apiKey, setApiKey] = useState("");
 	const [authVar, setAuthVar] = useState<AuthVar>("ANTHROPIC_AUTH_TOKEN");
 	const [pendingModels, setPendingModels] = useState<string[]>([]);
+	const [pendingSpecs, setPendingSpecs] = useState<ConfiguredProvider["modelSpecs"]>(undefined);
+	const [pendingModel, setPendingModel] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [existingNames, setExistingNames] = useState<string[]>([]);
 
@@ -56,7 +63,11 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 
 	const template = PROVIDER_TEMPLATES.find((tmpl) => tmpl.id === templateId);
 
-	const persistProvider = async (effectiveKey: string, models: string[]) => {
+	const persistProvider = async (
+		effectiveKey: string,
+		models: string[],
+		modelSpecs?: ConfiguredProvider["modelSpecs"],
+	) => {
 		const config = await loadConfig();
 		const provider: ConfiguredProvider = {
 			id: crypto.randomUUID(),
@@ -68,6 +79,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			models,
 			baseUrl: baseUrl && baseUrl !== template?.baseUrl ? baseUrl : undefined,
 			authVar: template?.promptAuthVar ? authVar : undefined,
+			modelSpecs,
 		};
 		config.providers.push(provider);
 		await saveConfig(config);
@@ -106,7 +118,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		validateApiKey(templateId, apiKey, baseUrl || undefined).then((result) => {
 			if (cancelled) return;
 			if (result.valid) {
-				persistProvider(apiKey, pendingModels).catch(() => {});
+				persistProvider(apiKey, pendingModels, pendingSpecs).catch(() => {});
 			} else {
 				const providerLabel = template ? getTemplateLabel(template, t) : templateId;
 				const errorMsg =
@@ -315,7 +327,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		);
 	}
 
-	const lastField: Field = template?.promptModel ? "model" : "key";
+	const lastField: Field = template?.promptModel ? "context" : "key";
 
 	const detailsFooterItems = [
 		{
@@ -344,6 +356,17 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			setStep("validating-key");
 		} else {
 			persistProvider(effectiveKey, models).catch(() => {});
+		}
+	};
+
+	const finishWithModels = (models: string[], specs?: ConfiguredProvider["modelSpecs"]) => {
+		if (hasApiKeyValidation(templateId)) {
+			setPendingModels(models);
+			setPendingSpecs(specs);
+			setValidationError(null);
+			setStep("validating-key");
+		} else {
+			persistProvider(apiKey, models, specs).catch(() => {});
 		}
 	};
 
@@ -406,15 +429,16 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 					/>
 				</Box>
 			)}
-			{template?.promptAuthVar && (activeField === "key" || activeField === "model") && (
-				<Box marginTop={1} flexDirection="column">
-					<Text dimColor>{t("addFlow.authVarLabel")}</Text>
-					<Box>
-						<Text color="green">{"✓ "}</Text>
-						<Text>{authVarLabel}</Text>
+			{template?.promptAuthVar &&
+				(activeField === "key" || activeField === "model" || activeField === "context") && (
+					<Box marginTop={1} flexDirection="column">
+						<Text dimColor>{t("addFlow.authVarLabel")}</Text>
+						<Box>
+							<Text color="green">{"✓ "}</Text>
+							<Text>{authVarLabel}</Text>
+						</Box>
 					</Box>
-				</Box>
-			)}
+				)}
 			{template?.defaultApiKey ? (
 				<Box marginTop={1} flexDirection="column">
 					<TextPrompt
@@ -466,19 +490,35 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 							return undefined;
 						}}
 						onSubmit={(model) => {
-							const models = [model.trim()];
-							if (hasApiKeyValidation(templateId)) {
-								setPendingModels(models);
-								setValidationError(null);
-								setStep("validating-key");
-							} else {
-								persistProvider(apiKey, models).catch(() => {});
-							}
+							setPendingModel(model.trim());
+							setActiveField("context");
 						}}
 						onCancel={() => {
 							setActiveField("key");
 						}}
 					/>
+				</Box>
+			)}
+			{template?.promptModel && (
+				<Box marginTop={1} flexDirection="column">
+					<TextPrompt
+						label={t("addFlow.contextLabel")}
+						focus={activeField === "context"}
+						validate={(val) => validateContextWindow(val, t)}
+						onSubmit={(val) => {
+							const tokens = parseContextWindow(val);
+							finishWithModels(
+								[pendingModel],
+								tokens ? { [pendingModel.toLowerCase()]: { context: tokens } } : undefined,
+							);
+						}}
+						onCancel={() => {
+							setActiveField("model");
+						}}
+					/>
+					{activeField === "context" && ignoresContextWindow(pendingModel) && (
+						<StatusMessage variant="warning">{t("addFlow.contextClaudeWarning")}</StatusMessage>
+					)}
 				</Box>
 			)}
 		</AppShell>

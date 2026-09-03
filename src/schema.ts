@@ -32,6 +32,19 @@ export const configuredProviderSchema = z.object({
 	apiKey: z.string().default(""),
 	apiKeyValid: z.boolean().default(true),
 	models: z.array(z.string()).default([]),
+	/**
+	 * Per-model context window entered by the user. Keys are lowercase model ids.
+	 * Wins over both the provider API and the template table.
+	 */
+	modelSpecs: z
+		.record(
+			z.string(),
+			z.object({
+				context: z.number().int().positive(),
+				maxOutput: z.number().int().positive().optional(),
+			}),
+		)
+		.optional(),
 	baseUrl: z.string().optional(),
 	authVar: z.enum(AUTH_VARS).optional(),
 });
