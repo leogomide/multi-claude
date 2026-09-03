@@ -8,7 +8,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.38-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.39-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -394,12 +394,12 @@ Local proxy that routes requests to 40+ AI providers with automatic fallback, Op
 
 - **Base URL:** None — you enter it when adding the provider
 - **API key:** Optional — press Enter to skip it if your gateway does not require authentication
-- **Models:** Fetched from `/v1/models` on the configured base URL (and from `/models` when that answers 404) — falls back to the model ID you typed in the wizard when the endpoint does not answer
+- **Models:** Fetched from `/v1/models` on the configured base URL (and from `/models` when that answers 404). The model ID in the wizard is **optional** — press Enter to skip it and rely on the endpoint, or type one to have a fallback for when the endpoint is unreachable
 - **Context window:** Most gateways do not report it, so the wizard asks for it right after the model ID, and you can change it later in **Manage models**. Leave it empty to let Claude Code decide.
 
 Use this for any Anthropic-compatible endpoint that does not have its own template: a corporate proxy, a self-hosted gateway, a cloud AI gateway, or a provider that multi-claude does not ship yet.
 
-The wizard asks for a name, the base URL, the authentication header, the token, one model ID and the context window. The authentication step matters because gateways disagree on how the token should be sent:
+The wizard asks for a name, the base URL, the authentication header, the token and — optionally — one model ID plus its context window. Skipping the model ID is the right choice when your gateway answers `/v1/models`; typing one gives you a fallback for when it does not. If neither source produces a model, **Start Claude** stops with "no models available" instead of launching — add one from **Manage models**. The authentication step matters because gateways disagree on how the token should be sent:
 
 | Choice | Env var set | Header sent |
 |--------|-------------|-------------|
@@ -583,7 +583,12 @@ Color-coded indicators change from green to yellow to red based on context usage
 
 ## Changelog
 
-### v1.0.38 (current)
+### v1.0.39 (current)
+
+- **feat:** the model ID is now optional when adding a Custom Provider — leave it empty to take the model list from the gateway's `/v1/models`, and the launch flow stops with a clear message when neither the API nor the saved list has any model
+- **fix:** model fetching and its error messages named the provider template instead of the provider, so two gateways built from the same template were indistinguishable
+
+### v1.0.38
 
 - **feat:** the context window can now be set by hand per model, for any provider — gateways whose API does not report it no longer fall back to the 200k Claude Code assumes for unknown models
 - **feat:** the Custom Provider now fetches its model list from `/v1/models`, reading the context window from any of the field names gateways use, and falls back to the model you typed when the endpoint does not answer
