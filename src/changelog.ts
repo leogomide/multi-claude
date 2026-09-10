@@ -17,8 +17,8 @@ export interface ChangelogVersion {
 
 export async function parseChangelog(): Promise<ChangelogVersion[]> {
 	try {
-		const readmePath = join(__dirname, "..", "README.md");
-		const content = await readFile(readmePath, "utf-8");
+		const changelogPath = join(__dirname, "..", "CHANGELOG.md");
+		const content = await readFile(changelogPath, "utf-8");
 
 		const changelogMatch = content.match(/^## Changelog\s*$/m);
 		if (!changelogMatch || changelogMatch.index === undefined) return [];

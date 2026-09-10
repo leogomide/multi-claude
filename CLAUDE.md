@@ -30,6 +30,7 @@ src/
 ├── keystore.ts         # Gerenciamento de chaves de encriptacao
 ├── statusline.ts       # Renderizacao da status line do Claude Code
 ├── logs-viewer.ts      # Visualizador de logs de debug
+├── changelog.ts        # Parser do CHANGELOG.md para a tela Changelog da TUI
 ├── services/
 │   ├── api-models.ts   # Fetch de modelos de APIs externas
 │   ├── openrouter.ts   # Integracao OpenRouter
@@ -129,10 +130,11 @@ bun test
 
 Atualizar o campo `version` no `package.json` e rodar `bun install` para atualizar o `bun.lock`.
 
-### 3. Atualizar README.md
+### 3. Atualizar README.md, README.en.md e CHANGELOG.md
 
-- **Badge de versão:** atualizar o número na badge `[![Version](https://img.shields.io/badge/version-X.Y.Z-blue)]`
-- **Changelog:** adicionar nova seção `### vX.Y.Z (current)` com as entradas da versão e remover `(current)` da versão anterior
+- **Badge de versão:** atualizar o número na badge `[![Version](https://img.shields.io/badge/version-X.Y.Z-blue)]` nos dois READMEs (`README.md` em PT-BR e `README.en.md` em inglês)
+- **Changelog:** no `CHANGELOG.md`, adicionar nova seção `### vX.Y.Z (current)` com as entradas da versão e remover `(current)` da versão anterior
+- A tela Changelog da TUI le o `CHANGELOG.md` (`src/changelog.ts`): mantenha o titulo `## Changelog` e o formato `### vX.Y.Z` / `- **tipo:** ...`
 
 ### 4. Formato do changelog
 
@@ -144,7 +146,7 @@ Atualizar o campo `version` no `package.json` e rodar `bun install` para atualiz
 
 ```bash
 # Commitar as alterações de versão
-git add package.json bun.lock README.md
+git add package.json bun.lock README.md README.en.md CHANGELOG.md
 git commit -m "docs: bump version to vX.Y.Z"
 
 # Criar tag da versão

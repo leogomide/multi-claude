@@ -1,10 +1,8 @@
-> *Gerar código é fácil. Transformar ideias em software real é o desafio.*
-
-Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade que elimina a tentativa e erro e te dá controle total do projeto? Conheça a comunidade Ai Coders Academy:
-
-**[Entrar na comunidade](https://kiwify.app/kBV4r4X?afid=Xox2vMps)**
-
 <h1 align="center">multi-claude</h1>
+
+<p align="center">
+  <b>Português</b> · <a href="README.en.md">English</a>
+</p>
 
 <div align="center">
 
@@ -17,7 +15,7 @@ Quer ir além de prompts e dominar a **Engenharia de Contexto** — a habilidade
 </div>
 
 <div align="center">
-  <img src="cover.png" alt="multi-claude cover" width="600"/>
+  <img src="cover.png" alt="multi-claude" width="600"/>
 </div>
 
 <div align="center">
@@ -26,507 +24,112 @@ https://github.com/user-attachments/assets/d8565001-350a-46b8-ae28-6b5cc6937aa5
 
 </div>
 
-CLI tool to manage multiple API providers and launch [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the correct environment variables.
+**Use o [Claude Code](https://docs.anthropic.com/en/docs/claude-code) com qualquer provedor de IA — e troque entre eles em segundos.**
 
-Run `mclaude` to open a terminal UI where you can select a provider and model, manage your provider configurations, and launch Claude Code — all in one place.
+Digite `mclaude`, escolha o provedor e o modelo num menu no terminal, e o Claude Code abre já configurado. Sem editar variável de ambiente, sem copiar chave de um lado para o outro.
 
-## Prerequisites
+---
 
-- [Bun](https://bun.sh)
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+<div align="center">
+  <sub>PATROCINADO POR</sub>
+  <br><br>
+  <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
+    <img src="assets/sponsors/flatt.png" alt="Flatt" width="72"/>
+  </a>
+  <h3>Flatt — inferência a preço fixo.</h3>
+  <p>
+    Seu agente roda o dia inteiro, o mês inteiro — e a conta não muda.<br>
+    Sem contagem de token, 262 mil de contexto em todos os planos e API compatível com a Anthropic,<br>
+    pronta para usar no <b>mclaude</b> como <a href="#provedor-personalizado">Provedor personalizado</a> em um minuto.
+  </p>
+  <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
+    <img src="https://img.shields.io/badge/Comece%20com%20a%20Flatt-4b3fe6?style=for-the-badge" alt="Comece com a Flatt"/>
+  </a>
+</div>
 
-## Installation
+---
 
-### Global install (recommended)
+## Por que usar
+
+- **20 provedores num só menu** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio e muitos outros, além de qualquer gateway compatível com a API da Anthropic.
+- **Várias contas Anthropic** — alterne entre conta pessoal e de trabalho sem fazer logout.
+- **Instalações isoladas** — configurações, MCPs e histórico separados por contexto (trabalho, pessoal, cliente).
+- **Chaves protegidas** — suas API keys ficam criptografadas no disco, com senha mestra opcional.
+- **Status line completa** — modelo, tokens, custo e uso de contexto em tempo real dentro do Claude Code.
+- **Interface em português**, inglês ou espanhol.
+
+## Instalação
+
+Pré-requisitos: [Bun](https://bun.sh) e [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 ```bash
 bun install -g @leogomide/multi-claude
 ```
 
-### Run without installing (using bunx)
+Ou rode sem instalar:
 
 ```bash
 bunx @leogomide/multi-claude
 ```
 
-You can also create an alias for convenience:
+Para atualizar, use `bun install -g @leogomide/multi-claude@latest`. Para remover, `bun remove -g @leogomide/multi-claude`.
 
-```bash
-# Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
-alias mclaude='bunx @leogomide/multi-claude'
-
-# Then run normally
-mclaude
-```
-
-## Update
-
-```bash
-bun install -g @leogomide/multi-claude@latest
-```
-
-## Uninstall
-
-```bash
-bun remove -g @leogomide/multi-claude
-```
-
-## Usage
-
-### Launch
+## Como usar
 
 ```bash
 mclaude
 ```
 
-This opens the TUI where you can:
+1. Escolha um provedor no menu principal (ou adicione um em **Gerenciar provedores**)
+2. Escolha o modelo
+3. Escolha a instalação (ou use a padrão)
+4. O Claude Code abre com tudo configurado
 
-1. Select a configured provider from the main menu
-2. Pick a model
-3. Select an installation (or use default)
-4. Claude Code starts with the correct environment variables
+Qualquer argumento extra é repassado ao Claude Code — por exemplo, `mclaude -p "explique este projeto"`.
 
-### Forwarding arguments to Claude Code
+## Provedores suportados
 
-All extra arguments are passed directly to Claude Code:
+| Provedor | Tipo | Onde obter acesso |
+|----------|------|-------------------|
+| Anthropic | Conta Claude (OAuth) | [claude.ai](https://claude.ai) |
+| Alibaba Cloud | Plano de assinatura | [Model Studio](https://bailian.console.alibabacloud.com/) |
+| BytePlus ModelArk | Plano de assinatura | [BytePlus](https://www.byteplus.com/en/activity/codingplan) |
+| DeepSeek | API | [platform.deepseek.com](https://platform.deepseek.com) |
+| Kimi Code | Plano de assinatura | [kimi.com](https://www.kimi.com/code/docs/en/more/third-party-agents.html) |
+| MiniMax | Plano de assinatura | [platform.minimax.io](https://platform.minimax.io) |
+| Moonshot AI | API | [platform.moonshot.ai](https://platform.moonshot.ai) |
+| NanoGPT | Agregador | [nano-gpt.com](https://nano-gpt.com/api) |
+| Novita AI | API | [novita.ai](https://novita.ai) |
+| OpenRouter | Agregador | [openrouter.ai](https://openrouter.ai/keys) |
+| Poe | Agregador | [poe.com](https://poe.com) |
+| Requesty | Agregador | [requesty.ai](https://requesty.ai) |
+| Z.AI Coding Plan | Plano de assinatura | [z.ai](https://z.ai/subscribe) |
+| LiteLLM Proxy | Proxy próprio | [docs.litellm.ai](https://docs.litellm.ai/docs/) |
+| llama.cpp | Local | [GitHub](https://github.com/ggml-org/llama.cpp) |
+| LM Studio | Local | [lmstudio.ai](https://lmstudio.ai) |
+| Ollama | Local | [ollama.com](https://ollama.com) |
+| OmniRoute | Local | [GitHub](https://github.com/diegosouzapw/OmniRoute) |
+| 9Router | Local | [GitHub](https://github.com/decolua/9router) |
+| Provedor personalizado | Qualquer API compatível com a Anthropic | — |
 
-```bash
-mclaude --debug
-mclaude -p "explain this codebase"
-mclaude --allowedTools "Bash(git *)" -p "show recent commits"
-```
+Provedores locais não precisam de API key. Em OpenRouter, NanoGPT, LiteLLM e nos locais, a lista de modelos é carregada automaticamente.
 
-In TUI mode, the model is selected interactively. In headless mode, use `--model` / `-m` to specify it directly.
+### Provedor personalizado
 
-### TUI Flag Selection
+Tem um gateway que não está na lista? Use o **Provedor personalizado**: informe um nome, a URL base e o token, e pronto. A lista de modelos é buscada no próprio endpoint. Funciona com proxies corporativos, gateways próprios e serviços como a [Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude) — basta colar a URL base e a chave do painel.
 
-Before launching Claude Code, the TUI presents a flag selection step where you can toggle common flags on or off. Flags passed via the command line are pre-checked, and your selection is persisted between sessions.
+## Várias contas Anthropic
 
-| Group | Flag | Description |
-|-------|------|-------------|
-| Session | `--resume` | Resume a previous session (interactive picker) |
-| Permissions | `--dangerously-skip-permissions` | Skip all permission prompts (use with caution) |
-| Development | `--worktree [name]` | Run in an isolated git worktree |
+Adicione quantas contas Anthropic (OAuth) quiser — "Trabalho", "Pessoal" — e faça login uma vez em cada. Cada conta usa sua própria instalação, com configurações, histórico e MCPs totalmente separados.
 
-### Headless Mode (non-interactive)
+## Instalações isoladas
 
-Skip the TUI entirely by specifying `--provider` on the command line. Useful for scripting, automation, and AI agents.
+Por padrão o Claude Code usa `~/.claude/`. Em **Gerenciar instalações** você cria diretórios de configuração independentes e escolhe qual usar a cada sessão.
 
-```bash
-mclaude --provider deepseek --model deepseek-chat -p "explain this function"
-mclaude --provider ollama --model llama3 -c
-mclaude --provider anthropic --installation work -p "review this PR"
-```
+## Status line
 
-**mclaude flags:**
+O mclaude adiciona ao Claude Code uma status line com informações da sessão em tempo real. Escolha o modelo em **Configurações → Status line**:
 
-| Flag | Description |
-|------|-------------|
-| `--provider <name>` | Provider to use (template ID, name, or slug). **Required for headless mode.** |
-| `--model <model>` | Model to use. Auto-selects first available if omitted. |
-| `--installation <name>` | Installation to use. Defaults to `default`. |
-| `--master-password <pw>` | Master password, if configured. Also accepts `MCLAUDE_MASTER_PASSWORD` env var. |
-| `--list` | Print available providers, models, and installations as JSON. |
-
-All other flags are forwarded to Claude Code (`-p`, `-c`, `--resume`, `--max-turns`, `--output-format`, etc.).
-
-#### Discovery
-
-Use `--list` to see what's available:
-
-```bash
-mclaude --list
-```
-
-```json
-{
-  "providers": [
-    { "cliId": "deepseek", "name": "DeepSeek", "templateId": "deepseek", "type": "api", "models": ["deepseek-chat", "deepseek-reasoner"] }
-  ],
-  "installations": [
-    { "cliId": "default", "name": "Default" }
-  ],
-  "usage": "mclaude --provider <cliId> [--model <model>] [--installation <cliId>] [claude-flags...]"
-}
-```
-
-The `cliId` field is the identifier to use with `--provider` and `--installation`. It's also shown in the TUI sidebar as **CLI ID** when you highlight a provider.
-
-#### Provider matching
-
-The `--provider` value is matched in this order:
-
-1. **Provider name** (case-insensitive) — `--provider "My DeepSeek"`
-2. **Template ID** — `--provider deepseek`
-3. **Slug of the name** — `--provider my-deepseek`
-4. **Provider UUID** — for scripting with stable IDs
-
-If multiple providers match (e.g., two OpenRouter accounts), use the exact name to disambiguate.
-
-#### Examples
-
-```bash
-# Non-interactive query
-mclaude --provider deepseek --model deepseek-chat -p "explain this codebase"
-
-# Auto-select model (uses first available)
-mclaude --provider deepseek -p "hello"
-
-# Continue last conversation
-mclaude --provider ollama --model llama3 -c
-
-# Autonomous agent with limits
-mclaude --provider openrouter --model anthropic/claude-sonnet-4 --max-turns 5 -p "fix the failing tests"
-
-# JSON output for programmatic parsing
-mclaude --provider deepseek --model deepseek-chat -p --output-format json "list all TODOs"
-
-# With specific installation
-mclaude --provider anthropic --installation work -p "review this PR"
-```
-
-### Claude Code Skill
-
-A bundled skill at [`.claude/skills/mclaude-headless/`](.claude/skills/mclaude-headless/) teaches AI agents how to use mclaude in headless mode. It includes:
-
-- Usage guide with discovery (`--list`), syntax, and examples
-- Complete Claude Code CLI reference (`references/claude-code-cli.md`) with all flags for non-interactive use
-
-The skill triggers automatically when an agent needs to launch Claude Code via mclaude.
-
-### Other flags
-
-```bash
-mclaude --help
-mclaude --version
-```
-
-## Supported Providers
-
-### Anthropic (OAuth)
-
-Uses the native Claude Code OAuth login flow — no API key required. You can add multiple Anthropic accounts and switch between them.
-
-- **Type:** OAuth
-- **How to add:** Select "Anthropic (OAuth)" → enter an account name → complete the OAuth login in your browser
-- **Models:** Managed natively by Claude Code (no model selection in the TUI)
-
-This is ideal if you already have a Claude Pro/Team/Enterprise subscription and want to manage multiple accounts.
-
-### Alibaba Cloud
-
-- **Docs:** [Alibaba Cloud Coding Plan](https://www.alibabacloud.com/help/en/model-studio/coding-plan#79cb18916c1fl)
-- **Base URL:** `https://coding-intl.dashscope.aliyuncs.com/apps/anthropic`
-- **API key:** Get a coding plan key (`sk-sp-xxxxx`) at [Alibaba Cloud Model Studio](https://bailian.console.alibabacloud.com/)
-- **Default models:** `glm-4.7`, `glm-5`, `kimi-k2.5`, `MiniMax-M2.5`, `qwen3-coder-next`, `qwen3-coder-plus`, `qwen3-max-2026-01-23`, `qwen3.5-plus`
-
-**Coding Plan:** Subscription-based pricing with multi-model access. One subscription covers Qwen, GLM, Kimi, and MiniMax models. Usage is restricted to coding tools (Claude Code, Cursor, etc.).
-
-| Tier | Price | Requests / 5h | Requests / month |
-|------|-------|---------------|-----------------|
-| Lite | $10/mo | 1,200 | 18,000 |
-| Pro | $50/mo | 6,000 | 90,000 |
-
-First month promotional pricing starting at ~$3. [Subscribe here](https://common-buy-intl.alibabacloud.com/coding-plan).
-
-### BytePlus ModelArk
-
-- **Docs:** [BytePlus ModelArk Claude Code integration](https://docs.byteplus.com/en/docs/ModelArk/1928262)
-- **Base URL:** `https://ark.ap-southeast.bytepluses.com/api/coding`
-- **API key:** Get one at [BytePlus ModelArk Console](https://console.byteplus.com/ark/region:ark+ap-southeast-1/apiKey)
-- **Default models:** `ark-code-latest`, `bytedance-seed-code`, `glm-4.7`, `gpt-oss-120b`, `kimi-k2-thinking`, `kimi-k2.5`
-
-**Coding Plan:** Subscription with Auto mode that intelligently selects the best model per task. New users get 50% off.
-
-| Tier | Price | New user price |
-|------|-------|---------------|
-| Lite | $10/mo | $5/mo |
-| Pro | $50/mo | $25/mo |
-| Lite (3 months) | $30 | $15 |
-| Pro (3 months) | $120 | $60 |
-
-[Subscribe here](https://www.byteplus.com/en/activity/codingplan).
-
-### DeepSeek
-
-- **Docs:** [DeepSeek Anthropic API guide](https://api-docs.deepseek.com/guides/anthropic_api)
-- **Base URL:** `https://api.deepseek.com/anthropic`
-- **API key:** Get one at [platform.deepseek.com](https://platform.deepseek.com)
-- **Default models:** `deepseek-chat`, `deepseek-reasoner`
-
-### MiniMax
-
-- **Docs:** [MiniMax Claude Code integration](https://platform.minimax.io/docs/coding-plan/claude-code)
-- **Base URL:** `https://api.minimax.io/anthropic`
-- **API key:** Get one at [platform.minimax.io](https://platform.minimax.io)
-- **Default models:** `MiniMax-M2`, `MiniMax-M2.1`, `MiniMax-M2.5`, `MiniMax-M2.5-highspeed`
-
-**Coding Plan:** Subscription tiers with a rolling 5-hour window for rate limiting. Annual plans save ~17%.
-
-| Tier | Price | Prompts / 5h | Model |
-|------|-------|-------------|-------|
-| Starter | $10/mo | 100 | M2.5 (~50 TPS) |
-| Plus | $20/mo | 300 | M2.5 (~50 TPS) |
-| Max | $50/mo | 1,000 | M2.5 (~50 TPS) |
-| Plus HS | $40/mo | 300 | M2.5-highspeed (~100 TPS) |
-| Max HS | $80/mo | 1,000 | M2.5-highspeed (~100 TPS) |
-| Ultra HS | $150/mo | 2,000 | M2.5-highspeed (~100 TPS) |
-
-[Subscribe here](https://platform.minimax.io/subscribe/coding-plan).
-
-### Moonshot AI
-
-- **Docs:** [Moonshot Claude Code support](https://platform.moonshot.ai/docs/guide/agent-support#configure-environment-variables-1)
-- **Base URL:** `https://api.moonshot.ai/anthropic`
-- **API key:** Get one at [platform.moonshot.ai](https://platform.moonshot.ai)
-- **Default models:** `kimi-k2-0711-preview`, `kimi-k2-0905-preview`, `kimi-k2-thinking-turbo`, `kimi-k2-thinking`, `kimi-k2-turbo-preview`, `kimi-k2.5`
-
-### NanoGPT
-
-- **Docs:** [NanoGPT Claude Code integration](https://docs.nano-gpt.com/integrations/claude-code)
-- **Base URL:** `https://nano-gpt.com/api/v1`
-- **API key:** Get one at [nano-gpt.com/api](https://nano-gpt.com/api)
-- **Default models:** None — models are fetched from the NanoGPT API. Supports 400+ models including Claude, GPT, Gemini, DeepSeek, and more.
-
-NanoGPT validates your API key when you add or edit a provider.
-
-### Novita AI
-
-- **Docs:** [Novita AI Claude Code guide](https://novita.ai/docs/guides/claude-code) | [Supported models](https://novita.ai/docs/guides/llm-anthropic-compatibility#supported-models)
-- **Base URL:** `https://api.novita.ai/anthropic`
-- **API key:** Get one at [novita.ai](https://novita.ai)
-- **Default models:** `deepseek/deepseek-v3-0324`, `deepseek/deepseek-v3.1`, `deepseek/deepseek-v3.1-terminus`, `deepseek/deepseek-v3.2`, `deepseek/deepseek-v3.2-exp`, `minimax/minimax-m2`, `minimax/minimax-m2.1`, `minimax/minimax-m2.5`, `moonshotai/kimi-k2-0905`, `moonshotai/kimi-k2-instruct`, `moonshotai/kimi-k2-thinking`, `moonshotai/kimi-k2.5`, `qwen/qwen3-235b-a22b-thinking-2507`, `qwen/qwen3-coder-480b-a35b-instruct`, `qwen/qwen3-coder-next`, `qwen/qwen3-next-80b-a3b-instruct`, `qwen/qwen3-next-80b-a3b-thinking`, `xiaomimimo/mimo-v2-flash`, `zai-org/glm-4.6`, `zai-org/glm-4.6v`, `zai-org/glm-4.7`, `zai-org/glm-5`
-
-### OpenRouter
-
-- **Docs:** [OpenRouter Claude Code integration](https://openrouter.ai/docs/guides/guides/claude-code-integration)
-- **Base URL:** `https://openrouter.ai/api`
-- **API key:** Get one at [openrouter.ai/keys](https://openrouter.ai/keys)
-- **Default models:** None — models are fetched from the OpenRouter API based on your account. The model list shows pricing, context length, and capability details.
-
-OpenRouter validates your API key when you add or edit a provider.
-
-### Poe
-
-- **Docs:** [Poe Anthropic-compatible API](https://creator.poe.com/docs/external-applications/anthropic-compatible-api)
-- **Base URL:** `https://api.poe.com`
-- **API key:** Get one at [poe.com](https://poe.com)
-- **Default models:** `claude-haiku-3`, `claude-haiku-3.5`, `claude-haiku-4.5`, `claude-opus-4`, `claude-opus-4.1`, `claude-opus-4.5`, `claude-sonnet-3.7`, `claude-sonnet-4`, `claude-sonnet-4.5`
-
-### Requesty
-
-- **Docs:** [Requesty Claude Code integration](https://docs.requesty.ai/integrations/claude-code)
-- **Base URL:** `https://router.requesty.ai`
-- **API key:** Get one at [requesty.ai](https://requesty.ai)
-- **Default models:** None — add your own model IDs
-
-### Z.AI Coding Plan
-
-- **Docs:** [Z.AI Claude Code manual configuration](https://docs.z.ai/devpack/tool/claude#manual-configuration)
-- **Base URL:** `https://api.z.ai/api/anthropic` — the Coding Plan endpoint, not the pay-as-you-go API (`https://api.z.ai/api/paas/v4`)
-- **API key:** Get one at [z.ai](https://z.ai)
-- **Models:** Fetched from `/v1/models` on the configured base URL — falls back to `GLM-5.3`, `GLM-5-Turbo`, `GLM-4.7` if the API is unreachable
-- **Context window:** Z.AI does not report it over the API, so multi-claude ships a per-model table (GLM-5.3 / 5.3-Flash / 5.2 at 1M, GLM-5 / 5.1 / 4.7 / 4.6 at 200K, GLM-4.5 / 4.5-Air at 128K) and passes it to Claude Code, which would otherwise assume 200k for every GLM model
-
-**Coding Plan:** Subscription tiers with a rolling 5-hour window and weekly limits. All tiers include GLM-5.3, GLM-5-Turbo and GLM-4.7 — requests for previous models (GLM-5.2 / GLM-5.1) are automatically routed to GLM-5.3. Quarterly saves 10%, yearly saves 30%.
-
-| Tier | Price | Prompts / 5h | Prompts / week | Features |
-|------|-------|-------------|---------------|----------|
-| Lite | $10/mo | ~80 | ~400 | 3× Claude Pro usage, 20+ coding tools |
-| Pro | $30/mo | ~400 | ~2,000 | 5× Lite, 40–60% faster, Vision/Web Search/Web Reader MCP |
-| Max | $80/mo | ~1,600 | ~8,000 | 4× Pro, first access to new models, guaranteed peak-hour performance |
-
-[Subscribe here](https://z.ai/subscribe).
-
-### LiteLLM Proxy
-
-- **Docs:** [LiteLLM documentation](https://docs.litellm.ai/docs/) | [Claude Code integration](https://docs.litellm.ai/docs/tutorials/claude_responses_api)
-- **Base URL:** `http://localhost:4000` (configurable — edit the provider to point to your proxy)
-- **API key:** Your LiteLLM master key or virtual key
-- **Default models:** None — models are fetched from the LiteLLM proxy via `/model/info`. Configure them in your LiteLLM `config.yaml`.
-
-LiteLLM acts as a unified proxy for 100+ LLM providers (Anthropic, AWS Bedrock, Azure, Vertex AI, etc.), providing centralized authentication, cost tracking, and rate limiting. Run the proxy anywhere (local or remote) and point multi-claude to it.
-
-### Local Providers
-
-These providers run locally on your machine — no API key is required (a placeholder is used automatically).
-
-llama.cpp and LM Studio report the context window of the loaded model, so multi-claude passes it straight through. Ollama, OmniRoute and 9Router do not report it — set it yourself per model in **Manage models**, otherwise Claude Code assumes 200k.
-
-#### llama.cpp
-
-- **Docs:** [llama.cpp on GitHub](https://github.com/ggml-org/llama.cpp)
-- **Base URL:** `http://127.0.0.1:8080`
-- **Default models:** None — depends on the model you load locally
-
-#### LM Studio
-
-- **Docs:** [LM Studio Claude Code integration](https://lmstudio.ai/docs/integrations/claude-code)
-- **Base URL:** `http://localhost:1234`
-- **Default models:** None — depends on the model you load in LM Studio
-
-#### Ollama
-
-- **Docs:** [Ollama Claude Code support](https://ollama.com/blog/claude)
-- **Base URL:** `http://localhost:11434`
-- **Default models:** None — depends on the model you pull with Ollama
-
-#### OmniRoute
-
-- **Docs:** [OmniRoute on GitHub](https://github.com/diegosouzapw/OmniRoute)
-- **Base URL:** `http://localhost:20128/v1` (configurable)
-- **Default models:** None — depends on the models configured in your OmniRoute instance
-
-Self-hosted AI gateway with Anthropic API support. Run OmniRoute separately, then add it as a provider in multi-claude.
-
-#### 9Router
-
-- **Docs:** [9Router on GitHub](https://github.com/decolua/9router)
-- **Base URL:** `http://localhost:20128/v1` (configurable)
-- **API key:** Optional — copy it from the 9Router dashboard if you enabled `requireApiKey`
-- **Default models:** None — fetched from `/v1/models`, depending on the providers you connected in the 9Router dashboard
-
-Local proxy that routes requests to 40+ AI providers with automatic fallback, OpenAI ↔ Claude format translation, and token savings. Install it with `npm install -g 9router`, run `9router`, connect at least one provider in the dashboard at `http://localhost:20128`, then add it as a provider in multi-claude. Model ids are namespaced by source (`cc/`, `kr/`, `glm/`, `oc/`, `vertex/`, ...).
-
-> 9Router and OmniRoute both default to port `20128`. If you use both, change the base URL of one of them when adding the provider.
-
-### Custom Provider
-
-- **Base URL:** None — you enter it when adding the provider
-- **API key:** Optional — press Enter to skip it if your gateway does not require authentication
-- **Models:** Fetched from `/v1/models` on the configured base URL (and from `/models` when that answers 404). The model ID in the wizard is **optional** — press Enter to skip it and rely on the endpoint, or type one to have a fallback for when the endpoint is unreachable
-- **Context window:** Most gateways do not report it, so the wizard asks for it right after the model ID, and you can change it later in **Manage models**. Leave it empty to let Claude Code decide.
-
-Use this for any Anthropic-compatible endpoint that does not have its own template: a corporate proxy, a self-hosted gateway, a cloud AI gateway, or a provider that multi-claude does not ship yet.
-
-The wizard asks for a name, the base URL, the authentication header, the token and — optionally — one model ID plus its context window. Skipping the model ID is the right choice when your gateway answers `/v1/models`; typing one gives you a fallback for when it does not. If neither source produces a model, **Start Claude** stops with "no models available" instead of launching — add one from **Manage models**. The authentication step matters because gateways disagree on how the token should be sent:
-
-| Choice | Env var set | Header sent |
-|--------|-------------|-------------|
-| Bearer token | `ANTHROPIC_AUTH_TOKEN` | `Authorization: Bearer <token>` |
-| API key header | `ANTHROPIC_API_KEY` | `x-api-key: <token>` |
-
-Pick Bearer first — it is what most Anthropic-compatible gateways expect. If requests come back unauthorized, edit the provider and choose **Edit authentication** to switch to the other one. The base URL, token and models can all be changed later from **Manage providers**.
-
-> Claude Code ignores `CLAUDE_CODE_MAX_CONTEXT_TOKENS` for model ids that start with `claude-`. If your gateway serves Anthropic models under their original ids, the context window you enter has no effect and the session stays on 200k. The wizard warns you when it sees such an id, but still lets you save it — the id may be just an alias on your gateway.
-
-You can add several custom providers, each with its own URL and token — just give them different names.
-
-## Provider Management
-
-All provider management is done inside the TUI. From the main menu, select **Manage providers** to:
-
-- **Add a provider** — pick a provider template, enter a name and API key (or complete OAuth login for Anthropic)
-- **Edit a provider** — change name, API key, re-authenticate OAuth, or remove it
-- **Manage models** — add custom model IDs or remove models from a provider. Custom models appear alongside the provider's default models. **Set context window** lets you enter the window in tokens per model, for any provider — including the provider's default models, so a built-in value can be corrected. It accepts `128000`, `128k` or `1M`; an empty value clears the override and falls back to whatever the provider API or the built-in table reports. Your value wins over both.
-
-## Installation Management
-
-Installations are isolated Claude Code configuration directories. Each installation has its own settings, MCP servers, history, and project data — stored in `~/.multi-claude/installations/<id>/`.
-
-By default, Claude Code uses `~/.claude/`. Custom installations let you keep separate configurations for different contexts (work, personal, client projects, etc.).
-
-From the main menu, select **Manage installations** to:
-
-- **Add an installation** — enter a name and a new isolated directory is created
-- **Edit an installation** — rename or remove it
-- **Remove an installation** — deletes the configuration and its directory
-
-### Auto-selection rules
-
-- **API providers with no custom installations:** Default (`~/.claude/`) is used automatically
-- **API providers with custom installations:** You pick which installation to use
-- **Anthropic (OAuth):** Always requires a custom installation (created during onboarding if none exist)
-
-## Multiple Anthropic Accounts (OAuth)
-
-multi-claude lets you manage multiple Anthropic accounts simultaneously using isolated OAuth credentials:
-
-1. Add a new Anthropic (OAuth) provider and give it a name (e.g. "Work", "Personal")
-2. If no installations exist, you'll be prompted to create one (required for OAuth)
-3. Complete the OAuth login in your browser
-4. Credentials are stored in `~/.multi-claude/accounts/<provider-id>/`
-5. Each account uses its own installation — fully isolated settings, history, and MCP servers
-
-If a session expires, you can re-authenticate from **Edit provider → Re-authenticate**.
-
-## Security — Credential Encryption
-
-All API keys are encrypted at rest using **AES-256-GCM**. Credentials are never stored in plain text.
-
-### How it works
-
-On first launch, mclaude generates two files in `~/.multi-claude/`:
-
-- **`.key`** — a random 256-bit encryption key (base64)
-- **`.salt`** — a random 32-byte salt (base64)
-
-Both files are created with `chmod 0600` (owner-only on Unix). API keys in `config.json` are encrypted with the `.key` file before writing to disk and decrypted transparently when loaded.
-
-### Master password (optional)
-
-For additional security, you can set a master password in **Settings → Set master password**. When enabled:
-
-1. The `.key` file itself is encrypted (wrapped) using a key derived from your password via PBKDF2-HMAC-SHA512 (600,000 iterations)
-2. You'll be prompted for the password each time you launch mclaude
-3. Disabling the master password unwraps the `.key` file back to its original state
-
-**In headless mode**, pass the master password via flag or environment variable:
-
-```bash
-# Via flag (more practical)
-mclaude --provider deepseek --master-password yourPassword -p "hello"
-
-# Via environment variable (more secure in shared environments)
-MCLAUDE_MASTER_PASSWORD=yourPassword mclaude --provider deepseek -p "hello"
-```
-
-The `--master-password` flag takes priority over the environment variable.
-
-### What is protected
-
-| Threat | Protected? |
-|--------|-----------|
-| Config file shared/copied without `.key` | Yes — credentials are encrypted |
-| Backup leaks (cloud sync of dotfiles) | Yes — if `.key` is excluded |
-| Casual browsing of `config.json` | Yes — API keys are opaque JSON blobs |
-| Attacker with full access to `~/.multi-claude/` | Without master password: No (`.key` readable). With master password: Yes |
-
-### Migration
-
-Existing plain-text credentials are automatically encrypted on the first launch after updating. No action needed.
-
-## Configuration
-
-- **Config file:** `~/.multi-claude/config.json`
-- **Encryption key:** `~/.multi-claude/.key`
-- **Encryption salt:** `~/.multi-claude/.salt`
-- **OAuth accounts:** `~/.multi-claude/accounts/`
-- **Installations:** `~/.multi-claude/installations/`
-- **Supported languages:** English, Português (BR), Español — change in **Settings → Change language**
-
-## Status Line
-
-mclaude injects a customizable status line into Claude Code that shows real-time session information. Configure it from **Settings > Status line** in the TUI.
-
-### Templates
-
-| Template | Lines | Focus |
-|----------|-------|-------|
-| **none** | — | Disabled |
-| **default** (default) | 4 | Model + git, tokens I/O + cache, session + API time + cost + burn rate, context bar (status) |
-| **full** | 4 | Model + git, tokens I/O + cache, session + API time + cost + burn rate, context detail (ctx/left/win) + status |
-| **slim** | 3 | Model + git, tokens I/O + cost + session, context bar (status) |
-| **mini** | 2 | Model + git, context % (status) + cost + duration |
-| **cost** | 4 | Model + git, in/out cost breakdown, burn rate + hourly projection + session, context bar (status) |
-| **perf** | 4 | Model + git, cache hit + I/O ratio + API time %, output throughput + session + cost, context bar (status) |
-| **context** | 4 | Model + git, input/output/total token breakdown, cache create/read detail, context bar (status) |
-
-Context status indicators: `(approaching)` at 61%+, `(imminent)` at 70%+, `(/compact)` at 80%+.
-
-### Preview
-
-**default:**
 ```
 Provider/Opus (master +45 -7)
 Input:84.2k    | Output:62.8k   | Cache:20.6M
@@ -534,277 +137,46 @@ Session:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min
 ━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
 ```
 
-**full:**
-```
-Provider/Opus (master +45 -7)
-Input:84.2k    | Output:62.8k   | Cache:20.6M
-Session:3h31m  | API:1h38m      | Cost:$11.15    | $0.19/min
-Ctx:153.9k/77% | Left:46.1k/23% | Win:200k       | (imminent)
-```
+Há também os modelos `full`, `slim`, `mini`, `cost`, `perf` e `context`.
 
-**slim:**
-```
-Provider/Opus (master +45 -7)
-Input:84.2k    | Output:62.8k   | Cost:$11.15    | Session:3h31m
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
+## Automação (modo headless)
+
+Pule o menu informando o provedor na linha de comando — útil para scripts e agentes de IA:
+
+```bash
+mclaude --provider deepseek --model deepseek-chat -p "explique esta função"
+mclaude --list   # lista provedores, modelos e instalações em JSON
 ```
 
-**mini:**
-```
-Provider/Opus (master +45 -7)
-Ctx 77% (imminent) | $11.15 | 3h31m
-```
+A skill [`mclaude-headless`](.claude/skills/mclaude-headless/) ensina agentes a usar o mclaude dessa forma. Veja todas as opções com `mclaude --help`.
 
-**cost:**
-```
-Provider/Opus (master +45 -7)
-Input:$3.40    | Output:$7.75   | Cost:$11.15
-$0.19/min      | ~$11.40/h      | Session:3h31m
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
-```
+## Segurança
 
-**perf:**
-```
-Provider/Opus (master +45 -7)
-Cache:71% hit  | I/O 1.3:1      | API:47% time
-Output:~297tok/s | Session:3h31m  | $11.15
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
-```
+As API keys são criptografadas com **AES-256-GCM** antes de irem para o disco. Para uma camada extra, ative uma senha mestra em **Configurações → Definir senha mestra**.
 
-**context:**
-```
-Provider/Opus (master +45 -7)
-Input:84.2k    | Output:62.8k   | Total:167.6k/200k
-CacheCreate:2.1k | CacheRead:18.5k | Cache:20.6M
-━━━━━━━━━━━━━━━━━━━━━━━━╌╌╌╌╌╌╌ | 153.9k/77%     | 46.1k/23% left (imminent)
-```
+## Patrocinadores
 
-Color-coded indicators change from green to yellow to red based on context usage, cost, and cache hit rates.
+<a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
+  <img src="assets/sponsors/flatt.png" alt="Flatt" width="40" align="left"/>
+</a>
 
-## Changelog
+**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — inferência de modelos de linguagem por preço fixo mensal, feita para agentes de código que rodam o dia inteiro. Funciona no mclaude como [Provedor personalizado](#provedor-personalizado).
 
-### v1.0.39 (current)
+<br clear="left"/>
 
-- **feat:** the model ID is now optional when adding a Custom Provider — leave it empty to take the model list from the gateway's `/v1/models`, and the launch flow stops with a clear message when neither the API nor the saved list has any model
-- **fix:** model fetching and its error messages named the provider template instead of the provider, so two gateways built from the same template were indistinguishable
+## Novidades
 
-### v1.0.38
+Veja o [CHANGELOG](CHANGELOG.md) ou as [releases](https://github.com/leogomide/multi-claude/releases). O histórico também aparece dentro do app, na tela **Changelog**.
 
-- **feat:** the context window can now be set by hand per model, for any provider — gateways whose API does not report it no longer fall back to the 200k Claude Code assumes for unknown models
-- **feat:** the Custom Provider now fetches its model list from `/v1/models`, reading the context window from any of the field names gateways use, and falls back to the model you typed when the endpoint does not answer
-- **fix:** headless launches resolved the context window from the built-in table only, so OpenRouter, Requesty, LiteLLM, LM Studio and llama.cpp got no window outside the TUI
-
-### v1.0.37
-
-- **feat:** third-party models now report their real context window to Claude Code, which previously assumed 200k for every unrecognized model — sourced from the provider API when available, from a built-in per-model table otherwise
-- **feat:** the auto-compact budget is now derived from the model context window instead of being hardcoded per provider
-- **feat:** the Z.AI provider now fetches its model list from the provider API, falling back to the built-in list when the API is unreachable
-- **fix:** a failed model fetch no longer dead-ends on an error screen when a saved model list is available
-- **fix:** confirming with Enter right after an arrow key no longer selects the item above the highlighted one, in the main menu, the model list and the launch options
-- **fix:** headless launches (`--provider` / `--model`) did not pass the model context window, so only the TUI benefited from it
-
-### v1.0.36
-
-- **feat:** added a Custom Provider template — set your own base URL, token and model for any Anthropic-compatible gateway, and pick whether the token is sent as `ANTHROPIC_AUTH_TOKEN` or `ANTHROPIC_API_KEY`
-- **fix:** custom base URLs were ignored when launching from the TUI, so providers like Ollama, LM Studio, llama.cpp, LiteLLM, OmniRoute and 9Router fell back to the template default unless launched with `--provider`
-- **fix:** the main menu sidebar showed the template base URL instead of the one configured on the provider
-- **fix:** editing an API key validated it against the template URL instead of the provider custom URL
-
-### v1.0.35
-
-- **fix:** updated the Z.AI provider to the current GLM Coding Plan lineup — `GLM-5.3`, `GLM-5-Turbo` and `GLM-4.7`, dropping the discontinued GLM-4.5/4.6 models
-- **fix:** the Z.AI provider now sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` and `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, as recommended by Z.AI's official configuration
-- **refactor:** renamed the Z.AI provider to `Z.AI Coding Plan`, making it explicit that it targets the Coding Plan endpoint rather than the pay-as-you-go API
-
-### v1.0.34
-
-- **feat:** added 9Router as a local provider — self-hosted proxy for 40+ AI providers, with models fetched automatically from the local instance
-
-### v1.0.33
-
-- **feat:** new `Load .env variables` option in the launch screen — reads `.env` from the current directory and injects its variables into Claude Code (empty values are skipped; precedence is `.env` < provider < user-selected)
-- **refactor:** removed the experimental `No Flicker` option from the launch screen
-
-### v1.0.32
-
-- **fix:** `default` statusline template now renders two stacked progress bars (5h session and 7d weekly), each with its own percentage and reset time
-- **fix:** `full` statusline template now shows a dedicated `reset:7d_time` cell next to the weekly usage percentage
-
-### v1.0.31
-
-- **refactor:** dropped Anthropic API call for 5-hour and weekly usage limits — statusline now reads `rate_limits` directly from Claude Code's native JSON (also removes the on-disk cache and rate-limit lock)
-- **feat:** added `effort.level` and `thinking.enabled` indicators in the statusline header across all templates
-- **feat:** added `200k+` warning tag in the `default` and `full` statusline templates when `exceeds_200k_tokens` is true
-
-### v1.0.30
-
-- **refactor:** removed `--enable-auto-mode` flag from launch screen (auto-mode is now native in Claude Code)
-- **refactor:** removed `--verbose` flag from launch screen (rarely used; can be set inside Claude Code)
-- **refactor:** removed `@Lordymine/opencode-go-cli` provider (does not provide the Anthropic-compatible proxy required)
-
-### v1.0.29
-
-- **feat:** added CLAUDE_CODE_NO_FLICKER toggle on launch screen for fullscreen flicker-free rendering
-
-### v1.0.28
-
-- **feat:** added @Lordymine/opencode-go-cli as a new provider (local Anthropic API proxy with configurable URL)
-- **feat:** added OmniRoute as a new provider (self-hosted AI gateway with Anthropic API support)
-
-### v1.0.27
-
-- **fix:** removed `--resume` flag from launch screen (available via `/resume` within Claude Code)
-- **fix:** updated ZAI and MiniMax models
-
-### v1.0.26
-
-- **fix:** Session usage bar now only appears for default and OAuth provider launches, not for API key providers
-
-### v1.0.25
-
-- **fix:** Fixed crash when installations config is undefined (defensive fallback)
-- **fix:** Updated smoke tests for new menu layout and added missing mocks
-
-### v1.0.24
-
-- **feat:** Added `--enable-auto-mode` flag to TUI launch options (auto-approves safe actions, blocks risky ones)
-- **feat:** Added mutual exclusion between `--enable-auto-mode` and `--dangerously-skip-permissions` in launch options
-
-### v1.0.23
-
-- **refactor:** Changelog viewer now uses version list with sidebar panel for consistency with other TUI pages
-- **fix:** Fixed changelog sidebar showing stale entries when scrolling between versions
-- **fix:** Fixed invisible items in changelog list by replacing ink-select-input with custom non-looping scroll
-- **fix:** Fixed last item not visible in changelog list by reserving space for scroll indicators
-
-### v1.0.22
-
-- **feat:** Added changelog viewer in TUI with scrollable display and NEW badge indicator on main menu
-
-### v1.0.21
-
-- **feat:** Added Kimi Code provider with `kimi-for-coding` model and `ENABLE_TOOL_SEARCH=false` env var
-
-### v1.0.20
-
-- **fix:** Preserved essential Claude Code env vars (`CLAUDE_CODE_GIT_BASH_PATH`, `CLAUDE_CODE_SHELL`, `CLAUDE_CODE_TMPDIR`) during provider env cleanup
-- **refactor:** Centralized `CLAUDE_CODE_*` env var cleanup into single `cleanupClaudeCodeVars()` function
-
-### v1.0.19
-
-- **fix:** Status line 5h usage data now uses distributed cache (lock file) and fresh OAuth token reading to prevent stale data from rate limiting and expired tokens
-- **fix:** Usage cache TTL increased to 240s to reduce API calls
-- **docs:** Added changelog section to README and maintenance instructions to CLAUDE.md
-
-### v1.0.18
-
-- **docs:** Added multi-account proxy feasibility report for Claude Code
-- **feat:** Added Anthropic usage limits (5h/7d) to status line with 30s cache
-
-### v1.0.17
-
-- **feat:** Changed header icon from sparkles to octopus
-- **docs:** Added coding plan pricing info for Z.AI, Alibaba, MiniMax, BytePlus
-
-### v1.0.16
-
-- **fix:** Fixed diacritics in pt-BR and es locale files
-- **fix:** Blocked provider selection when API key is invalid
-- **feat:** Added invalid API key warning in main menu and sidebar
-
-### v1.0.15
-
-- **fix:** Fixed critical vulnerability — master password hash was identical to encryption key (domain separation)
-- **fix:** Fixed master password confirmation field pre-filled
-- **feat:** Added option to remove master password from login screen (force-reset)
-- **fix:** Translated master password prompt using i18n
-- **fix:** Unified flow for LiteLLM, Ollama, llama.cpp, and LM Studio providers (URL + optional API key)
-
-### v1.0.14
-
-- **feat:** Created Remotion project for demo video (7 scenes, 1920x1080, ~31s)
-- **feat:** Added Remotion best practices skill
-
-### v1.0.13
-
-- **feat:** Added context status indicators in status line (approaching/imminent/compact)
-- **refactor:** Standardized all status line templates (full, slim, cost, perf, context) to follow default template layout and colors
-- **refactor:** Removed unused "Dev" status line template
-
-### v1.0.12
-
-- **feat:** Added AES-256-GCM credential encryption with optional master password
-- **feat:** Added master password support in headless mode (flag + env var)
-- **docs:** Documented credential encryption and master password in README
-
-### v1.0.11
-
-- **feat:** Added NanoGPT provider with model listing and API key validation
-- **feat:** Added LiteLLM Proxy provider
-- **feat:** Added base URL editing for cloud providers
-- **feat:** Added BytePlus ModelArk provider
-- **refactor:** Renamed Alibaba provider to "alibaba-coding"
-
-### v1.0.10
-
-- **feat:** Status line templates consolidated from 12 to 7 focused layouts (none/default/full/slim/mini/cost/perf/context)
-- **feat:** Status line env vars passed via `--settings` instead of `process.env`
-- **feat:** Added specialized status line templates: cost, perf, and context
-- **refactor:** Extracted status line script from inline string to separate `statusline-script.mjs`
-
-### v1.0.9
-
-- **feat:** Added auto-return loop to TUI after Claude Code exits
-- **feat:** Added strategic flag selection step before Claude Code launch (resume, skip-permissions, verbose, worktree)
-- **feat:** Flag selection persisted between sessions
-- **feat:** Terminal title set to provider/model during Claude Code session
-
-### v1.0.8
-
-- **feat:** Added option to launch Claude Code without a provider (default Anthropic account)
-- **fix:** Robust terminal size detection with fallbacks for Windows
-- **fix:** Terminal resize handling via polling (Windows fix)
-
-### v1.0.7
-
-- **feat:** Session-based debug logging with per-PID files and automatic cleanup
-- **feat:** Added auto-update check in main menu
-- **fix:** Fixed OAuth spawn crash on Windows (UV_EPIPE)
-
-### v1.0.6
-
-- **feat:** Added headless mode for non-interactive CLI usage (`--provider`, `--model`, `--installation`)
-- **feat:** Added `--list` flag for provider/model/installation discovery
-- **feat:** Added mclaude-headless skill for AI agents
-- **feat:** Added complete Claude Code CLI reference
-
-### v1.0.5
-
-- **feat:** Installation directory names changed to readable format (`{8hex}-{slug}`)
-- **feat:** Added custom URL field for local providers (Ollama, LM Studio, llama.cpp)
-
-### v1.0.4
-
-- **feat:** Added mclaude version in app header
-- **feat:** Global error handling with debug.log output
-
-### v1.0.3
-
-- **feat:** Added i18n support (English, Português BR, Español)
-- **feat:** Added configuration reset option
-
-### v1.0.0
-
-- Initial release — TUI for managing multiple API providers and launching Claude Code
-- Supported providers: Anthropic (OAuth), Alibaba Cloud, DeepSeek, MiniMax, Moonshot AI, Novita AI, OpenRouter, Poe, Requesty, Z.AI, Ollama, LM Studio, llama.cpp
-- Installation management with isolated Claude Code config directories
-- Multiple Anthropic account support via OAuth
-
-## Development
+## Desenvolvimento
 
 ```bash
 bun install && bun link
-mclaude                  # run the CLI
-bunx tsc --noEmit        # type check
-bun test                 # run smoke tests
+mclaude                  # roda a CLI
+bunx tsc --noEmit        # checagem de tipos
+bun test                 # smoke tests
 ```
+
+## Licença
+
+[MIT](./LICENSE)

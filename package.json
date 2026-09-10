@@ -19,6 +19,7 @@
 	"files": [
 		"cli.ts",
 		"src/",
+		"CHANGELOG.md",
 		"package.json"
 	],
 	"type": "module",
