@@ -1,10 +1,54 @@
-import { chmod, readFile, writeFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+import { chmod, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { CONFIG_DIR } from "./config.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const SESSION_DIR = join(CONFIG_DIR, "sessions");
+const SESSION_FILE_RE = /^settings-(\d+)-[0-9a-f]{8}\.json$/;
+
+/**
+ * Writes the --settings payload to a per-session file; returns its path.
+ * A path carries no quotes or shell metacharacters, unlike the inline JSON.
+ */
+export async function writeSessionSettings(json: string, dir = SESSION_DIR): Promise<string> {
+	await mkdir(dir, { recursive: true });
+	const file = join(dir, `settings-${process.pid}-${randomBytes(4).toString("hex")}.json`);
+	await writeFile(file, json, "utf-8");
+	return file;
+}
+
+function isProcessAlive(pid: number): boolean {
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (err) {
+		// EPERM: the process exists but belongs to someone else.
+		return (err as NodeJS.ErrnoException).code === "EPERM";
+	}
+}
+
+/** Deletes session files whose owning mclaude process is gone (crash leftovers). */
+export async function cleanStaleSessionSettings(dir = SESSION_DIR): Promise<void> {
+	let names: string[];
+	try {
+		names = await readdir(dir);
+	} catch {
+		return;
+	}
+	await Promise.all(
+		names.map(async (name) => {
+			const match = SESSION_FILE_RE.exec(name);
+			if (!match) return;
+			const pid = Number(match[1]);
+			if (pid === process.pid || isProcessAlive(pid)) return;
+			await rm(join(dir, name), { force: true }).catch(() => {});
+		}),
+	);
+}
 
 export const STATUSLINE_TEMPLATE_IDS = [
 	"none",

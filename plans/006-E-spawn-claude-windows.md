@@ -31,11 +31,11 @@ Pacotes com binário nativo apontam direto para um `.exe` dentro de `node_module
 
 ### 1. Dependência
 
-- [ ] `pnpm add cross-spawn` e `pnpm add -D @types/cross-spawn`.
+- [x] `pnpm add cross-spawn` e `pnpm add -D @types/cross-spawn`.
 
 ### 2. `src/utils/claude-bin.ts` (novo)
 
-- [ ] API pública:
+- [x] API pública:
   ```ts
   export interface ResolvedCommand {
   	command: string;
@@ -51,29 +51,29 @@ Pacotes com binário nativo apontam direto para um `.exe` dentro de `node_module
   export function spawnClaude(args: string[], options: SpawnOptions): ChildProcess;
   export function spawnClaudeSync(args: string[], options: SpawnSyncOptions): SpawnSyncReturns<Buffer>;
   ```
-- [ ] `findOnPath(name, env, platform)`:
+- [x] `findOnPath(name, env, platform)`:
   - **win32**: para cada diretório do `PATH`, testar `name + ext` para cada `ext` do `PATHEXT` (padrão `.COM;.EXE;.BAT;.CMD`), na ordem do PATHEXT, e ignorar o arquivo sem extensão;
   - **posix**: testar `name` com `accessSync(X_OK)`.
   - Sem processo filho (`where`/`which`).
-- [ ] `readCmdShimTarget(cmdPath)`:
+- [x] `readCmdShimTarget(cmdPath)`:
   - ler o arquivo e coletar os caminhos entre aspas que começam com `%dp0%\` ou `%~dp0\`;
   - descartar `node.exe` e ficar com o **último**, resolvido contra `dirname(cmdPath)`;
   - devolver `null` se nada casar ou se o alvo não existir.
-- [ ] `resolveClaude`:
+- [x] `resolveClaude`:
   1. posix → `{ command: found ?? "claude", via: found ? "posix" : "fallback" }`;
   2. win32 com `.exe` → `via: "exe"`;
   3. win32 com `.cmd`/`.bat` e alvo `.exe` → `{ command: target, via: "shim-exe" }`;
   4. alvo `.js`/`.cjs`/`.mjs` → o runtime segue a lógica do shim: `<dir>\node.exe` se existir; senão `process.execPath` quando `!process.versions.bun`; senão `"node"`. Resultado: `{ command: runtime, prefixArgs: [target], via: "shim-node" }`;
   5. `.cmd` ilegível → `{ command: cmdPath, via: "cross-spawn" }`;
   6. nada encontrado → `{ command: "claude", via: "fallback" }`. O spawn emite ENOENT, e a mensagem de instalação que já existe aparece.
-- [ ] `spawnClaude` / `spawnClaudeSync`:
+- [x] `spawnClaude` / `spawnClaudeSync`:
   - `via === "cross-spawn"` → `crossSpawn(command, args, options)` (ou `.sync`);
   - senão → `spawn(command, [...prefixArgs, ...args], options)`, **sem** `shell`;
   - logar `claudePath` e `via` com o logger `claude-bin`.
 
 ### 3. `src/statusline.ts` — settings por arquivo de sessão
 
-- [ ] Adicionar:
+- [x] Adicionar:
   ```ts
   const SESSION_DIR = join(CONFIG_DIR, "sessions");
 
@@ -85,11 +85,11 @@ Pacotes com binário nativo apontam direto para um `.exe` dentro de `node_module
   ```
   - Nome: `settings-<process.pid>-<8 hex aleatórios>.json`.
   - A limpeza extrai o pid do nome e apaga o arquivo quando `process.kill(pid, 0)` lança erro (processo morto). Funciona no Windows.
-- [ ] `buildStatusLineSettingsJson` continua devolvendo a string; quem chama grava.
+- [x] `buildStatusLineSettingsJson` continua devolvendo a string; quem chama grava.
 
 ### 4. `src/runner.ts`
 
-- [ ] `runClaude` e `runClaudeDefault`:
+- [x] `runClaude` e `runClaudeDefault`:
   - remover os blocos de resolução (linhas 82-94 e 210-221);
   - `await cleanStaleSessionSettings()` no início;
   - trocar `args.push("--settings", buildStatusLineSettingsJson(...))` por:
@@ -103,23 +103,23 @@ Pacotes com binário nativo apontam direto para um `.exe` dentro de `node_module
 
 ### 5. `cli.ts` — login OAuth (linha 239-263)
 
-- [ ] Remover `resolveClaudePath` (linha 92-101) e o import de `execSync`, se ficar órfão.
-- [ ] Trocar o spawn por `spawnClaudeSync([], { stdio: "inherit", env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir } })`.
-- [ ] RN-10: quando `loginResult.error` existir (spawn falhou), mostrar a mesma mensagem de "claude not found" do runner, e não `loginFailedNew`/`reAuthFailed`. O provider novo continua sendo removido, porque não há conta autenticada, mas o motivo na mensagem fica correto.
+- [x] Remover `resolveClaudePath` (linha 92-101) e o import de `execSync`, se ficar órfão.
+- [x] Trocar o spawn por `spawnClaudeSync([], { stdio: "inherit", env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir } })`.
+- [x] RN-10: quando `loginResult.error` existir (spawn falhou), mostrar a mesma mensagem de "claude not found" do runner, e não `loginFailedNew`/`reAuthFailed`. O provider novo continua sendo removido, porque não há conta autenticada, mas o motivo na mensagem fica correto.
 
 ### 6. Testes
 
-- [ ] `src/utils/claude-bin.test.ts` (Vitest), com diretórios temporários (`mkdtemp`), `PATH`/`PATHEXT` injetados e `platform` passado explicitamente (roda em qualquer SO):
+- [x] `src/utils/claude-bin.test.ts` (Vitest), com diretórios temporários (`mkdtemp`), `PATH`/`PATHEXT` injetados e `platform` passado explicitamente (roda em qualquer SO):
   - dir com `claude` (sem extensão) e `claude.cmd` → nunca escolhe o sem extensão;
   - `claude.exe` e `claude.cmd` em dirs diferentes → vence o primeiro na ordem do PATH;
   - shim no formato do npm apontando para `cli.js` → `via: "shim-node"`, `prefixArgs: [<abs>/cli.js]`;
   - shim com `%~dp0` (pnpm) apontando para `.exe` → `via: "shim-exe"`;
   - shim sem alvo reconhecível → `via: "cross-spawn"`;
   - nada no PATH → `via: "fallback"`.
-- [ ] Integração (roda só com `process.platform === "win32"`; `skipIf` nos outros):
+- [x] Integração (roda só com `process.platform === "win32"`; `skipIf` nos outros):
   - um `claude.cmd` falso no formato do npm aponta para um `.js` que grava `process.argv.slice(2)` num arquivo;
   - chamar `spawnClaudeSync(["--model", "m", "-p", 'a & b "c" ^ %PATH%'], ...)` e conferir o argv idêntico.
-- [ ] `writeSessionSettings` e `cleanStaleSessionSettings`: arquivo criado, conteúdo JSON íntegro; um arquivo com pid inexistente some e o do pid atual fica.
+- [x] `writeSessionSettings` e `cleanStaleSessionSettings`: arquivo criado, conteúdo JSON íntegro; um arquivo com pid inexistente some e o do pid atual fica.
 
 ## Arquivos a Modificar
 
@@ -145,4 +145,18 @@ Pacotes com binário nativo apontam direto para um `.exe` dentro de `node_module
 
 ## Resumo de Implementacao
 
-_(preencher após a execução)_
+**Status:** implementado (2026-09-11). Validação: `pnpm check-types` ok, `pnpm test` 77 passaram / 1 pulado (caso posix, roda fora do Windows), `pnpm build` ok, `node dist/cli.js --version` e `--list` ok.
+
+- [x] Dependências `cross-spawn` (runtime, o build usa `packages: "external"`) e `@types/cross-spawn` (dev).
+- [x] `src/utils/claude-bin.ts`: `findOnPath` (PATH + PATHEXT, ignora o arquivo sem extensão, chave `Path`/`PATH` sem diferenciar maiúsculas no win32, sem `where`/`which`), `readCmdShimTarget` (`%dp0%\` e `%~dp0\`, descarta `node.exe`, fica com o último), `resolveClaude` (`posix`/`exe`/`shim-exe`/`shim-node`/`cross-spawn`/`fallback`), `spawnClaude`/`spawnClaudeSync` com `shell: false` e log `claudePath=... via=...` no logger `claude-bin`. A resolução usa o `options.env` do spawn (PATH do filho). Também exporta `isClaudeLaunchError` e `printClaudeNotFound`, a mensagem de instalação única para runner e OAuth.
+- [x] `src/statusline.ts`: `writeSessionSettings` (`~/.multi-claude/sessions/settings-<pid>-<8 hex>.json`) e `cleanStaleSessionSettings` (apaga quando `process.kill(pid, 0)` falha; `EPERM` conta como vivo). As duas aceitam um diretório opcional, usado nos testes.
+- [x] `src/runner.ts`: os dois blocos `where`/`which` foram removidos; `runClaude` e `runClaudeDefault` limpam sessões órfãs, passam `--settings <arquivo>` e lançam por `launchClaude` (helper comum que chama `spawnClaude`, também trata a exceção síncrona do spawn e mantém o tratamento por `err.code`).
+- [x] `cli.ts`: `resolveClaudePath` removido (o `execSync` continua em uso por `getPathNodeMajor`); o login OAuth usa `spawnClaudeSync`. RN-10: com `loginResult.error`, mostra a mensagem de "claude not found" em vez de `loginFailedNew`/`reAuthFailed`, e o provider novo continua sendo removido.
+- [x] `src/utils/claude-bin.test.ts`: os seis casos de resolução do plano, mais `node.exe` ao lado do shim e o caso posix; integração no Windows via shim npm falso (`'a & b "c" ^ %PATH%'` chega idêntico); sessão (JSON íntegro, pid morto apagado, pid atual mantido).
+- [x] Contrato: `rg "where claude|which claude|shell:\s*true"` em `cli.ts`/`src/` sem resultados. Nesta máquina `resolveClaude()` devolve `C:\Users\Usuario\.local\bin\claude.exe` com `via: "exe"`. Headless com o claude fora do PATH: a mensagem de instalação aparece, sai com código 1 sem derrubar nada, e `~/.multi-claude/sessions/` fica vazio.
+
+**Desvio:** o arquivo de sessão é apagado **antes** de a Promise do runner resolver (com `await`), e não "sem esperar". O headless chama `process.exit` logo depois, o que matava o `rm` pendente e deixava o arquivo para trás (visto no teste de fumaça).
+
+**Testes manuais pendentes:** launch real de provider API, OAuth e default com `MCLAUDE_LOG_LEVEL=debug` (log `via=exe` e status line visível); o Claude Code via npm num prefix separado primeiro no PATH (`via=shim-node`/`shim-exe`); provider renomeado para `R&D <teste> "x"`, com a status line mostrando o nome exato; o OAuth com o claude fora do PATH.
+
+**Fora do escopo (preexistente):** `Header.tsx` ainda roda `execSync("claude -v")` (passa pelo shell, mas sem argumentos do usuário).

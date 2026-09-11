@@ -98,17 +98,6 @@ function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[
 	return [...selectedFlags, ...nonStrategic];
 }
 
-function resolveClaudePath(): string {
-	try {
-		if (process.platform === "win32") {
-			return execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
-		}
-		return execSync("which claude", { encoding: "utf-8" }).trim();
-	} catch {
-		return "claude";
-	}
-}
-
 // Major version of the `node` on PATH, or null when there is none. The bridge
 // release still runs on Bun, so process.versions.node says nothing about it.
 function getPathNodeMajor(): { major: number; raw: string } | null {
@@ -273,16 +262,33 @@ while (true) {
 					saveConfig,
 				} = await import("./src/config.ts");
 				const accountDir = await ensureAccountDir(oauthData.providerId);
-				const claudePath = resolveClaudePath();
+				const { printClaudeNotFound, spawnClaudeSync } = await import("./src/utils/claude-bin.ts");
 
 				log.info("running claude for OAuth login, provider=" + oauthData.providerName);
-				const loginResult = spawnSync(claudePath, [], {
-					stdio: "inherit",
-					env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
-				});
+				let loginResult: { status: number | null; error?: Error };
+				try {
+					loginResult = spawnClaudeSync([], {
+						stdio: "inherit",
+						env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
+					});
+				} catch (err) {
+					loginResult = { status: null, error: err as Error };
+				}
 
 				const dict = getLocaleDict();
-				if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
+				if (loginResult.error) {
+					// RN-10: claude could not be launched at all — not a refused login.
+					log.error("OAuth login spawn error", loginResult.error);
+					if (oauthData.isNew) {
+						const cfg = await loadConfig();
+						cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
+						await saveConfig(cfg);
+						await removeAccountDir(oauthData.providerId);
+					}
+					console.error("");
+					printClaudeNotFound();
+					console.error("");
+				} else if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
 					log.info("OAuth login successful");
 					const msg = dict.anthropic.loginSuccess.replace("{{name}}", oauthData.providerName);
 					console.log(`\n\u2713 ${msg}\n`);

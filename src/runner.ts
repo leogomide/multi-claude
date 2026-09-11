@@ -1,4 +1,5 @@
-import { execSync, spawn } from "node:child_process";
+import type { ChildProcess, SpawnOptions } from "node:child_process";
+import { rm } from "node:fs/promises";
 import { getInstallationPath, loadConfig } from "./config.ts";
 import { createLogger } from "./debug.ts";
 
@@ -10,10 +11,68 @@ import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import { loadDotenvFromCwd } from "./services/dotenv-loader.ts";
 import {
 	buildStatusLineSettingsJson,
+	cleanStaleSessionSettings,
 	ensureStatusLineScript,
 	getStatusLineEnvVars,
 	STATUSLINE_TEMPLATE_IDS,
+	writeSessionSettings,
 } from "./statusline.ts";
+import { isClaudeLaunchError, printClaudeNotFound, spawnClaude } from "./utils/claude-bin.ts";
+
+/**
+ * Spawns claude and resolves with its exit code. The session settings file is
+ * deleted when the child ends or fails to start; `onDone` runs in both cases.
+ */
+function launchClaude(
+	args: string[],
+	options: SpawnOptions,
+	settingsPath: string | undefined,
+	label: string,
+	onDone?: () => void,
+): Promise<number> {
+	return new Promise<number>((res, rej) => {
+		let settled = false;
+		// Callers may process.exit right after we settle, so the session file is
+		// removed before settling instead of fire-and-forget.
+		const removeSettings = () =>
+			settingsPath ? rm(settingsPath, { force: true }).catch(() => {}) : Promise.resolve();
+		const resolve = (code: number) => void removeSettings().then(() => res(code));
+		const reject = (err: Error) => void removeSettings().then(() => rej(err));
+		const finish = () => {
+			if (settled) return false;
+			settled = true;
+			onDone?.();
+			return true;
+		};
+
+		const onError = (err: Error) => {
+			if (!finish()) return;
+			log.error("spawn error", err);
+			if (isClaudeLaunchError(err)) {
+				printClaudeNotFound();
+				resolve(1);
+			} else {
+				reject(err);
+			}
+		};
+
+		let child: ChildProcess;
+		try {
+			child = spawnClaude(args, options);
+		} catch (err) {
+			// Node throws synchronously for some launch failures (e.g. EINVAL on .cmd).
+			onError(err as Error);
+			return;
+		}
+
+		child.on("error", onError);
+		child.on("close", (code, signal) => {
+			if (!finish()) return;
+			log.info("child closed" + label + ", code=" + code + ", signal=" + signal);
+			resolve(code ?? 1);
+		});
+	});
+}
 
 export async function runClaude(
 	provider: ConfiguredProvider,
@@ -24,6 +83,8 @@ export async function runClaude(
 	loadDotenv?: boolean,
 	contextWindowTokens?: number,
 ): Promise<number> {
+	await cleanStaleSessionSettings();
+
 	// Inject .env vars into process.env BEFORE buildClaudeEnv copies it.
 	// Provider's configureEnv runs after and overrides any conflicting keys,
 	// keeping precedence: .env < provider < user-selected.
@@ -79,20 +140,6 @@ export async function runClaude(
 		args.push(arg);
 	}
 
-	// Resolve full claude path (handles .cmd shims on Windows)
-	let claudePath = "claude";
-	try {
-		if (process.platform === "win32") {
-			claudePath =
-				execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
-		} else {
-			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
-		}
-	} catch {
-		log.warn("could not resolve claude path, using 'claude'");
-	}
-	log.info("claudePath=" + claudePath);
-
 	// Status line injection
 	const config = await loadConfig();
 	let slTemplate = config.statusLine?.template ?? "default";
@@ -103,11 +150,13 @@ export async function runClaude(
 		log.warn("unknown template '" + slTemplate + "', falling back to 'default'");
 		slTemplate = "default";
 	}
+	let settingsPath: string | undefined;
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
 		const slEnvVars = getStatusLineEnvVars(provider, model, slTemplate, language);
-		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
+		settingsPath = await writeSessionSettings(buildStatusLineSettingsJson(scriptPath, slEnvVars));
+		args.push("--settings", settingsPath);
 		log.info("statusline template=" + slTemplate);
 	}
 
@@ -136,37 +185,7 @@ export async function runClaude(
 	}
 	log.debug("env=" + JSON.stringify(sanitizedEnv));
 
-	return new Promise<number>((resolve, reject) => {
-		const child = spawn(claudePath, args, {
-			stdio: "inherit",
-			env,
-		});
-
-		child.on("error", (err) => {
-			log.error("spawn error", err);
-			const code = (err as NodeJS.ErrnoException).code;
-			if (
-				code === "ENOENT" ||
-				code === "EINVAL" ||
-				code === "EACCES" ||
-				err.message.includes("Failed to spawn") // Bun's wording
-			) {
-				console.error('Error: "claude" not found in PATH.\n');
-				console.error("Install Claude Code:");
-				console.error("  macOS/Linux/WSL:  curl -fsSL https://claude.ai/install.sh | bash");
-				console.error("  Windows:          irm https://claude.ai/install.ps1 | iex");
-				console.error("  Homebrew:         brew install --cask claude-code");
-				resolve(1);
-			} else {
-				reject(err);
-			}
-		});
-
-		child.on("close", (code, signal) => {
-			log.info("child closed, code=" + code + ", signal=" + signal);
-			resolve(code ?? 1);
-		});
-	});
+	return launchClaude(args, { stdio: "inherit", env }, settingsPath, "");
 }
 
 export async function runClaudeDefault(
@@ -175,6 +194,8 @@ export async function runClaudeDefault(
 	selectedEnvVars?: Record<string, string>,
 	loadDotenv?: boolean,
 ): Promise<number> {
+	await cleanStaleSessionSettings();
+
 	// Track env vars we set so we can clean them up after spawn
 	const addedEnvKeys: string[] = [];
 
@@ -212,19 +233,6 @@ export async function runClaudeDefault(
 		args.push(arg);
 	}
 
-	// Resolve full claude path
-	let claudePath = "claude";
-	try {
-		if (process.platform === "win32") {
-			claudePath =
-				execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
-		} else {
-			claudePath = execSync("which claude", { encoding: "utf-8" }).trim();
-		}
-	} catch {
-		log.warn("could not resolve claude path, using 'claude'");
-	}
-
 	// Status line injection
 	const config = await loadConfig();
 	let slTemplate = config.statusLine?.template ?? "default";
@@ -234,6 +242,7 @@ export async function runClaudeDefault(
 	) {
 		slTemplate = "default";
 	}
+	let settingsPath: string | undefined;
 	if (slTemplate !== "none") {
 		const scriptPath = await ensureStatusLineScript();
 		const language = config.language ?? "en";
@@ -243,7 +252,8 @@ export async function runClaudeDefault(
 			MCLAUDE_STATUSLINE_TEMPLATE: slTemplate,
 			MCLAUDE_LANG: language,
 		};
-		args.push("--settings", buildStatusLineSettingsJson(scriptPath, slEnvVars));
+		settingsPath = await writeSessionSettings(buildStatusLineSettingsJson(scriptPath, slEnvVars));
+		args.push("--settings", settingsPath);
 		log.info("statusline template=" + slTemplate + " (default launch)");
 	}
 
@@ -257,43 +267,12 @@ export async function runClaudeDefault(
 
 	log.info("spawning claude (default), args=" + JSON.stringify(args));
 
-	return new Promise<number>((resolve, reject) => {
-		// No explicit env — inherit process.env natively
-		const child = spawn(claudePath, args, {
-			stdio: "inherit",
-		});
+	const cleanup = () => {
+		for (const key of addedEnvKeys) {
+			delete process.env[key];
+		}
+	};
 
-		const cleanup = () => {
-			for (const key of addedEnvKeys) {
-				delete process.env[key];
-			}
-		};
-
-		child.on("error", (err) => {
-			cleanup();
-			log.error("spawn error", err);
-			const code = (err as NodeJS.ErrnoException).code;
-			if (
-				code === "ENOENT" ||
-				code === "EINVAL" ||
-				code === "EACCES" ||
-				err.message.includes("Failed to spawn") // Bun's wording
-			) {
-				console.error('Error: "claude" not found in PATH.\n');
-				console.error("Install Claude Code:");
-				console.error("  macOS/Linux/WSL:  curl -fsSL https://claude.ai/install.sh | bash");
-				console.error("  Windows:          irm https://claude.ai/install.ps1 | iex");
-				console.error("  Homebrew:         brew install --cask claude-code");
-				resolve(1);
-			} else {
-				reject(err);
-			}
-		});
-
-		child.on("close", (code, signal) => {
-			cleanup();
-			log.info("child closed (default), code=" + code + ", signal=" + signal);
-			resolve(code ?? 1);
-		});
-	});
+	// No explicit env — inherit process.env natively
+	return launchClaude(args, { stdio: "inherit" }, settingsPath, " (default)", cleanup);
 }
