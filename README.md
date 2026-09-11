@@ -6,7 +6,7 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.39-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-1.0.40-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
@@ -61,6 +61,8 @@ Digite `mclaude`, escolha o provedor e o modelo num menu no terminal, e o Claude
 ## Instalação
 
 Pré-requisitos: [Bun](https://bun.sh) e [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+
+> A próxima versão maior (2.x) roda em Node.js 22+ e passa a ser instalada com `npm i -g @leogomide/multi-claude`.
 
 ```bash
 bun install -g @leogomide/multi-claude

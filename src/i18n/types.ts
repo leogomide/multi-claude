@@ -315,6 +315,9 @@ export interface TranslationDictionary {
 		success: string;
 		failed: string;
 		sidebarDesc: string;
+		nodeMissing: string;
+		nodeTooOld: string;
+		nodeHowTo: string;
 	};
 	launchOptions: {
 		title: string;

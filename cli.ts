@@ -100,6 +100,18 @@ function resolveClaudePath(): string {
 	}
 }
 
+// Major version of the `node` on PATH, or null when there is none. The bridge
+// release still runs on Bun, so process.versions.node says nothing about it.
+function getPathNodeMajor(): { major: number; raw: string } | null {
+	try {
+		const raw = execSync("node --version", { encoding: "utf-8", timeout: 5000 }).trim();
+		const major = Number.parseInt(raw.replace(/^v/, ""), 10);
+		return Number.isFinite(major) ? { major, raw } : null;
+	} catch {
+		return null;
+	}
+}
+
 function resetTerminal(): void {
 	if (process.stdin.isTTY && process.stdin.setRawMode) {
 		process.stdin.setRawMode(false);
@@ -269,6 +281,25 @@ while (true) {
 
 		if (tuiExitCode === 4) {
 			resetTerminal();
+			// v2 dropped the Bun runtime: installing it where there is no Node.js 22+
+			// would leave `mclaude` failing to start. Only a 2.x target is gated, and
+			// an unreachable registry never blocks (the install would fail on its own).
+			const { version: currentVersion } = await import("./package.json");
+			const { checkForUpdate } = await import("./src/services/version-check.ts");
+			const target = await checkForUpdate(currentVersion, AbortSignal.timeout(10000));
+			if (target.updateAvailable && Number.parseInt(target.latestVersion, 10) >= 2) {
+				const node = getPathNodeMajor();
+				if (!node || node.major < 22) {
+					const dict = getLocaleDict();
+					const reason = node
+						? dict.update.nodeTooOld.replace("{{current}}", node.raw)
+						: dict.update.nodeMissing;
+					console.error(`\n\u2717 ${reason.replace("{{version}}", target.latestVersion)}`);
+					console.error(`\n${dict.update.nodeHowTo}\n`);
+					log.info("update blocked: node " + (node?.raw ?? "missing"));
+					process.exit(1);
+				}
+			}
 			console.log("\n\u2B06\uFE0F  Updating mclaude...\n");
 			const updateResult = spawnSync(
 				process.execPath,

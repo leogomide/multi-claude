@@ -1,6 +1,10 @@
 ## Changelog
 
-### v1.0.39 (current)
+### v1.0.40 (current)
+
+- **feat:** the in-app update checks for Node.js 22+ before installing mclaude 2.x, which runs on Node.js instead of Bun — without it, the update stops and explains how to install Node.js or run mclaude with `bunx`
+
+### v1.0.39
 
 - **feat:** the model ID is now optional when adding a Custom Provider — leave it empty to take the model list from the gateway's `/v1/models`, and the launch flow stops with a clear message when neither the API nor the saved list has any model
 - **fix:** model fetching and its error messages named the provider template instead of the provider, so two gateways built from the same template were indistinguishable
