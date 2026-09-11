@@ -1,42 +1,49 @@
-import { afterEach, describe, expect, mock, test } from "bun:test";
 import React from "react";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 // ── Fake data ────────────────────────────────────────────────────────
-const fakeProviders = [
-	{
-		id: "test-minimax",
-		name: "My MiniMax",
-		templateId: "minimax",
-		apiKey: "sk-minimax-123",
-		models: ["minimax-01"],
-	},
-	{
-		id: "test-openrouter",
-		name: "My OpenRouter",
-		templateId: "openrouter",
-		apiKey: "sk-test-123",
-		models: ["openai/gpt-4o"],
-	},
-];
+const { fakeProviders } = vi.hoisted(() => ({
+	fakeProviders: [
+		{
+			id: "test-minimax",
+			name: "My MiniMax",
+			templateId: "minimax",
+			apiKey: "sk-minimax-123",
+			models: ["minimax-01"],
+		},
+		{
+			id: "test-openrouter",
+			name: "My OpenRouter",
+			templateId: "openrouter",
+			apiKey: "sk-test-123",
+			models: ["openai/gpt-4o"],
+		},
+	],
+}));
 
 // ── Module mocks (hoisted before imports) ────────────────────────────
-mock.module("./config.ts", () => ({
+// Partial mocks: Vitest throws on any export the factory does not define.
+vi.mock("./config.ts", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./config.ts")>()),
 	loadConfig: async () => ({ providers: fakeProviders, language: "en", installations: [] }),
 	saveConfig: async () => {},
 	CONFIG_DIR: "/tmp/test-mclaude",
 	isAccountAuthenticated: () => false,
 }));
 
-mock.module("./services/version-check.ts", () => ({
+vi.mock("./services/version-check.ts", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./services/version-check.ts")>()),
 	checkForUpdate: async () => ({ updateAvailable: false }),
 	compareSemver: () => 0,
 }));
 
-mock.module("./changelog.ts", () => ({
+vi.mock("./changelog.ts", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./changelog.ts")>()),
 	parseChangelog: async () => [],
 }));
 
-mock.module("./services/api-models.ts", () => ({
+vi.mock("./services/api-models.ts", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./services/api-models.ts")>()),
 	hasApiModelFetching: (templateId: string) =>
 		templateId === "openrouter" || templateId === "requesty",
 	hasApiKeyValidation: (templateId: string) =>
@@ -120,14 +127,10 @@ afterEach(() => {
 // 7: Exit (🚪)
 describe("Smoke Test — TUI Flows", () => {
 	test("1. Main menu renders with both providers", async () => {
-		const onStartClaude = mock(() => {});
+		const onStartClaude = vi.fn();
 		const { lastFrame } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 
@@ -143,14 +146,10 @@ describe("Smoke Test — TUI Flows", () => {
 	});
 
 	test("2. Navigate to Manage Providers", async () => {
-		const onStartClaude = mock(() => {});
+		const onStartClaude = vi.fn();
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 
@@ -163,14 +162,10 @@ describe("Smoke Test — TUI Flows", () => {
 	}, 10000);
 
 	test("3. Navigate to Settings", async () => {
-		const onStartClaude = mock(() => {});
+		const onStartClaude = vi.fn();
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 
@@ -186,14 +181,10 @@ describe("Smoke Test — TUI Flows", () => {
 	}, 10000);
 
 	test("4. Default launch → shows flags", async () => {
-		const onStartClaude = mock(() => {});
+		const onStartClaude = vi.fn();
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 
@@ -211,14 +202,10 @@ describe("Smoke Test — TUI Flows", () => {
 	}, 10000);
 
 	test("5. Select OpenRouter → fetches models and shows list", async () => {
-		const onStartClaude = mock(() => {});
+		const onStartClaude = vi.fn();
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 
@@ -245,11 +232,7 @@ describe("Smoke Test — TUI Flows", () => {
 	test("6. Enter right after arrow keys selects the highlighted item", async () => {
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={mock(() => {})}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={vi.fn()} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 
@@ -269,14 +252,10 @@ describe("Smoke Test — TUI Flows", () => {
 	// Same stale-handler hazard in the model list, where picking the wrong row
 	// means launching Claude Code against the wrong model.
 	test("7. Enter right after arrow keys picks the highlighted model", async () => {
-		const onStartClaude = mock(() => {});
+		const onStartClaude = vi.fn();
 		const { lastFrame, stdin } = render(
 			<I18nProvider>
-				<UnifiedApp
-					onStartClaude={onStartClaude}
-					onOAuthLogin={mock(() => {})}
-					onRunUpdate={mock(() => {})}
-				/>
+				<UnifiedApp onStartClaude={onStartClaude} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
 			</I18nProvider>,
 		);
 

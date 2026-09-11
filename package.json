@@ -28,21 +28,27 @@
 	},
 	"scripts": {
 		"dev": "bun run cli.ts",
-		"check-types": "bunx tsc --noEmit",
+		"check-types": "tsc --noEmit",
 		"lint": "biome check --fix .",
-		"link": "bun link",
-		"prepare": "bun link",
-		"test": "bun test src/smoke.test.tsx src/context-window.test.ts",
-		"publish": "npm publish"
+		"lint:ci": "biome ci .",
+		"test": "vitest run"
 	},
-	"peerDependencies": {
-		"typescript": "^5"
+	"packageManager": "pnpm@10.34.3",
+	"engines": {
+		"node": ">=22"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.9",
-		"@types/bun": "latest",
+		"@types/node": "^22.20.2",
 		"@types/react": "19.2.14",
-		"ink-testing-library": "4.0.0"
+		"ink-testing-library": "4.0.0",
+		"typescript": "^5.9.3",
+		"vitest": "^5.0.0"
 	},
 	"dependencies": {
 		"@inkjs/ui": "2.0.0",
