@@ -243,10 +243,16 @@ describe("buildClaudeEnv context window", () => {
 		return buildClaudeEnv(provider, "GLM-4.7", undefined, tokens);
 	};
 
-	test("a known window sets both vars, the compaction budget derived at 0.8", () => {
+	test("a known window sets both vars, the compaction budget being the full window", () => {
+		const env = build(204_800);
+		expect(env?.["CLAUDE_CODE_MAX_CONTEXT_TOKENS"]).toBe("204800");
+		expect(env?.["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]).toBe("204800");
+	});
+
+	test("a 1M+ window keeps its real size but the compaction budget caps at 1M", () => {
 		const env = build(1_048_576);
 		expect(env?.["CLAUDE_CODE_MAX_CONTEXT_TOKENS"]).toBe("1048576");
-		expect(env?.["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]).toBe("838861");
+		expect(env?.["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]).toBe("1000000");
 	});
 
 	test("the compaction budget clamps at the 100k floor", () => {
@@ -279,7 +285,7 @@ describe("buildClaudeEnv context window", () => {
 		const env = buildClaudeEnv(base, "GLM-4.7", undefined, 1_048_576);
 		expect(env?.["CLAUDE_CODE_MAX_CONTEXT_TOKENS"]).toBe("123456");
 		// The derived budget still comes from the resolved window, not from the override.
-		expect(env?.["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]).toBe("838861");
+		expect(env?.["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]).toBe("1000000");
 	});
 
 	test("an OAuth provider never gets the vars", () => {

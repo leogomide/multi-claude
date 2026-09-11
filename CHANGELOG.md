@@ -6,6 +6,7 @@
 - **feat:** the in-app update detects whether mclaude was installed with npm, pnpm, Bun, Yarn or Volta and updates with the same tool, and explains what to do when the global folder needs administrator rights
 - **fix:** Claude Code installed through npm on Windows (`claude.cmd`) now launches, including provider and model names with characters like `&`
 - **fix:** a failure to start Claude Code during an Anthropic account login no longer reads as a rejected login
+- **fix:** auto-compact on third-party models no longer kicks in early — the budget now uses the full context window (Claude Code already keeps its own reply headroom), so a 200k model compacts at ~84% instead of ~64%
 
 ### v1.0.40
 

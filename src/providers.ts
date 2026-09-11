@@ -374,9 +374,10 @@ function setModelEnvVars(env: Record<string, string>, model: string): void {
 	env["ANTHROPIC_DEFAULT_HAIKU_MODEL"] = model;
 }
 
-// Claude Code compacts as usage approaches this budget, so leave headroom for the
-// reply and for tool results already in flight. It only accepts 100k..1M.
-const AUTO_COMPACT_FRACTION = 0.8;
+// Claude Code compacts at min(window, budget) minus its own ~33k headroom (reply
+// reserve + buffer), so the budget is the full window — a fraction on top of that
+// compacts far too early. Pinning it also keeps Claude Code's automatic sources
+// from picking another value. It only accepts 100k..1M; outside that it is ignored.
 const AUTO_COMPACT_MIN = 100_000;
 const AUTO_COMPACT_MAX = 1_000_000;
 
@@ -455,8 +456,7 @@ export function buildClaudeEnv(
 
 	// Derive the compaction budget from the window instead of hardcoding it per template.
 	if (contextWindowTokens && contextWindowTokens > 0 && !env["CLAUDE_CODE_AUTO_COMPACT_WINDOW"]) {
-		const derived = Math.round(contextWindowTokens * AUTO_COMPACT_FRACTION);
-		const clamped = Math.min(AUTO_COMPACT_MAX, Math.max(AUTO_COMPACT_MIN, derived));
+		const clamped = Math.min(AUTO_COMPACT_MAX, Math.max(AUTO_COMPACT_MIN, contextWindowTokens));
 		env["CLAUDE_CODE_AUTO_COMPACT_WINDOW"] = String(clamped);
 	}
 
