@@ -335,7 +335,8 @@ export const es: TranslationDictionary = {
 		permission:
 			"La carpeta global de {{manager}} requiere permisos de administrador. Ejecute en una terminal elevada (Windows) o con sudo, o apunte el prefix a una carpeta del usuario, y luego: {{command}}",
 		busy: "Los archivos de mclaude están en uso. Cierre las otras ventanas de mclaude y ejecute: {{command}}",
-		ephemeral: "Ejecutando mediante {{runner}}: la próxima ejecución ya obtiene la versión más reciente.",
+		ephemeral:
+			"Ejecutando mediante {{runner}}: la próxima ejecución ya obtiene la versión más reciente.",
 		devLink: "Instalación de desarrollo (enlazada): actualice con git pull && pnpm build.",
 		sidebarDesc: "Una nueva versión de mclaude está disponible. Seleccione para actualizar ahora.",
 	},

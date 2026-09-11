@@ -102,7 +102,10 @@ function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[
 // Runs a package manager with its stderr tee'd: the bytes still reach the
 // terminal, and a copy is kept to recognise EACCES/EPERM/EBUSY afterwards.
 // cross-spawn handles npm.cmd/pnpm.cmd/yarn.cmd; the args are fixed, no metachars.
-function runTee(command: string, args: string[]): Promise<{ status: number | null; stderrText: string }> {
+function runTee(
+	command: string,
+	args: string[],
+): Promise<{ status: number | null; stderrText: string }> {
 	return new Promise((resolve) => {
 		let stderrText = "";
 		const child = crossSpawn(command, args, { stdio: ["inherit", "inherit", "pipe"] });
