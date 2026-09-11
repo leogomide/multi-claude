@@ -25,7 +25,7 @@ Ambientes: Windows 10 (Windows Terminal, conhost/`cmd.exe` e PowerShell); macOS 
 
 ### Instalação e artefato (006-D)
 
-- [ ] **CT-04** `npm i -g ./leogomide-multi-claude-2.0.0.tgz` (terminal elevado):
+- [x] **CT-04** `npm i -g ./leogomide-multi-claude-2.0.0.tgz` (terminal elevado):
   - `mclaude --version`, `mclaude --help`;
   - `mclaude --list | node -e "JSON.parse(require('fs').readFileSync(0,'utf8'))"`;
   - `mclaude --logs last | Measure-Object -Character` com a contagem igual ao tamanho do arquivo de log (R-05 do stdout).
@@ -83,4 +83,31 @@ Ambientes: Windows 10 (Windows Terminal, conhost/`cmd.exe` e PowerShell); macOS 
 
 ## Resumo de Implementacao
 
-_(preencher após a execução, com a tabela CT × ambiente × resultado)_
+Execução parcial em 2026-09-11, só com o que roda de forma segura e não interativa nesta máquina (Windows 10, Node v22.17.0, npm 11.10.0, pnpm 10.34.3). Nada tocou os globais reais, o `~/.multi-claude` real ou APIs pagas. O tarball foi instalado com `npm i -g <tgz> --prefix <temp>`, sem elevação, e o `HOME`/`USERPROFILE` apontava para um diretório temporário. O temp e o `.tgz` foram removidos no fim.
+
+Pré-validação: `pnpm build` ok (`dist/cli.js` 149.6kb, `dist/tui-process.js` 289.3kb). `npm pack` gerou 8 arquivos. `pnpm test`: 4 arquivos, 97 testes passaram e 1 foi pulado.
+
+| CT | Ambiente | Resultado | Observação |
+|----|----------|-----------|------------|
+| CT-01 | Win10 | PENDENTE (manual) | Exige Node fora do PATH e o mock do `checkForUpdate` na v1.0.40 |
+| CT-02 | Win10 | PENDENTE (manual) | Exige a 1.0.39 instalada via Bun e o Update pela TUI (ver nota 1) |
+| CT-03 | Win10 | PENDENTE (manual) | Exige a 1.0.39 e um ambiente sem Node |
+| CT-04 | Win10, Git Bash, prefix temporário (sem elevação) | PASS | `--version` → `2.0.0` (exit 0). `--help` → `multi-claude v2.0.0` + uso (exit 0). `--list` com pipe para `JSON.parse` → JSON válido (`providers`, `installations`, `usage`). `--logs last` com um log sintético de 3.000.000 bytes → 3.000.001 caracteres no stdout (arquivo + `\n` do `console.log`), sem truncamento (R-05). Não rodou no prefix real `C:\Program Files\nodejs` |
+| CT-05 | Win10 | PENDENTE (manual) | `pnpm add -g` mexe no global real do pnpm |
+| CT-06 | Win10 | PENDENTE (manual) | `bun add -g` mexe no global real do Bun (hoje é um link de dev, ver nota 1) |
+| CT-07 | Win10 | PENDENTE (manual) | Abre a TUI (interativo) |
+| CT-08 | Win10, PowerShell `Measure-Command` | PARCIAL: só o `--version` | Mediana de 5 execuções, com 1 de aquecimento antes: 2.0.0 via `mclaude.cmd` (npm, Node) **116 ms** (116, 129, 118, 115, 114). 2.0.0 via `node dist/cli.js` direto **102 ms**. O shim `~/.bun/bin/mclaude.exe` fez **108 ms**, mas roda a 2.0.0 deste repo, e não a 1.0.39 (nota 1). **Antes (1.0.39 no Bun): N/A**, porque ela não está instalada. O tempo até o menu da TUI está PENDENTE (manual) |
+| CT-09 a CT-13 | Win10 (WT, conhost, PowerShell) | PENDENTE (manual) | TUI interativa, redimensionamento, senha mestra, Ctrl+C |
+| CT-14 a CT-16 | Win10 | PENDENTE (manual) | Sessões reais do Claude Code |
+| CT-17 | Win10 | PENDENTE (manual) | O caminho OAuth só é alcançável pela TUI (exit 3). O código trata o erro de spawn com `printClaudeNotFound()` (cli.ts), mas o fluxo não foi executado |
+| CT-18 | Win10, Node 22 `--experimental-strip-types`, dir temporário | PARCIAL: PASS na função | `cleanStaleSessionSettings()` removeu `settings-999999-*.json` (PID morto) e manteve o arquivo do PID vivo, o arquivo da própria sessão e um arquivo fora do padrão. O ciclo real (fechar o Claude Code, matar o mclaude à força) está PENDENTE (manual) |
+| CT-19 | Win10 | PENDENTE (manual) | Chamada real à API do provider |
+| CT-20, CT-21 | Win10 | PENDENTE (manual) | Ollama/LM Studio e proxy local. O CT-21 exige Node ≥ 22.21 e a máquina tem a v22.17.0 |
+| CT-22 a CT-25 | Win10 | PENDENTE (manual) | Update real via npm/pnpm/bun e terminal não elevado |
+| CT-26 | Vitest | PARCIAL: PASS nos unitários | `src/services/install-detect.test.ts` cobre a detecção `ephemeral`/`dev-link` e passou. A mensagem na TUI via `npx` e via `pnpm link --global` está PENDENTE (manual) |
+| CT-27 | Win10 | PENDENTE (manual) | Dados reais da 1.0.39 |
+| macOS / Linux | — | N/A | Sem acesso. O CI cobre o automatizado |
+
+Nota 1: o pré-requisito "mclaude 1.0.39 instalado via Bun" não vale mais nesta máquina. `~/.bun/install/global/node_modules/@leogomide/multi-claude` é um symlink para este repositório (atualizado em 2026-09-11) e `mclaude --version` responde `2.0.0`. Antes do CT-02, do CT-03 e da medição "antes" do CT-08, reinstalar a 1.0.39 (`bun add -g @leogomide/multi-claude@1.0.39`).
+
+Nenhum FAIL encontrado no que foi executado. O publish continua bloqueado pelos CTs pendentes.
