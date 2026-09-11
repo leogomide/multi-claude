@@ -23,7 +23,7 @@ Ela reutiliza dois pontos que já existem:
 
 ### 1. `src/i18n/types.ts` — chaves novas no bloco `update` (linha 311)
 
-- [ ] Adicionar ao tipo `update`:
+- [x] Adicionar ao tipo `update`:
   ```ts
   		nodeMissing: string;
   		nodeTooOld: string;
@@ -32,18 +32,18 @@ Ela reutiliza dois pontos que já existem:
 
 ### 2. `src/i18n/locales/{en,pt-BR,es}.ts` — textos
 
-- [ ] `en.ts` (bloco `update`, linha 321-328):
+- [x] `en.ts` (bloco `update`, linha 321-328):
   ```ts
   		nodeMissing: "mclaude v{{version}} runs on Node.js 22 or newer, and Node.js was not found.",
   		nodeTooOld: "mclaude v{{version}} runs on Node.js 22 or newer, and the installed one is {{current}}.",
   		nodeHowTo:
   			"Install Node.js 22+ (https://nodejs.org) and run: npm i -g @leogomide/multi-claude\nOr run it without installing: bunx @leogomide/multi-claude",
   ```
-- [ ] `pt-BR.ts` e `es.ts`: as mesmas três chaves, traduzidas. O comando e a URL não se traduzem.
+- [x] `pt-BR.ts` e `es.ts`: as mesmas três chaves, traduzidas. O comando e a URL não se traduzem.
 
 ### 3. `cli.ts` — helper de versão do Node
 
-- [ ] Ao lado de `resolveClaudePath` (linha 92), adicionar:
+- [x] Ao lado de `resolveClaudePath` (linha 92), adicionar:
   ```ts
   // Major version of the `node` on PATH, or null when there is none. The bridge
   // release still runs on Bun, so process.versions.node says nothing about it.
@@ -60,7 +60,7 @@ Ela reutiliza dois pontos que já existem:
 
 ### 4. `cli.ts` — guarda no exit code 4 (linha 270-291)
 
-- [ ] Logo depois de `resetTerminal();`, antes do `spawnSync`:
+- [x] Logo depois de `resetTerminal();`, antes do `spawnSync`:
   ```ts
   			// v2 dropped the Bun runtime: installing it where there is no Node.js 22+
   			// would leave `mclaude` failing to start. Only a 2.x target is gated, and
@@ -87,20 +87,20 @@ Ela reutiliza dois pontos que já existem:
 
 ### 5. CHANGELOG.md, README.md e README.en.md
 
-- [ ] CHANGELOG: nova seção `### v1.0.40 (current)` e remover `(current)` da v1.0.39:
+- [x] CHANGELOG: nova seção `### v1.0.40 (current)` e remover `(current)` da v1.0.39:
   ```md
   - **feat:** the in-app update checks for Node.js 22+ before installing mclaude 2.x, which runs on Node.js instead of Bun — without it, the update stops and explains how to install Node.js or run mclaude with `bunx`
   ```
-- [ ] README.md e README.en.md: na seção Instalação, logo depois dos pré-requisitos, uma nota curta:
+- [x] README.md e README.en.md: na seção Instalação, logo depois dos pré-requisitos, uma nota curta:
   > A próxima versão maior (2.x) roda em Node.js 22+ e passa a ser instalada com `npm i -g @leogomide/multi-claude`.
-- [ ] Badge de versão: 1.0.40.
+- [x] Badge de versão: 1.0.40.
 
 ### 6. Release (processo atual do CLAUDE.md, no `master`)
 
-- [ ] `bunx tsc --noEmit` e `bun test`.
-- [ ] Bump de `package.json` para 1.0.40 e `bun install`.
+- [x] `bunx tsc --noEmit` e `bun test`.
+- [x] Bump de `package.json` para 1.0.40 e `bun install`.
 - [ ] Commit, tag `v1.0.40`, **mover a tag `latest` pela última vez** (ela fica congelada aqui), push, `npm publish` e `gh release create`.
-- [ ] Mergear o `master` na `feat/node-runtime-migration`.
+- [x] Mergear o `master` na `feat/node-runtime-migration`.
 
 ## Arquivos a Modificar
 
@@ -125,4 +125,13 @@ Ela reutiliza dois pontos que já existem:
 
 ## Resumo de Implementacao
 
-_(preencher após a execução)_
+Executado no `master` (commit `7ef9afb`) e mergeado na `feat/node-runtime-migration` (merge `7825379`).
+
+- `src/i18n/types.ts` e `src/i18n/locales/{en,pt-BR,es}.ts`: chaves `nodeMissing`, `nodeTooOld` e `nodeHowTo` no bloco `update`, com textos traduzidos (comando e URL mantidos).
+- `cli.ts`: `getPathNodeMajor()` antes de `resetTerminal()`, e a guarda no exit code 4 logo depois de `resetTerminal();`, como no checklist.
+  - **Desvio:** `checkForUpdate` é chamado com `AbortSignal.timeout(10000)`. O `fetch` dele não tem timeout próprio, então uma rede lenta poderia travar o update. Se estourar o timeout, o `catch` devolve `updateAvailable: false` e o update segue sem bloquear, o que mantém a regra de que o registry inacessível não bloqueia.
+- `CHANGELOG.md`: seção `### v1.0.40 (current)`, e o `(current)` saiu da v1.0.39.
+- `README.md` e `README.en.md`: nota sobre a 2.x logo depois dos pré-requisitos, e a badge foi para 1.0.40.
+- `package.json`: 1.0.40. O `bun install` não alterou o `bun.lock`, porque ele não guarda a versão do pacote raiz.
+- Validação: `bunx tsc --noEmit` limpo; `bun test` com 67 pass e 0 fail.
+- Pendente (manual): tag `v1.0.40`, mover a tag `latest`, push, `npm publish` e `gh release create`. O contrato de teste com `checkForUpdate` mockado para 2.0.0 também não foi executado.
