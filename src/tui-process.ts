@@ -70,6 +70,7 @@ if (hasMasterPassword(preConfig)) {
 					if (ch === "\r" || ch === "\n") {
 						process.stdout.write("\n");
 						process.stdin.removeListener("data", onData);
+						process.stdin.pause();
 						if (process.stdin.isTTY && process.stdin.setRawMode) {
 							process.stdin.setRawMode(false);
 						}
@@ -104,6 +105,7 @@ if (hasMasterPassword(preConfig)) {
 			const onData = (data: string) => {
 				const ch = data[0] ?? "";
 				process.stdin.removeListener("data", onData);
+				process.stdin.pause();
 				if (process.stdin.isTTY && process.stdin.setRawMode) {
 					process.stdin.setRawMode(false);
 				}

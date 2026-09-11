@@ -144,8 +144,13 @@ export async function runClaude(
 
 		child.on("error", (err) => {
 			log.error("spawn error", err);
-			const msg = err.message;
-			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
+			const code = (err as NodeJS.ErrnoException).code;
+			if (
+				code === "ENOENT" ||
+				code === "EINVAL" ||
+				code === "EACCES" ||
+				err.message.includes("Failed to spawn") // Bun's wording
+			) {
 				console.error('Error: "claude" not found in PATH.\n');
 				console.error("Install Claude Code:");
 				console.error("  macOS/Linux/WSL:  curl -fsSL https://claude.ai/install.sh | bash");
@@ -267,8 +272,13 @@ export async function runClaudeDefault(
 		child.on("error", (err) => {
 			cleanup();
 			log.error("spawn error", err);
-			const msg = err.message;
-			if (msg.includes("ENOENT") || msg.includes("Failed to spawn")) {
+			const code = (err as NodeJS.ErrnoException).code;
+			if (
+				code === "ENOENT" ||
+				code === "EINVAL" ||
+				code === "EACCES" ||
+				err.message.includes("Failed to spawn") // Bun's wording
+			) {
 				console.error('Error: "claude" not found in PATH.\n');
 				console.error("Install Claude Code:");
 				console.error("  macOS/Linux/WSL:  curl -fsSL https://claude.ai/install.sh | bash");

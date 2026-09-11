@@ -49,6 +49,15 @@ export async function ensureStatusLineScript(): Promise<string> {
 	return scriptPath;
 }
 
+// The status line runs on whatever runtime launched mclaude. An absolute path is
+// only used when it has no whitespace: Claude Code may hand the command to
+// `cmd /c`, which strips the outer quotes of a command that starts with one.
+function statusLineRuntime(): string {
+	const exec = process.execPath.replace(/\\/g, "/");
+	if (!/\s/.test(exec)) return `"${exec}"`;
+	return process.versions.bun ? "bun" : "node";
+}
+
 export function buildStatusLineSettingsJson(
 	scriptPath: string,
 	envVars?: Record<string, string>,
@@ -57,7 +66,7 @@ export function buildStatusLineSettingsJson(
 	const settings: Record<string, unknown> = {
 		statusLine: {
 			type: "command",
-			command: `bun "${normalizedPath}"`,
+			command: `${statusLineRuntime()} "${normalizedPath}"`,
 			padding: 0,
 		},
 	};

@@ -4,7 +4,9 @@ import { execSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import pkg from "./package.json";
 import { decryptCredential } from "./src/credential-store.ts";
 import { createLogger, formatError, initLogger } from "./src/debug.ts";
 import { en } from "./src/i18n/locales/en.ts";
@@ -121,6 +123,13 @@ function resetTerminal(): void {
 	process.stdout.write("\x1b[?1049l"); // Exit alternate screen
 }
 
+// process.exit does not wait for pending stdout writes, and on POSIX pipes they
+// are async in Node: `mclaude --list | jq` would get a truncated document.
+async function exitAfterFlush(code: number): Promise<never> {
+	await new Promise<void>((resolve) => process.stdout.write("", () => resolve()));
+	process.exit(code);
+}
+
 process.on("uncaughtException", (err) => {
 	log.error("UNCAUGHT EXCEPTION", err);
 	console.error("mclaude crash:", formatError(err));
@@ -142,8 +151,7 @@ const cliArgs = process.argv.slice(2);
 
 // Interceptar --help / -h
 if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
-	const { version } = await import("./package.json");
-	console.log(`multi-claude v${version}`);
+	console.log(`multi-claude v${pkg.version}`);
 	console.log("");
 	console.log("Usage: mclaude [options] [claude-code-flags...]");
 	console.log("");
@@ -173,28 +181,27 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 	console.log("  --help, -h         Show this help message");
 	console.log("  --version, -v      Show version number");
 	console.log("  --logs [last|tail] Show debug log files");
-	process.exit(0);
+	await exitAfterFlush(0);
 }
 
 // Interceptar --version / -v
 if (cliArgs.includes("--version") || cliArgs.includes("-v")) {
-	const { version } = await import("./package.json");
-	console.log(version);
-	process.exit(0);
+	console.log(pkg.version);
+	await exitAfterFlush(0);
 }
 
 // Interceptar --logs
 if (cliArgs[0] === "--logs") {
 	const { handleLogs } = await import("./src/logs-viewer.ts");
 	await handleLogs(cliArgs[1]);
-	process.exit(0);
+	await exitAfterFlush(0);
 }
 
 // Interceptar --list
 if (cliArgs.includes("--list")) {
 	const { printHeadlessInfo } = await import("./src/headless.ts");
 	await printHeadlessInfo();
-	process.exit(0);
+	await exitAfterFlush(0);
 }
 
 // Headless mode (--provider flag)
@@ -208,7 +215,17 @@ if (headlessArgs) {
 }
 
 // Spawn TUI in a separate process — never import Ink/React here
-const tuiPath = join(import.meta.dir, "src", "tui-process.ts");
+const tuiPath = join(dirname(fileURLToPath(import.meta.url)), "src", "tui-process.ts");
+
+// Bun's fetch honours HTTP(S)_PROXY on its own; Node's only with NODE_USE_ENV_PROXY
+// (22.21+/24.0+), read at startup — so it has to be set on the child's env.
+const proxied = ["HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"].some(
+	(k) => process.env[k],
+);
+const tuiEnv =
+	proxied && process.env["NODE_USE_ENV_PROXY"] === undefined
+		? { ...process.env, NODE_USE_ENV_PROXY: "1" }
+		: process.env;
 
 // Main loop: return to TUI after Claude Code exits
 while (true) {
@@ -217,7 +234,7 @@ while (true) {
 		log.info("spawning TUI process: " + tuiPath);
 		const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], {
 			stdio: "inherit",
-			env: process.env,
+			env: tuiEnv,
 		});
 
 		if (tuiResult.error) {
@@ -284,9 +301,8 @@ while (true) {
 			// v2 dropped the Bun runtime: installing it where there is no Node.js 22+
 			// would leave `mclaude` failing to start. Only a 2.x target is gated, and
 			// an unreachable registry never blocks (the install would fail on its own).
-			const { version: currentVersion } = await import("./package.json");
 			const { checkForUpdate } = await import("./src/services/version-check.ts");
-			const target = await checkForUpdate(currentVersion, AbortSignal.timeout(10000));
+			const target = await checkForUpdate(pkg.version, AbortSignal.timeout(10000));
 			if (target.updateAvailable && Number.parseInt(target.latestVersion, 10) >= 2) {
 				const node = getPathNodeMajor();
 				if (!node || node.major < 22) {
