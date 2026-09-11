@@ -127,4 +127,16 @@ A saída de erro do gerenciador passa por um "tee": os bytes vão para o termina
 
 ## Resumo de Implementacao
 
-_(preencher após a execução)_
+Executado em 2026-09-11 na branch `feat/node-runtime-migration`.
+
+- [x] `src/services/install-detect.ts`: `PACKAGE_SPEC`, `InstallSource`, `detectInstallSource(realPath, env, platform)` (normalização `\` → `/` e minúsculas no win32, ordem da tabela), `formatCommand(source)` e `runnerLabel(runner)` (exibe `pnpm dlx`).
+- [x] Volta também reconhecido em `~/.volta/tools/image/packages/` (Unix, com ponto), além de `%LOCALAPPDATA%\Volta\...`.
+- [x] i18n (`types.ts` + en/pt-BR/es): `failed` passou a `{{command}}`; chaves novas `permission`, `busy`, `ephemeral`, `devLink`.
+- [x] `update.success` não era consumido em lugar nenhum (nem TUI nem CLI). Agora o `cli.ts` o usa, e o `{{version}}` vem do registry depois do update (`checkForUpdate("0.0.0")`, timeout 5s; fallback `latest`).
+- [x] `cli.ts` exit 4 reescrito: realpath do bundle → `detectInstallSource`; `ephemeral`/`dev-link` saem com 0 sem instalar (RN-05); o update roda via `runTee` (`cross-spawn` assíncrono, stderr espelhado no terminal e acumulado); `EACCES|EPERM` → `permission`, `EBUSY` → `busy`, senão `failed`, com `{{command}}`/`{{manager}}` interpolados; `log.info("update source=...")`.
+- [x] Guarda de Node da ponte removida do `cli.ts` (`getPathNodeMajor` e o `execSync` junto).
+- [x] **Desvio:** as chaves `update.nodeMissing`, `nodeTooOld` e `nodeHowTo`, só usadas pela guarda da ponte, foram removidas de `types.ts` e dos 3 locales (continuam no `master`/v1.0.40).
+- [x] `src/services/install-detect.test.ts`: tabela com os 14 fixtures do plano + pnpm dlx + `BUN_INSTALL` no Windows com barra final, caixa sensível fora do win32, `formatCommand` para todos os `kind`.
+- [x] Contrato: `rg "bun install -g" src cli.ts` e `rg 'process.execPath,\s*\[\s*"install"' cli.ts` sem resultados, e `dist/` também sem `bun install -g`.
+- [x] Validação: `pnpm check-types`, `pnpm test`, `pnpm build`, `node dist/cli.js --version` e `--list` ok.
+- [ ] Manuais (006-H): update a partir de `npm i -g`, `pnpm add -g` e `bun add -g`; `npx` → `ephemeral`; `pnpm link --global` → `devLink`; prefix `C:\Program Files\nodejs` sem elevação → `permission`; `bun add -g` com outra janela do mclaude aberta → `busy`.

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
-import { execSync, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { readFileSync, realpathSync } from "node:fs";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import crossSpawn from "cross-spawn";
 import pkg from "./package.json";
 import { decryptCredential } from "./src/credential-store.ts";
 import { createLogger, formatError, initLogger } from "./src/debug.ts";
@@ -98,16 +99,24 @@ function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[
 	return [...selectedFlags, ...nonStrategic];
 }
 
-// Major version of the `node` on PATH, or null when there is none. The bridge
-// release still runs on Bun, so process.versions.node says nothing about it.
-function getPathNodeMajor(): { major: number; raw: string } | null {
-	try {
-		const raw = execSync("node --version", { encoding: "utf-8", timeout: 5000 }).trim();
-		const major = Number.parseInt(raw.replace(/^v/, ""), 10);
-		return Number.isFinite(major) ? { major, raw } : null;
-	} catch {
-		return null;
-	}
+// Runs a package manager with its stderr tee'd: the bytes still reach the
+// terminal, and a copy is kept to recognise EACCES/EPERM/EBUSY afterwards.
+// cross-spawn handles npm.cmd/pnpm.cmd/yarn.cmd; the args are fixed, no metachars.
+function runTee(command: string, args: string[]): Promise<{ status: number | null; stderrText: string }> {
+	return new Promise((resolve) => {
+		let stderrText = "";
+		const child = crossSpawn(command, args, { stdio: ["inherit", "inherit", "pipe"] });
+		child.stderr?.on("data", (chunk: Buffer) => {
+			process.stderr.write(chunk);
+			stderrText += chunk.toString();
+		});
+		child.on("error", (err) => {
+			log.error("update spawn error", err);
+			stderrText += String(err);
+			resolve({ status: null, stderrText });
+		});
+		child.on("close", (status) => resolve({ status, stderrText }));
+	});
 }
 
 function resetTerminal(): void {
@@ -312,43 +321,48 @@ while (true) {
 
 		if (tuiExitCode === 4) {
 			resetTerminal();
-			// v2 dropped the Bun runtime: installing it where there is no Node.js 22+
-			// would leave `mclaude` failing to start. Only a 2.x target is gated, and
-			// an unreachable registry never blocks (the install would fail on its own).
-			const { checkForUpdate } = await import("./src/services/version-check.ts");
-			const target = await checkForUpdate(pkg.version, AbortSignal.timeout(10000));
-			if (target.updateAvailable && Number.parseInt(target.latestVersion, 10) >= 2) {
-				const node = getPathNodeMajor();
-				if (!node || node.major < 22) {
-					const dict = getLocaleDict();
-					const reason = node
-						? dict.update.nodeTooOld.replace("{{current}}", node.raw)
-						: dict.update.nodeMissing;
-					console.error(`\n\u2717 ${reason.replace("{{version}}", target.latestVersion)}`);
-					console.error(`\n${dict.update.nodeHowTo}\n`);
-					log.info("update blocked: node " + (node?.raw ?? "missing"));
-					process.exit(1);
-				}
-			}
-			console.log("\n\u2B06\uFE0F  Updating mclaude...\n");
-			const updateResult = spawnSync(
-				process.execPath,
-				["install", "-g", "@leogomide/multi-claude@latest"],
-				{
-					stdio: "inherit",
-				},
+			const dict = getLocaleDict();
+			// RN-04: update through the manager that installed this bundle, never
+			// `process.execPath install`. RN-05: ephemeral runs and dev links don't update.
+			const { detectInstallSource, formatCommand, runnerLabel } = await import(
+				"./src/services/install-detect.ts"
 			);
-			if (updateResult.status === 0) {
+			const selfPath = realpathSync(fileURLToPath(import.meta.url));
+			const source = detectInstallSource(selfPath, process.env, process.platform);
+			log.info("update source=" + source.kind + " path=" + selfPath);
+
+			if (source.kind === "ephemeral") {
 				console.log(
-					"\n\u2713 mclaude updated successfully! Run 'mclaude' to use the new version.\n",
+					`\n${dict.update.ephemeral.replace("{{runner}}", runnerLabel(source.runner))}\n`,
 				);
 				process.exit(0);
-			} else {
-				console.error(
-					"\n\u2717 Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n",
-				);
-				process.exit(1);
 			}
+			if (source.kind === "dev-link") {
+				console.log(`\n${dict.update.devLink}\n`);
+				process.exit(0);
+			}
+
+			const command = formatCommand(source);
+			console.log(`\n\u2B06\uFE0F  ${dict.update.updating}\n`);
+			log.info("update command: " + command);
+			const { status, stderrText } = await runTee(source.command, source.args);
+			if (status === 0) {
+				const { checkForUpdate } = await import("./src/services/version-check.ts");
+				// Compared against 0.0.0 so any published version comes back as the latest.
+				const latest = await checkForUpdate("0.0.0", AbortSignal.timeout(5000));
+				const version = latest.updateAvailable ? latest.latestVersion : "latest";
+				console.log(`\n\u2713 ${dict.update.success.replace("{{version}}", version)}\n`);
+				process.exit(0);
+			}
+			log.error("update failed, status=" + status + " stderr=" + stderrText.slice(-2000));
+			const template = /EACCES|EPERM/.test(stderrText)
+				? dict.update.permission
+				: /EBUSY/.test(stderrText)
+					? dict.update.busy
+					: dict.update.failed;
+			const msg = template.replace("{{manager}}", source.kind).replace("{{command}}", command);
+			console.error(`\n\u2717 ${msg}\n`);
+			process.exit(1);
 		}
 
 		if (tuiExitCode !== 0) {

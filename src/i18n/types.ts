@@ -314,10 +314,11 @@ export interface TranslationDictionary {
 		updating: string;
 		success: string;
 		failed: string;
+		permission: string;
+		busy: string;
+		ephemeral: string;
+		devLink: string;
 		sidebarDesc: string;
-		nodeMissing: string;
-		nodeTooOld: string;
-		nodeHowTo: string;
 	};
 	launchOptions: {
 		title: string;
