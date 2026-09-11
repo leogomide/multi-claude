@@ -1,10 +1,10 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { execSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import pkg from "./package.json";
 import { decryptCredential } from "./src/credential-store.ts";
@@ -16,6 +16,13 @@ import type { TranslationDictionary } from "./src/i18n/types.ts";
 import { initKeystore } from "./src/keystore.ts";
 import type { AuthVar, ConfiguredProvider } from "./src/schema.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
+
+// engines is only advisory: fail with a readable message instead of a syntax or API error.
+const nodeMajor = Number.parseInt(process.versions.node, 10);
+if (!process.versions.bun && nodeMajor < 22) {
+	console.error(`mclaude requires Node.js 22 or newer (found ${process.version}).`);
+	process.exit(1);
+}
 
 function getLocaleDict(): TranslationDictionary {
 	try {
@@ -215,7 +222,8 @@ if (headlessArgs) {
 }
 
 // Spawn TUI in a separate process — never import Ink/React here
-const tuiPath = join(dirname(fileURLToPath(import.meta.url)), "src", "tui-process.ts");
+// Runs from the bundle: dist/cli.js spawns its sibling dist/tui-process.js.
+const tuiPath = fileURLToPath(new URL("./tui-process.js", import.meta.url));
 
 // Bun's fetch honours HTTP(S)_PROXY on its own; Node's only with NODE_USE_ENV_PROXY
 // (22.21+/24.0+), read at startup — so it has to be set on the child's env.

@@ -20,8 +20,8 @@ Três armadilhas do esbuild, todas confirmadas na revisão:
 
 ### 1. `scripts/build.mjs` (novo)
 
-- [ ] Adicionar `esbuild` em `devDependencies`.
-- [ ] Criar:
+- [x] Adicionar `esbuild` em `devDependencies`.
+- [x] Criar:
   ```js
   import { cp, readFile, rm } from "node:fs/promises";
   import * as esbuild from "esbuild";
@@ -69,8 +69,8 @@ Três armadilhas do esbuild, todas confirmadas na revisão:
 
 ### 2. `cli.ts`
 
-- [ ] Linha 1: `#!/usr/bin/env node`.
-- [ ] Guard de versão, logo depois dos imports:
+- [x] Linha 1: `#!/usr/bin/env node`.
+- [x] Guard de versão, logo depois dos imports:
   ```ts
   // engines is only advisory: fail with a readable message instead of a syntax or API error.
   const nodeMajor = Number.parseInt(process.versions.node, 10);
@@ -79,7 +79,7 @@ Três armadilhas do esbuild, todas confirmadas na revisão:
   	process.exit(1);
   }
   ```
-- [ ] Spawn da TUI (a linha que o 006-B deixou apontando para `src/tui-process.ts`):
+- [x] Spawn da TUI (a linha que o 006-B deixou apontando para `src/tui-process.ts`):
   ```ts
   const tuiPath = fileURLToPath(new URL("./tui-process.js", import.meta.url));
   ```
@@ -87,13 +87,13 @@ Três armadilhas do esbuild, todas confirmadas na revisão:
 
 ### 3. `package.json`
 
-- [ ] Campos:
+- [x] Campos:
   ```json
   "bin": { "mclaude": "dist/cli.js" },
   "files": ["dist/", "CHANGELOG.md"],
   ```
   - O npm inclui `README.md`, `LICENSE` e `package.json` por conta própria (RN-07).
-- [ ] `scripts`:
+- [x] `scripts`:
   ```json
   "build": "node scripts/build.mjs",
   "build:watch": "node scripts/build.mjs --watch",
@@ -107,18 +107,18 @@ Três armadilhas do esbuild, todas confirmadas na revisão:
 
 ### 4. Imports de `package.json` nos componentes
 
-- [ ] Nenhuma mudança obrigatória: `Header.tsx:4`, `MainMenu.tsx:3` e `ChangelogPage.tsx:3` fazem `import pkg from "../../../package.json"`, que o esbuild inlina.
-- [ ] Conferir no bundle que a versão aparece certa na TUI.
+- [x] Nenhuma mudança obrigatória: `Header.tsx:4`, `MainMenu.tsx:3` e `ChangelogPage.tsx:3` fazem `import pkg from "../../../package.json"`, que o esbuild inlina.
+- [ ] Conferir no bundle que a versão aparece certa na TUI. _(a string `1.0.40` está inlinada em `dist/tui-process.js`; falta a conferência visual na TUI)_
 
 ### 5. Fluxo de dev local
 
-- [ ] Documentado no 006-G, mas validado aqui:
+- [ ] Documentado no 006-G, mas validado aqui _(manual, pendente com o dev)_:
   1. `bun remove -g @leogomide/multi-claude` (a 1.0.39 instalada via Bun);
   2. `pnpm setup` (o bin global do pnpm não está no PATH);
   3. `pnpm install` (roda o `prepare`, que builda);
   4. `pnpm link --global`;
   5. `mclaude`.
-- [ ] Para iterar: `pnpm build:watch` num terminal e `mclaude` no outro.
+- [ ] Para iterar: `pnpm build:watch` num terminal e `mclaude` no outro. _(manual)_
 
 ## Arquivos a Modificar
 
@@ -147,4 +147,41 @@ Três armadilhas do esbuild, todas confirmadas na revisão:
 
 ## Resumo de Implementacao
 
-_(preencher após a execução)_
+Executado em 2026-09-11 na branch `feat/node-runtime-migration`.
+
+**Arquivos:**
+- `scripts/build.mjs` (novo): o script do checklist, sem alterações.
+- `cli.ts`:
+  - shebang `node`;
+  - guard de Node >= 22, ignorado no Bun;
+  - `tuiPath` aponta para o `./tui-process.js` irmão do bundle;
+  - removido o import de `dirname`, que ficou sem uso.
+- `package.json`:
+  - `bin` e `files` apontam para o `dist/`;
+  - adicionados os scripts `build`, `build:watch`, `dev`, `prepare`, `prepublishOnly` e `link`;
+  - `esbuild` (^0.28.2) entrou em `devDependencies`.
+- `pnpm-lock.yaml`: atualizado.
+
+O `dist/` e o `*.tgz` já estavam no `.gitignore`, e o `biome.json` já ignora o `dist`.
+
+**Contrato de teste:**
+
+| Item | Resultado |
+|------|-----------|
+| `pnpm build` | Gera só `dist/cli.js`, `dist/tui-process.js` e `dist/statusline-script.mjs`, sem `dist/src/` e sem chunks. Um único `#!/usr/bin/env node`, e as asserções passam. |
+| `--version`, `--help` e `--list` no Node, com HOME temporário | `1.0.40`, a ajuda completa e JSON válido (`providers`, `installations`, `usage`) |
+| `bun dist/cli.js --list` e `--version` | OK (RN-02) |
+| Node 20.18.1 e 20.10.0 (exe do nvm, sem trocar o Node global) | Mensagem do guard e exit 1 |
+| `npm pack --dry-run` | `dist/*`, `CHANGELOG.md`, `README.md`, `LICENSE` e `package.json`, e também `README.en.md` (ver desvio) |
+| `pnpm check-types` | Limpo |
+| `pnpm test` | 67/67 |
+| `pnpm lint:ci` | 17 erros **pré-existentes**: `src/statusline-script.mjs` e `video/`. Os arquivos deste passo só geram infos. |
+
+**Desvios e observações:**
+- **RN-07.** O npm inclui automaticamente todo arquivo `README*`, então o `README.en.md` também entra no tarball. Essa inclusão é inofensiva. Para barrar o arquivo, seria preciso mudar a RN ou renomeá-lo.
+- **`--list` no PowerShell 5.1.** No pipe `node dist/cli.js --list | node -e ...`, o próprio PowerShell 5.1 insere um BOM entre os dois processos nativos, e o `JSON.parse` falha. A falha é do shell, e não do mclaude. No Git Bash o teste passa.
+
+**Pendente (manual):**
+- A TUI via `node dist/cli.js`: página Changelog, versão no header, status line num launch e volta à TUI.
+- `npm pack` + `npm i -g` do tarball com prefix de usuário, e `mclaude --version` num shell novo.
+- O fluxo de dev local (seção 5) e o `pnpm build:watch`.

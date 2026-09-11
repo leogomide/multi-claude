@@ -17,17 +17,20 @@
 		"tui"
 	],
 	"files": [
-		"cli.ts",
-		"src/",
-		"CHANGELOG.md",
-		"package.json"
+		"dist/",
+		"CHANGELOG.md"
 	],
 	"type": "module",
 	"bin": {
-		"mclaude": "./cli.ts"
+		"mclaude": "dist/cli.js"
 	},
 	"scripts": {
-		"dev": "bun run cli.ts",
+		"build": "node scripts/build.mjs",
+		"build:watch": "node scripts/build.mjs --watch",
+		"dev": "node scripts/build.mjs && node dist/cli.js",
+		"prepare": "node scripts/build.mjs",
+		"prepublishOnly": "pnpm check-types && pnpm test && pnpm build",
+		"link": "pnpm link --global",
 		"check-types": "tsc --noEmit",
 		"lint": "biome check --fix .",
 		"lint:ci": "biome ci .",
@@ -46,6 +49,7 @@
 		"@biomejs/biome": "2.4.9",
 		"@types/node": "^22.20.2",
 		"@types/react": "19.2.14",
+		"esbuild": "^0.28.2",
 		"ink-testing-library": "4.0.0",
 		"typescript": "^5.9.3",
 		"vitest": "^5.0.0"
