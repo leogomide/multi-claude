@@ -15,7 +15,7 @@
 </div>
 
 <div align="center">
-  <img src="cover.png" alt="multi-claude" width="600"/>
+  <img src="cover.png" alt="multi-claude" width="500"/>
 </div>
 
 <div align="center">
