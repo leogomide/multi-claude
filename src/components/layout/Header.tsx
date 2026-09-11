@@ -37,6 +37,7 @@ export function Header() {
 			{hasCrumbs && (
 				<Box>
 					{crumbs.map((crumb, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: the crumb position is its identity
 						<Text key={i}>
 							{i > 0 && <Text color="gray">{" › "}</Text>}
 							<Text color="white">{crumb}</Text>

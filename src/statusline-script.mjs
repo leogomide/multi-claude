@@ -400,7 +400,7 @@ process.stdin.on("end", () => {
 				);
 
 				console.log(provModelLine);
-				lines.forEach((l) => console.log(l));
+				for (const l of lines) console.log(l);
 				console.log(barLine);
 				if (has5h) console.log(mkUsageBarLineSingle(usageC(u5h), u5h, 2 * W + SEP_W, W, reset5h));
 				if (has7d) console.log(mkUsageBarLineSingle(usageC(u7d), u7d, 2 * W + SEP_W, W, reset7d));
@@ -446,7 +446,7 @@ process.stdin.on("end", () => {
 				const lines = fmtGrid(W, coreLines, tailPerLine);
 
 				console.log(provModelLine);
-				lines.forEach((l) => console.log(l));
+				for (const l of lines) console.log(l);
 				if (has5h || has7d) {
 					const uc5 = usageC(u5h);
 					const uc7 = usageC(u7d);
@@ -497,7 +497,7 @@ process.stdin.on("end", () => {
 				);
 
 				console.log(provModelLine);
-				lines.forEach((l) => console.log(l));
+				for (const l of lines) console.log(l);
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
@@ -565,7 +565,7 @@ process.stdin.on("end", () => {
 				);
 
 				console.log(provModelLine);
-				lines.forEach((l) => console.log(l));
+				for (const l of lines) console.log(l);
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
@@ -617,7 +617,7 @@ process.stdin.on("end", () => {
 				);
 
 				console.log(provModelLine);
-				lines.forEach((l) => console.log(l));
+				for (const l of lines) console.log(l);
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);
@@ -665,7 +665,7 @@ process.stdin.on("end", () => {
 				);
 
 				console.log(provModelLine);
-				lines.forEach((l) => console.log(l));
+				for (const l of lines) console.log(l);
 				console.log(barLine);
 				if (has5h || has7d) {
 					const uc = usageC(u5h);

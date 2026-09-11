@@ -6,7 +6,15 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!node_modules", "!dist", "!**/bun.lock", "!pnpm-lock.yaml", "!plans/done"]
+		"includes": [
+			"**",
+			"!node_modules",
+			"!dist",
+			"!**/bun.lock",
+			"!pnpm-lock.yaml",
+			"!plans/done",
+			"!video"
+		]
 	},
 	"formatter": {
 		"enabled": true,

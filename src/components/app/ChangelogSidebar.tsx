@@ -26,8 +26,8 @@ export function ChangelogSidebar({ version, description }: ChangelogSidebarProps
 					<Text dimColor>{description}</Text>
 				</Box>
 			)}
-			{version.entries.map((entry, i) => (
-				<Box key={`${entry.type}-${i}`}>
+			{version.entries.map((entry) => (
+				<Box key={`${entry.type}-${entry.description}`}>
 					<Text bold color={TYPE_COLORS[entry.type] ?? "white"}>
 						{entry.type}
 					</Text>

@@ -31,10 +31,9 @@ export async function parseChangelog(): Promise<ChangelogVersion[]> {
 
 		const versions: ChangelogVersion[] = [];
 		const versionRegex = /^### (v[\d.]+)(?:\s+\(current\))?/gm;
-		let match: RegExpExecArray | null;
 		const versionPositions: { version: string; isCurrent: boolean; index: number }[] = [];
 
-		while ((match = versionRegex.exec(changelogSection)) !== null) {
+		for (const match of changelogSection.matchAll(versionRegex)) {
 			versionPositions.push({
 				version: match[1]!,
 				isCurrent: match[0].includes("(current)"),
@@ -51,8 +50,7 @@ export async function parseChangelog(): Promise<ChangelogVersion[]> {
 
 			const entries: ChangelogEntry[] = [];
 			const entryRegex = /^- \*\*(\w+):\*\*\s+(.+)$/gm;
-			let entryMatch: RegExpExecArray | null;
-			while ((entryMatch = entryRegex.exec(block)) !== null) {
+			for (const entryMatch of block.matchAll(entryRegex)) {
 				entries.push({ type: entryMatch[1]!, description: entryMatch[2]! });
 			}
 
