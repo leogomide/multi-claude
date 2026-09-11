@@ -5,6 +5,19 @@ https://platform.claude.com/docs/en/agent-sdk/typescript
 
 # correções
 
+
+
+
+-----------------------------------------------------
+
+pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
+
+-----------------------------------------------------
+
+pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
+
+-----------------------------------------------------
+
 pergunte para esclarecer sua dúvidas. sugira melhorias, adicoes e/ou correções caso necessario.
 
 -----------------------------------------------------

@@ -1,27 +1,13 @@
 import { execSync } from "child_process";
 import { useEffect, useRef, useState } from "react";
-import { getConsoleSizeWin32 } from "../utils/win32-console-size.ts";
 
 interface TerminalSize {
 	columns: number;
 	rows: number;
 }
 
-// Track whether FFI is available (set to false on first failure to avoid retries)
-let ffiAvailable = process.platform === "win32";
-
 function readTerminalSize(): TerminalSize {
-	// 1. [Windows] Direct kernel32.dll FFI — bypasses all caching
-	if (ffiAvailable) {
-		try {
-			const result = getConsoleSizeWin32();
-			if (result) return result;
-		} catch {
-			ffiAvailable = false;
-		}
-	}
-
-	// 2. Try getWindowSize() — works on macOS/Linux
+	// 1. Try getWindowSize() — works on macOS/Linux
 	if (process.stdout.isTTY && typeof process.stdout.getWindowSize === "function") {
 		try {
 			const [cols, rows] = process.stdout.getWindowSize();
@@ -29,12 +15,12 @@ function readTerminalSize(): TerminalSize {
 		} catch {}
 	}
 
-	// 3. Try .columns/.rows properties
+	// 2. Try .columns/.rows properties
 	if (process.stdout.columns && process.stdout.rows) {
 		return { columns: process.stdout.columns, rows: process.stdout.rows };
 	}
 
-	// 4. [Windows] Expensive fallback: 'mode con' (only if FFI failed to init)
+	// 3. [Windows] Expensive fallback: 'mode con' (only when the TTY reports no size)
 	if (process.platform === "win32") {
 		try {
 			const output = execSync("mode con", {

@@ -8,14 +8,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-- **Install dependencies:** `bun install`
-- **Run:** `mclaude` (apos `bun link`)
-- **Type check:** `bunx tsc --noEmit`
+- **Install dependencies:** `pnpm install` (roda o `prepare`, que builda para `dist/`)
+- **Build:** `pnpm build` (ou `pnpm build:watch`)
+- **Run:** `mclaude` (apos `pnpm link --global`; rode `pnpm setup` uma vez antes)
+- **Type check:** `pnpm check-types`
+- **Test:** `pnpm test` (Vitest)
+- **Lint:** `pnpm lint` (biome; `pnpm lint:ci` no CI)
 
 ## Project Structure
 
 ```
-cli.ts                  # Entry point da CLI (bin: mclaude)
+cli.ts                  # Entry point da CLI (buildado para dist/cli.js, bin: mclaude)
+scripts/
+└── build.mjs           # Build com esbuild -> dist/cli.js + dist/tui-process.js
+vitest.config.ts        # Config do Vitest (neutraliza CI=true para o Ink)
+.github/workflows/
+└── ci.yml              # CI: matriz SO x Node 22/24 + job Bun best-effort
+dist/                   # Gerado pelo build (fora do git, publicado no npm)
 src/
 ├── schema.ts           # Schemas Zod e tipos TypeScript
 ├── providers.ts        # Templates dos provedores suportados
@@ -29,10 +38,14 @@ src/
 ├── crypto.ts           # Operacoes criptograficas (AES-256-GCM)
 ├── keystore.ts         # Gerenciamento de chaves de encriptacao
 ├── statusline.ts       # Renderizacao da status line do Claude Code
+├── statusline-script.mjs # Script da status line (copiado para dist/ e ~/.multi-claude/)
 ├── logs-viewer.ts      # Visualizador de logs de debug
 ├── changelog.ts        # Parser do CHANGELOG.md para a tela Changelog da TUI
+├── language-selector.tsx # Seletor de idioma inicial
 ├── services/
 │   ├── api-models.ts   # Fetch de modelos de APIs externas
+│   ├── install-detect.ts # Deteccao do gerenciador que instalou o mclaude (auto-update)
+│   ├── dotenv-loader.ts # Leitura de .env
 │   ├── openrouter.ts   # Integracao OpenRouter
 │   ├── requesty.ts     # Integracao Requesty
 │   ├── ollama.ts       # Integracao Ollama
@@ -42,6 +55,8 @@ src/
 │   ├── nanogpt.ts      # Integracao NanoGPT
 │   ├── ninerouter.ts   # Integracao 9Router
 │   ├── omniroute.ts    # Integracao OmniRoute
+│   ├── zai.ts          # Integracao Z.AI
+│   ├── custom.ts       # Integracao Provedor personalizado
 │   └── version-check.ts # Verificacao de atualizacoes
 ├── i18n/
 │   ├── index.ts        # Setup do i18n (rosetta)
@@ -56,7 +71,10 @@ src/
 │   ├── useBreadcrumb.tsx   # Hook de breadcrumbs para navegacao
 │   └── useUpdateCheck.ts   # Hook de verificacao de atualizacoes
 ├── utils/
-│   └── win32-console-size.ts # Deteccao de tamanho do console no Windows
+│   ├── claude-bin.ts       # Resolucao e spawn do claude sem shell (shims .cmd no Windows)
+│   ├── format-tokens.ts    # Formatacao de contagem de tokens
+│   ├── validate-context.ts # Validacao da janela de contexto
+│   └── validate-url.ts     # Validacao de URLs
 └── components/
     ├── types.ts             # Tipos compartilhados dos componentes
     ├── common/
@@ -81,7 +99,9 @@ src/
     │   ├── ManageProvidersPage.tsx  # Pagina de gerenciamento de providers
     │   ├── ManageInstallationsPage.tsx # Pagina de gerenciamento de instalacoes
     │   ├── SettingsPage.tsx        # Pagina de configuracoes
-    │   └── StatusLinePage.tsx      # Pagina de configuracao da status line
+    │   ├── StatusLinePage.tsx      # Pagina de configuracao da status line
+    │   ├── ChangelogPage.tsx       # Pagina de changelog
+    │   └── ChangelogSidebar.tsx    # Sidebar da pagina de changelog
     └── config-wizard/
         ├── AddProviderFlow.tsx     # Fluxo: template -> nome -> api key
         ├── EditProviderFlow.tsx    # Fluxo: selecionar -> editar
@@ -105,9 +125,12 @@ Configuracoes sao salvas em `~/.multi-claude/config.json`.
 
 ## Tech Stack
 
-- **Runtime:** Bun (not Node.js)
+- **Runtime:** Node.js >= 22 (o artefato tambem roda no Bun, best-effort)
+- **Build:** esbuild (`scripts/build.mjs`) -> `dist/cli.js` + `dist/tui-process.js` (dois bundles, dependencias externas)
+- **Package manager:** pnpm (`pnpm-lock.yaml`, campo `packageManager`)
+- **Tests:** Vitest (`src/**/*.test.ts(x)`)
 - **Language:** TypeScript with strict mode enabled
-- **Module system:** ESNext with bundler module resolution (`noEmit: true`, no build step — Bun runs `.ts` directly)
+- **Module system:** ESNext with bundler module resolution (`tsc --noEmit` so checa tipos; quem emite e o esbuild)
 
 ## Protected Files
 
@@ -122,13 +145,12 @@ Checklist completo para lançar uma nova versão:
 ### 1. Validação
 
 ```bash
-bunx tsc --noEmit
-bun test
+pnpm check-types && pnpm test && pnpm build
 ```
 
 ### 2. Bump de versão
 
-Atualizar o campo `version` no `package.json` e rodar `bun install` para atualizar o `bun.lock`.
+Atualizar o campo `version` no `package.json` e rodar `pnpm install` para atualizar o `pnpm-lock.yaml`.
 
 ### 3. Atualizar README.md, README.en.md e CHANGELOG.md
 
@@ -146,32 +168,30 @@ Atualizar o campo `version` no `package.json` e rodar `bun install` para atualiz
 
 ```bash
 # Commitar as alterações de versão
-git add package.json bun.lock README.md README.en.md CHANGELOG.md
+git add package.json pnpm-lock.yaml README.md README.en.md CHANGELOG.md
 git commit -m "docs: bump version to vX.Y.Z"
 
 # Criar tag da versão
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 git push origin vX.Y.Z
 
-# Mover a tag latest para o commit atual
-git tag -d latest
-git push origin --delete latest
-git tag -a latest -m "Latest release"
-git push origin latest
-
 # Push do commit
 git push origin master
+
+# Publicar no npm (roda o prepublishOnly: check-types + test + build)
+pnpm publish
 
 # Criar GitHub Release a partir da tag
 # --generate-notes gera release notes automaticamente a partir dos commits desde a ultima release
 gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes --latest
 ```
 
+- A tag git `latest` fica **congelada na v1.0.40** (ultima versao que roda do fonte no Bun, para quem instalou via `github:...#latest`). Nao mova essa tag.
+
 ### Instalação pelos usuários
 
-- `bun install -g @leogomide/multi-claude@latest` (última versão via npm)
-- `bun install -g github:leogomide/multi-claude#latest` (última versão via git)
-- `bun install -g github:leogomide/multi-claude#vX.Y.Z` (versão específica via git)
+- `npm i -g @leogomide/multi-claude@latest`
+- Alternativas: `pnpm add -g @leogomide/multi-claude` ou `bun add -g @leogomide/multi-claude`
 
 ## Descricao automática para commits
 

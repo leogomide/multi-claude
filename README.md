@@ -6,10 +6,10 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.40-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
-[![Bun](https://img.shields.io/badge/runtime-Bun-ffcf2d)](https://bun.sh)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-339933)](https://nodejs.org)
 [![Claude Code](https://img.shields.io/badge/Claude-Code-orange)](https://docs.anthropic.com/en/docs/claude-code)
 
 </div>
@@ -60,21 +60,18 @@ Digite `mclaude`, escolha o provedor e o modelo num menu no terminal, e o Claude
 
 ## Instalação
 
-Pré-requisitos: [Bun](https://bun.sh) e [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
-
-> A próxima versão maior (2.x) roda em Node.js 22+ e passa a ser instalada com `npm i -g @leogomide/multi-claude`.
+Pré-requisitos: [Node.js](https://nodejs.org) 22 ou mais recente e [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 ```bash
-bun install -g @leogomide/multi-claude
+npm i -g @leogomide/multi-claude
 ```
 
-Ou rode sem instalar:
+Também funciona com `pnpm add -g @leogomide/multi-claude` ou `bun add -g @leogomide/multi-claude`. Para rodar sem instalar: `npx @leogomide/multi-claude`.
 
-```bash
-bunx @leogomide/multi-claude
-```
+Para atualizar, use a opção de update dentro do app ou reinstale com o mesmo gerenciador. Para remover: `npm rm -g @leogomide/multi-claude`.
 
-Para atualizar, use `bun install -g @leogomide/multi-claude@latest`. Para remover, `bun remove -g @leogomide/multi-claude`.
+- **Só tem o Bun?** Rode com `bunx @leogomide/multi-claude`. Um `mclaude` instalado globalmente exige Node.js no PATH.
+- **Atrás de proxy corporativo?** Defina `NODE_USE_ENV_PROXY=1` (Node 22.21+) junto de `HTTPS_PROXY`, e `NODE_EXTRA_CA_CERTS` se a rede usar uma CA própria.
 
 ## Como usar
 
@@ -173,10 +170,12 @@ Veja o [CHANGELOG](CHANGELOG.md) ou as [releases](https://github.com/leogomide/m
 ## Desenvolvimento
 
 ```bash
-bun install && bun link
-mclaude                  # roda a CLI
-bunx tsc --noEmit        # checagem de tipos
-bun test                 # smoke tests
+pnpm install             # instala e builda (prepare)
+pnpm link --global       # expõe o `mclaude` local (rode `pnpm setup` uma vez antes)
+pnpm build:watch         # rebuild contínuo; em outro terminal: mclaude
+pnpm check-types         # checagem de tipos
+pnpm test                # testes (Vitest)
+pnpm lint                # biome
 ```
 
 ## Licença

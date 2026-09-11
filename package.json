@@ -1,6 +1,6 @@
 {
 	"name": "@leogomide/multi-claude",
-	"version": "1.0.40",
+	"version": "2.0.0",
 	"description": "CLI tool to manage multiple API providers and launch Claude Code with the correct environment variables",
 	"license": "MIT",
 	"author": "Leonardo Gomide",
@@ -17,35 +17,47 @@
 		"tui"
 	],
 	"files": [
-		"cli.ts",
-		"src/",
-		"CHANGELOG.md",
-		"package.json"
+		"dist/",
+		"CHANGELOG.md"
 	],
 	"type": "module",
 	"bin": {
-		"mclaude": "./cli.ts"
+		"mclaude": "dist/cli.js"
 	},
 	"scripts": {
-		"dev": "bun run cli.ts",
-		"check-types": "bunx tsc --noEmit",
+		"build": "node scripts/build.mjs",
+		"build:watch": "node scripts/build.mjs --watch",
+		"dev": "node scripts/build.mjs && node dist/cli.js",
+		"prepare": "node scripts/build.mjs",
+		"prepublishOnly": "pnpm check-types && pnpm test && pnpm build",
+		"link": "pnpm link --global",
+		"check-types": "tsc --noEmit",
 		"lint": "biome check --fix .",
-		"link": "bun link",
-		"prepare": "bun link",
-		"test": "bun test src/smoke.test.tsx src/context-window.test.ts",
-		"publish": "npm publish"
+		"lint:ci": "biome ci .",
+		"test": "vitest run"
 	},
-	"peerDependencies": {
-		"typescript": "^5"
+	"packageManager": "pnpm@10.34.3",
+	"engines": {
+		"node": ">=22"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.9",
-		"@types/bun": "latest",
+		"@types/cross-spawn": "^6.0.6",
+		"@types/node": "^22.20.2",
 		"@types/react": "19.2.14",
-		"ink-testing-library": "4.0.0"
+		"esbuild": "^0.28.2",
+		"ink-testing-library": "4.0.0",
+		"typescript": "^5.9.3",
+		"vitest": "^5.0.0"
 	},
 	"dependencies": {
 		"@inkjs/ui": "2.0.0",
+		"cross-spawn": "^7.0.6",
 		"dotenv": "17.4.2",
 		"ink": "6.8.0",
 		"ink-select-input": "6.2.0",

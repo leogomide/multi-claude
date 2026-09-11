@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>multi-claude — Impacto da migração Bun → Node.js</title>
+<style>
+  :root { --fg:#1d232b; --muted:#5b6673; --line:#e3e7ec; --bg:#fbfcfd; --accent:#0e7490;
+          --hi:#b42318; --hi-bg:#fef3f2; --md:#b54708; --md-bg:#fffaeb; --lo:#067647; --lo-bg:#ecfdf3; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:900px; margin:0 auto; padding:48px 24px 80px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  h2 { font-size:18px; margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line); }
+  .sub { color:var(--muted); margin:0 0 28px; }
+  .verdict { border:1px solid var(--line); background:#fff; padding:16px 20px; border-radius:4px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .verdict p { margin:6px 0; }
+  table { width:100%; border-collapse:collapse; background:#fff; font-size:14px; }
+  th, td { text-align:left; vertical-align:top; padding:9px 10px; border-bottom:1px solid var(--line); }
+  th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600; }
+  code { font:13px/1.4 ui-monospace,Consolas,monospace; background:#eef1f4; padding:1px 5px; border-radius:3px; }
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+  .hi { color:var(--hi); background:var(--hi-bg); } .md { color:var(--md); background:var(--md-bg); } .lo { color:var(--lo); background:var(--lo-bg); }
+  ol, ul { padding-left:22px; } li { margin:4px 0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .stat { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px 14px; }
+  .stat b { display:block; font-size:22px; } .stat span { color:var(--muted); font-size:13px; }
+  footer { margin-top:48px; color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Migração do runtime: Bun → Node.js</h1>
+  <p class="sub">multi-claude v1.0.39 · análise de impacto · 10/09/2026</p>
+
+  <div class="verdict">
+    <p><strong>Resumo:</strong> dá para fazer, e o esforço é baixo a médio. O código já usa quase só APIs <code>node:*</code>; o que depende de verdade do Bun é pouco e bem localizado. A maior mudança <em>não</em> é de código, e sim de empacotamento: o Node não executa <code>.tsx</code> nem remove tipos de arquivos dentro de <code>node_modules</code>, então o projeto passa a precisar de um <strong>build step</strong> e publicar JS compilado.</p>
+    <p><strong>Instalações existentes:</strong> config, credenciais encriptadas e keystore continuam compatíveis, sem migração. O risco real está no <strong>fluxo de auto-update</strong> e em usuários que têm <strong>só o Bun</strong> instalado, sem o Node (veja a seção 3).</p>
+  </div>
+
+  <div class="grid" style="margin-top:20px">
+    <div class="stat"><b>96</b><span>arquivos .ts/.tsx/.mjs</span></div>
+    <div class="stat"><b>53</b><span>arquivos .tsx (JSX)</span></div>
+    <div class="stat"><b>6</b><span>pontos de acoplamento ao Bun</span></div>
+    <div class="stat"><b>~1–2 dias</b><span>esforço estimado</span></div>
+  </div>
+
+  <h2>1. O que está acoplado ao Bun</h2>
+  <table>
+    <tr><th>Onde</th><th>Uso</th><th>Impacto</th><th>Substituição</th></tr>
+    <tr><td><code>src/utils/win32-console-size.ts</code></td><td><code>bun:ffi</code> (<code>dlopen</code> kernel32.dll) para ler o tamanho do console no Windows</td><td><span class="tag hi">ALTO</span></td><td>Remover a FFI e usar <code>process.stdout.columns/rows</code> + evento <code>resize</code>, que no Node/libuv funcionam bem no Windows. O fallback <code>mode con</code> continua. (Alternativa: <code>koffi</code>, mas adiciona dependência nativa.)</td></tr>
+    <tr><td><code>cli.ts:199</code></td><td><code>import.meta.dir</code></td><td><span class="tag lo">BAIXO</span></td><td><code>dirname(fileURLToPath(import.meta.url))</code>, padrão que <code>statusline.ts</code>/<code>changelog.ts</code> já usam</td></tr>
+    <tr><td><code>cli.ts:133,169</code></td><td><code>await import("./package.json")</code> sem import attributes</td><td><span class="tag lo">BAIXO</span></td><td><code>import(..., { with: { type: "json" } })</code> ou <code>readFileSync</code></td></tr>
+    <tr><td><code>cli.ts:273</code> (exit code 4)</td><td>Auto-update chama <code>process.execPath install -g …</code>. No Node isso vira <code>node install -g</code> e quebra.</td><td><span class="tag hi">ALTO</span></td><td>Detectar o gerenciador que instalou (<code>npm_config_user_agent</code> / caminho do bin) e chamar <code>npm i -g</code> ou <code>bun i -g</code></td></tr>
+    <tr><td><code>src/statusline.ts:60</code></td><td>Comando da status line: <code>bun "…/statusline.mjs"</code></td><td><span class="tag md">MÉDIO</span></td><td><code>node "…"</code>, ou melhor, <code>"${process.execPath}" "…"</code>. O valor vai via <code>--settings</code> a cada launch e não fica persistido, então não gera legado.</td></tr>
+    <tr><td><code>cli.ts:1</code></td><td>Shebang <code>#!/usr/bin/env bun</code></td><td><span class="tag md">MÉDIO</span></td><td><code>#!/usr/bin/env node</code> no JS compilado</td></tr>
+    <tr><td><code>src/*.test.ts(x)</code></td><td><code>bun:test</code> com <code>mock.module</code></td><td><span class="tag md">MÉDIO</span></td><td>Vitest (<code>vi.mock</code>), que mapeia quase 1:1. <code>node:test</code> tem <code>mock.module</code> só como experimental.</td></tr>
+  </table>
+
+  <h2>2. O que precisa ser refeito</h2>
+  <ol>
+    <li><strong>Build step (principal mudança).</strong> Hoje o pacote publica <code>.ts/.tsx</code> cru e o Bun executa direto. Com Node:
+      <ul>
+        <li>Adicionar <code>tsup</code>/<code>esbuild</code> para gerar <code>dist/cli.js</code> e <code>dist/tui-process.js</code> (ESM, <code>jsx: react-jsx</code>). Precisam ser dois entrypoints, porque a TUI roda em processo separado.</li>
+        <li>Imports com extensão <code>.ts/.tsx</code> (~100 ocorrências) continuam valendo se o bundler resolver; com <code>tsc</code> puro seria preciso <code>rewriteRelativeImportExtensions</code>.</li>
+        <li>Copiar <code>statusline-script.mjs</code> para o <code>dist</code> e revisar caminhos relativos: <code>changelog.ts</code> faz <code>join(__dirname, "..", "CHANGELOG.md")</code>.</li>
+        <li><code>package.json</code>: <code>bin → dist/cli.js</code>, <code>files → dist/</code>, <code>engines.node ≥ 20</code>, scripts <code>build</code>/<code>prepublishOnly</code>.</li>
+        <li><code>prepare</code> hoje é <code>bun link</code>. Precisa virar <code>build</code>, senão a instalação via <code>github:…#latest</code> (que não passa pelo npm registry) instala sem <code>dist</code>.</li>
+      </ul>
+    </li>
+    <li><strong>Spawn do <code>claude</code> no Windows</strong> (<code>runner.ts</code>, <code>cli.ts</code>): <code>where claude</code> pode devolver <code>claude.cmd</code> (instalação via npm). Desde a CVE-2024-27980, o Node recusa <code>spawn</code> de <code>.cmd/.bat</code> sem <code>shell: true</code> (erro <code>EINVAL</code>), coisa que o Bun tolera. Testar os dois cenários (instalador nativo <code>.exe</code> e npm <code>.cmd</code>).</li>
+    <li><strong>tsconfig:</strong> trocar <code>@types/bun</code> por <code>@types/node</code>. <code>module: Preserve</code>/<code>bundler</code> pode ficar se o bundle for feito com tsup.</li>
+    <li><strong>Testes:</strong> portar 2 arquivos para Vitest.</li>
+    <li><strong>Textos e docs:</strong> mensagens de update em <code>i18n/locales/*</code> (3 idiomas) e em <code>cli.ts:287</code>, badges e instruções em <code>README.md</code>/<code>README.en.md</code>, <code>CLAUDE.md</code> e processo de release.</li>
+  </ol>
+  <p><em>Já compatível, sem mudanças:</em> criptografia (<code>node:crypto</code>, AES-256-GCM/PBKDF2), <code>fetch</code>, <code>crypto.randomUUID</code> global, <code>child_process</code>, <code>fs</code>, Ink/React, zod, rosetta, dotenv.</p>
+
+  <h2>3. Quebra as instalações existentes?</h2>
+  <table>
+    <tr><th>Aspecto</th><th>Risco</th><th>Detalhe</th></tr>
+    <tr><td><code>~/.multi-claude/config.json</code>, credenciais, <code>.key</code>/<code>.salt</code></td><td><span class="tag lo">NENHUM</span></td><td>Tudo usa <code>node:crypto</code> e JSON, que o Bun já implementa de forma idêntica. O Node lê os mesmos arquivos e o mesmo payload encriptado.</td></tr>
+    <tr><td>Instalações do Claude (<code>CLAUDE_CONFIG_DIR</code>)</td><td><span class="tag lo">NENHUM</span></td><td>São só diretórios, independem do runtime.</td></tr>
+    <tr><td>Usuário atual rodando o update pela TUI (v≤1.0.39)</td><td><span class="tag md">MÉDIO</span></td><td>A versão antiga roda <code>bun install -g …@latest</code>. Isso funciona e instala a versão nova, mas o bin passa a ter shebang <code>node</code>, então <strong>exige Node no PATH</strong>.</td></tr>
+    <tr><td>Usuário que tem só o Bun (sem Node)</td><td><span class="tag hi">ALTO</span></td><td>Quem instalou o Claude Code pelo instalador nativo pode não ter Node. Depois do update, <code>mclaude</code> falharia com "node: not found". Mitigação: o JS compilado roda nos dois runtimes; manter documentado <code>bun install -g</code> + <code>bunx --bun mclaude</code>, ou publicar uma versão de transição que avise antes.</td></tr>
+    <tr><td>Status line</td><td><span class="tag lo">BAIXO</span></td><td>O comando é recalculado a cada launch, então não fica legado. Basta usar o runtime atual (<code>process.execPath</code>).</td></tr>
+  </table>
+
+  <h2>4. Recomendação</h2>
+  <ol>
+    <li>Fazer build com <strong>tsup</strong> para JS ESM sem APIs do Bun. Assim o mesmo artefato roda em <strong>Node ≥ 20 e em Bun</strong>, e ninguém é forçado a trocar de runtime.</li>
+    <li>Tratar os dois itens de alto risco antes de publicar: a remoção do <code>bun:ffi</code> e um auto-update que detecta o gerenciador de pacotes.</li>
+    <li>Soltar uma versão de transição (ex.: <strong>v1.1.0</strong>) com nota no CHANGELOG ("requer Node ≥ 20 ou Bun") e instruções <code>npm i -g</code> como padrão no README.</li>
+    <li>Validar manualmente no Windows (spawn de <code>.cmd</code>, redimensionamento da TUI), macOS e Linux, com <code>npm i -g</code>, <code>bun i -g</code> e <code>npx</code>.</li>
+  </ol>
+
+  <footer>Relatório gerado a partir da leitura de <code>package.json</code>, <code>tsconfig.json</code>, <code>cli.ts</code>, <code>src/runner.ts</code>, <code>src/statusline.ts</code>, <code>src/hooks/useTerminalSize.ts</code>, <code>src/utils/win32-console-size.ts</code>, testes e READMEs.</footer>
+</main>
+</body>
+</html>

@@ -1,6 +1,13 @@
 ## Changelog
 
-### v1.0.40 (current)
+### v2.0.0 (current)
+
+- **feat:** mclaude now runs on Node.js 22+ and installs with `npm i -g @leogomide/multi-claude` (pnpm and Bun also work) — Bun is no longer required
+- **feat:** the in-app update detects whether mclaude was installed with npm, pnpm, Bun, Yarn or Volta and updates with the same tool, and explains what to do when the global folder needs administrator rights
+- **fix:** Claude Code installed through npm on Windows (`claude.cmd`) now launches, including provider and model names with characters like `&`
+- **fix:** a failure to start Claude Code during an Anthropic account login no longer reads as a rejected login
+
+### v1.0.40
 
 - **feat:** the in-app update checks for Node.js 22+ before installing mclaude 2.x, which runs on Node.js instead of Bun — without it, the update stops and explains how to install Node.js or run mclaude with `bunx`
 

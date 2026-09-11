@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # reads packageManager from package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile # runs prepare (build)
+      - run: pnpm check-types
+      - run: pnpm lint:ci
+        # Pre-existing lint errors (src/changelog.ts, statusline-script.mjs, video/) keep this non-blocking for now.
+        continue-on-error: true
+      - run: pnpm test # CI=true is neutralized in vitest.config.ts
+      - run: node dist/cli.js --version
+      - name: Pack + global install smoke
+        shell: bash
+        run: |
+          npm pack
+          npm i -g ./leogomide-multi-claude-*.tgz
+          mclaude --version
+          mclaude --help
+
+  bun:
+    name: bun (best-effort)
+    runs-on: ubuntu-latest
+    continue-on-error: true # best-effort (RN-02)
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: HOME=$(mktemp -d) bun dist/cli.js --list

@@ -331,14 +331,14 @@ export const es: TranslationDictionary = {
 		menuItem: "Actualizar a v{{version}}",
 		updating: "Actualizando mclaude...",
 		success: "¡Actualizado exitosamente! Ejecute 'mclaude' para usar la v{{version}}.",
-		failed: "Error en la actualización. Intente: bun install -g @leogomide/multi-claude@latest",
+		failed: "Error en la actualización. Intente manualmente: {{command}}",
+		permission:
+			"La carpeta global de {{manager}} requiere permisos de administrador. Ejecute en una terminal elevada (Windows) o con sudo, o apunte el prefix a una carpeta del usuario, y luego: {{command}}",
+		busy: "Los archivos de mclaude están en uso. Cierre las otras ventanas de mclaude y ejecute: {{command}}",
+		ephemeral:
+			"Ejecutando mediante {{runner}}: la próxima ejecución ya obtiene la versión más reciente.",
+		devLink: "Instalación de desarrollo (enlazada): actualice con git pull && pnpm build.",
 		sidebarDesc: "Una nueva versión de mclaude está disponible. Seleccione para actualizar ahora.",
-		nodeMissing:
-			"mclaude v{{version}} funciona con Node.js 22 o más reciente, y no se encontró Node.js.",
-		nodeTooOld:
-			"mclaude v{{version}} funciona con Node.js 22 o más reciente, y el instalado es {{current}}.",
-		nodeHowTo:
-			"Instale Node.js 22+ (https://nodejs.org) y ejecute: npm i -g @leogomide/multi-claude\nO ejecútelo sin instalar: bunx @leogomide/multi-claude",
 	},
 	launchOptions: {
 		title: "Opciones de lanzamiento",

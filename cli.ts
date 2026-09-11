@@ -1,10 +1,13 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
-import { execSync, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { readFileSync, realpathSync } from "node:fs";
 import { readFile, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import crossSpawn from "cross-spawn";
+import pkg from "./package.json";
 import { decryptCredential } from "./src/credential-store.ts";
 import { createLogger, formatError, initLogger } from "./src/debug.ts";
 import { en } from "./src/i18n/locales/en.ts";
@@ -14,6 +17,13 @@ import type { TranslationDictionary } from "./src/i18n/types.ts";
 import { initKeystore } from "./src/keystore.ts";
 import type { AuthVar, ConfiguredProvider } from "./src/schema.ts";
 import { DEFAULT_LAUNCH_TEMPLATE_ID } from "./src/schema.ts";
+
+// engines is only advisory: fail with a readable message instead of a syntax or API error.
+const nodeMajor = Number.parseInt(process.versions.node, 10);
+if (!process.versions.bun && nodeMajor < 22) {
+	console.error(`mclaude requires Node.js 22 or newer (found ${process.version}).`);
+	process.exit(1);
+}
 
 function getLocaleDict(): TranslationDictionary {
 	try {
@@ -89,27 +99,27 @@ function mergeFlags(originalCliArgs: string[], selectedFlags: string[]): string[
 	return [...selectedFlags, ...nonStrategic];
 }
 
-function resolveClaudePath(): string {
-	try {
-		if (process.platform === "win32") {
-			return execSync("where claude", { encoding: "utf-8" }).trim().split(/\r?\n/)[0] ?? "claude";
-		}
-		return execSync("which claude", { encoding: "utf-8" }).trim();
-	} catch {
-		return "claude";
-	}
-}
-
-// Major version of the `node` on PATH, or null when there is none. The bridge
-// release still runs on Bun, so process.versions.node says nothing about it.
-function getPathNodeMajor(): { major: number; raw: string } | null {
-	try {
-		const raw = execSync("node --version", { encoding: "utf-8", timeout: 5000 }).trim();
-		const major = Number.parseInt(raw.replace(/^v/, ""), 10);
-		return Number.isFinite(major) ? { major, raw } : null;
-	} catch {
-		return null;
-	}
+// Runs a package manager with its stderr tee'd: the bytes still reach the
+// terminal, and a copy is kept to recognise EACCES/EPERM/EBUSY afterwards.
+// cross-spawn handles npm.cmd/pnpm.cmd/yarn.cmd; the args are fixed, no metachars.
+function runTee(
+	command: string,
+	args: string[],
+): Promise<{ status: number | null; stderrText: string }> {
+	return new Promise((resolve) => {
+		let stderrText = "";
+		const child = crossSpawn(command, args, { stdio: ["inherit", "inherit", "pipe"] });
+		child.stderr?.on("data", (chunk: Buffer) => {
+			process.stderr.write(chunk);
+			stderrText += chunk.toString();
+		});
+		child.on("error", (err) => {
+			log.error("update spawn error", err);
+			stderrText += String(err);
+			resolve({ status: null, stderrText });
+		});
+		child.on("close", (status) => resolve({ status, stderrText }));
+	});
 }
 
 function resetTerminal(): void {
@@ -119,6 +129,13 @@ function resetTerminal(): void {
 	process.stdout.write("\x1b[?25h"); // Show cursor
 	process.stdout.write("\x1b[0m"); // Reset all attributes
 	process.stdout.write("\x1b[?1049l"); // Exit alternate screen
+}
+
+// process.exit does not wait for pending stdout writes, and on POSIX pipes they
+// are async in Node: `mclaude --list | jq` would get a truncated document.
+async function exitAfterFlush(code: number): Promise<never> {
+	await new Promise<void>((resolve) => process.stdout.write("", () => resolve()));
+	process.exit(code);
 }
 
 process.on("uncaughtException", (err) => {
@@ -142,8 +159,7 @@ const cliArgs = process.argv.slice(2);
 
 // Interceptar --help / -h
 if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
-	const { version } = await import("./package.json");
-	console.log(`multi-claude v${version}`);
+	console.log(`multi-claude v${pkg.version}`);
 	console.log("");
 	console.log("Usage: mclaude [options] [claude-code-flags...]");
 	console.log("");
@@ -173,28 +189,27 @@ if (cliArgs.includes("--help") || cliArgs.includes("-h")) {
 	console.log("  --help, -h         Show this help message");
 	console.log("  --version, -v      Show version number");
 	console.log("  --logs [last|tail] Show debug log files");
-	process.exit(0);
+	await exitAfterFlush(0);
 }
 
 // Interceptar --version / -v
 if (cliArgs.includes("--version") || cliArgs.includes("-v")) {
-	const { version } = await import("./package.json");
-	console.log(version);
-	process.exit(0);
+	console.log(pkg.version);
+	await exitAfterFlush(0);
 }
 
 // Interceptar --logs
 if (cliArgs[0] === "--logs") {
 	const { handleLogs } = await import("./src/logs-viewer.ts");
 	await handleLogs(cliArgs[1]);
-	process.exit(0);
+	await exitAfterFlush(0);
 }
 
 // Interceptar --list
 if (cliArgs.includes("--list")) {
 	const { printHeadlessInfo } = await import("./src/headless.ts");
 	await printHeadlessInfo();
-	process.exit(0);
+	await exitAfterFlush(0);
 }
 
 // Headless mode (--provider flag)
@@ -208,7 +223,18 @@ if (headlessArgs) {
 }
 
 // Spawn TUI in a separate process — never import Ink/React here
-const tuiPath = join(import.meta.dir, "src", "tui-process.ts");
+// Runs from the bundle: dist/cli.js spawns its sibling dist/tui-process.js.
+const tuiPath = fileURLToPath(new URL("./tui-process.js", import.meta.url));
+
+// Bun's fetch honours HTTP(S)_PROXY on its own; Node's only with NODE_USE_ENV_PROXY
+// (22.21+/24.0+), read at startup — so it has to be set on the child's env.
+const proxied = ["HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"].some(
+	(k) => process.env[k],
+);
+const tuiEnv =
+	proxied && process.env["NODE_USE_ENV_PROXY"] === undefined
+		? { ...process.env, NODE_USE_ENV_PROXY: "1" }
+		: process.env;
 
 // Main loop: return to TUI after Claude Code exits
 while (true) {
@@ -217,7 +243,7 @@ while (true) {
 		log.info("spawning TUI process: " + tuiPath);
 		const tuiResult = spawnSync(process.execPath, [tuiPath, ...cliArgs], {
 			stdio: "inherit",
-			env: process.env,
+			env: tuiEnv,
 		});
 
 		if (tuiResult.error) {
@@ -248,16 +274,33 @@ while (true) {
 					saveConfig,
 				} = await import("./src/config.ts");
 				const accountDir = await ensureAccountDir(oauthData.providerId);
-				const claudePath = resolveClaudePath();
+				const { printClaudeNotFound, spawnClaudeSync } = await import("./src/utils/claude-bin.ts");
 
 				log.info("running claude for OAuth login, provider=" + oauthData.providerName);
-				const loginResult = spawnSync(claudePath, [], {
-					stdio: "inherit",
-					env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
-				});
+				let loginResult: { status: number | null; error?: Error };
+				try {
+					loginResult = spawnClaudeSync([], {
+						stdio: "inherit",
+						env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
+					});
+				} catch (err) {
+					loginResult = { status: null, error: err as Error };
+				}
 
 				const dict = getLocaleDict();
-				if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
+				if (loginResult.error) {
+					// RN-10: claude could not be launched at all — not a refused login.
+					log.error("OAuth login spawn error", loginResult.error);
+					if (oauthData.isNew) {
+						const cfg = await loadConfig();
+						cfg.providers = cfg.providers.filter((p) => p.id !== oauthData.providerId);
+						await saveConfig(cfg);
+						await removeAccountDir(oauthData.providerId);
+					}
+					console.error("");
+					printClaudeNotFound();
+					console.error("");
+				} else if (loginResult.status === 0 && isAccountAuthenticated(oauthData.providerId)) {
 					log.info("OAuth login successful");
 					const msg = dict.anthropic.loginSuccess.replace("{{name}}", oauthData.providerName);
 					console.log(`\n\u2713 ${msg}\n`);
@@ -281,44 +324,48 @@ while (true) {
 
 		if (tuiExitCode === 4) {
 			resetTerminal();
-			// v2 dropped the Bun runtime: installing it where there is no Node.js 22+
-			// would leave `mclaude` failing to start. Only a 2.x target is gated, and
-			// an unreachable registry never blocks (the install would fail on its own).
-			const { version: currentVersion } = await import("./package.json");
-			const { checkForUpdate } = await import("./src/services/version-check.ts");
-			const target = await checkForUpdate(currentVersion, AbortSignal.timeout(10000));
-			if (target.updateAvailable && Number.parseInt(target.latestVersion, 10) >= 2) {
-				const node = getPathNodeMajor();
-				if (!node || node.major < 22) {
-					const dict = getLocaleDict();
-					const reason = node
-						? dict.update.nodeTooOld.replace("{{current}}", node.raw)
-						: dict.update.nodeMissing;
-					console.error(`\n\u2717 ${reason.replace("{{version}}", target.latestVersion)}`);
-					console.error(`\n${dict.update.nodeHowTo}\n`);
-					log.info("update blocked: node " + (node?.raw ?? "missing"));
-					process.exit(1);
-				}
-			}
-			console.log("\n\u2B06\uFE0F  Updating mclaude...\n");
-			const updateResult = spawnSync(
-				process.execPath,
-				["install", "-g", "@leogomide/multi-claude@latest"],
-				{
-					stdio: "inherit",
-				},
+			const dict = getLocaleDict();
+			// RN-04: update through the manager that installed this bundle, never
+			// `process.execPath install`. RN-05: ephemeral runs and dev links don't update.
+			const { detectInstallSource, formatCommand, runnerLabel } = await import(
+				"./src/services/install-detect.ts"
 			);
-			if (updateResult.status === 0) {
+			const selfPath = realpathSync(fileURLToPath(import.meta.url));
+			const source = detectInstallSource(selfPath, process.env, process.platform);
+			log.info("update source=" + source.kind + " path=" + selfPath);
+
+			if (source.kind === "ephemeral") {
 				console.log(
-					"\n\u2713 mclaude updated successfully! Run 'mclaude' to use the new version.\n",
+					`\n${dict.update.ephemeral.replace("{{runner}}", runnerLabel(source.runner))}\n`,
 				);
 				process.exit(0);
-			} else {
-				console.error(
-					"\n\u2717 Update failed. Try manually: bun install -g @leogomide/multi-claude@latest\n",
-				);
-				process.exit(1);
 			}
+			if (source.kind === "dev-link") {
+				console.log(`\n${dict.update.devLink}\n`);
+				process.exit(0);
+			}
+
+			const command = formatCommand(source);
+			console.log(`\n\u2B06\uFE0F  ${dict.update.updating}\n`);
+			log.info("update command: " + command);
+			const { status, stderrText } = await runTee(source.command, source.args);
+			if (status === 0) {
+				const { checkForUpdate } = await import("./src/services/version-check.ts");
+				// Compared against 0.0.0 so any published version comes back as the latest.
+				const latest = await checkForUpdate("0.0.0", AbortSignal.timeout(5000));
+				const version = latest.updateAvailable ? latest.latestVersion : "latest";
+				console.log(`\n\u2713 ${dict.update.success.replace("{{version}}", version)}\n`);
+				process.exit(0);
+			}
+			log.error("update failed, status=" + status + " stderr=" + stderrText.slice(-2000));
+			const template = /EACCES|EPERM/.test(stderrText)
+				? dict.update.permission
+				: /EBUSY/.test(stderrText)
+					? dict.update.busy
+					: dict.update.failed;
+			const msg = template.replace("{{manager}}", source.kind).replace("{{command}}", command);
+			console.error(`\n\u2717 ${msg}\n`);
+			process.exit(1);
 		}
 
 		if (tuiExitCode !== 0) {
