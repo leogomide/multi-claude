@@ -1,105 +1,76 @@
-import {
-	AbsoluteFill,
-	interpolate,
-	Sequence,
-	spring,
-	useCurrentFrame,
-	useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { enter, typed, typedEnd } from "../animations";
+import { Logo } from "../components/Logo";
+import { SceneBackground } from "../components/SceneBackground";
 import { COLORS } from "../constants";
+import { useCopy } from "../LocaleContext";
 import { mono, sans } from "../fonts";
+
+const TAGLINE_START = 26;
+const TAGLINE_CHAR_FRAMES = 1;
 
 export const IntroScene: React.FC = () => {
 	const frame = useCurrentFrame();
 	const { fps } = useVideoConfig();
+	const copy = useCopy();
 
-	// Title spring in
-	const titleScale = spring({
-		frame,
-		fps,
-		config: { damping: 12, stiffness: 100 },
-	});
-	const titleOpacity = interpolate(titleScale, [0, 0.5], [0, 1], {
-		extrapolateRight: "clamp",
-	});
+	const tagline = copy.intro.tagline;
+	const typedTagline = typed(tagline, frame, TAGLINE_START, TAGLINE_CHAR_FRAMES);
+	const stillTyping =
+		frame >= TAGLINE_START && frame < typedEnd(tagline, TAGLINE_START, TAGLINE_CHAR_FRAMES);
 
-	// Subtitle fade in
-	const subtitleProgress = spring({
-		frame,
-		fps,
-		delay: 25,
-		config: { damping: 200 },
-	});
+	const footnote = enter({ frame, fps, delay: 54 });
 
-	// Tagline typewriter
-	const tagline = "One CLI. Any Provider.";
-	const taglineStart = 50;
-	const charFrames = 2;
-	const typedChars = Math.min(
-		tagline.length,
-		Math.max(0, Math.floor((frame - taglineStart) / charFrames)),
-	);
-	const typedTagline = tagline.slice(0, typedChars);
-
-	// Cursor blink for tagline
 	const cursorOpacity = interpolate(frame % 16, [0, 8, 16], [1, 0, 1], {
 		extrapolateLeft: "clamp",
 		extrapolateRight: "clamp",
 	});
 
 	return (
-		<AbsoluteFill
-			style={{
-				background: `radial-gradient(ellipse at 50% 40%, #1e2040 0%, ${COLORS.background} 70%)`,
-				display: "flex",
-				justifyContent: "center",
-				alignItems: "center",
-				flexDirection: "column",
-			}}
-		>
-			{/* Logo / Title */}
-			<div
+		<AbsoluteFill>
+			<SceneBackground />
+			<AbsoluteFill
 				style={{
-					transform: `scale(${titleScale})`,
-					opacity: titleOpacity,
-					fontFamily: mono,
-					fontSize: 96,
-					fontWeight: 700,
-					color: COLORS.magenta,
-					marginBottom: 20,
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					flexDirection: "column",
+					gap: 34,
+					zIndex: 1,
 				}}
 			>
-				✨ multi-claude
-			</div>
+				<Logo variant="hero" size={132} />
 
-			{/* Subtitle */}
-			<div
-				style={{
-					opacity: subtitleProgress,
-					fontFamily: sans,
-					fontSize: 36,
-					color: "#ffffff",
-					marginBottom: 40,
-					transform: `translateY(${interpolate(subtitleProgress, [0, 1], [10, 0])}px)`,
-				}}
-			>
-				Manage multiple API providers for Claude Code
-			</div>
-
-			{/* Tagline typewriter */}
-			<Sequence from={taglineStart} layout="none">
+				{/* Tagline typewriter */}
 				<div
 					style={{
 						fontFamily: mono,
-						fontSize: 44,
+						fontSize: 46,
 						color: COLORS.cyan,
 						fontWeight: 700,
+						height: 56,
+						display: "flex",
+						alignItems: "center",
 					}}
 				>
 					{typedTagline}
-					{frame >= taglineStart && <span style={{ opacity: cursorOpacity }}>{"\u258C"}</span>}
+					{stillTyping && <span style={{ opacity: cursorOpacity }}>{"\u258C"}</span>}
 				</div>
-			</Sequence>
+
+				{/* Footnote */}
+				<div
+					style={{
+						opacity: footnote,
+						transform: `translateY(${interpolate(footnote, [0, 1], [12, 0])}px)`,
+						fontFamily: sans,
+						fontSize: 28,
+						color: COLORS.gray,
+						letterSpacing: 1,
+					}}
+				>
+					{copy.intro.footnote}
+				</div>
+			</AbsoluteFill>
 		</AbsoluteFill>
 	);
 };

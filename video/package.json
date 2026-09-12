@@ -3,7 +3,11 @@
 	"private": true,
 	"scripts": {
 		"dev": "remotion studio",
-		"build": "remotion render Main out/mclaude-demo.mp4"
+		"build": "npm run build:en && npm run build:pt",
+		"build:en": "remotion render MainEN out/mclaude-demo-en.mp4",
+		"build:pt": "remotion render MainPT out/mclaude-demo-pt.mp4",
+		"build:gif": "remotion render MainEN out/mclaude-demo.gif --codec=gif --every-nth-frame=2 --width=900",
+		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@remotion/cli": "^4",

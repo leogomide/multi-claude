@@ -1,5 +1,7 @@
 import { Composition, Folder } from "remotion";
 import { FPS, HEIGHT, SCENE_DURATIONS, TOTAL_DURATION, WIDTH } from "./constants";
+import type { Locale } from "./copy";
+import { LocaleProvider } from "./LocaleContext";
 import { Main } from "./Main";
 import { FlagsScene } from "./scenes/FlagsScene";
 import { IntroScene } from "./scenes/IntroScene";
@@ -9,73 +11,76 @@ import { ModelSelectScene } from "./scenes/ModelSelectScene";
 import { OutroScene } from "./scenes/OutroScene";
 import { TerminalOpenScene } from "./scenes/TerminalOpenScene";
 
+const video = { fps: FPS, width: WIDTH, height: HEIGHT } as const;
+
+/** Scene previews render in English; the full cuts carry the locale. */
+const preview =
+	(Scene: React.FC): React.FC =>
+	() => (
+		<LocaleProvider locale="en">
+			<Scene />
+		</LocaleProvider>
+	);
+
 export const RemotionRoot: React.FC = () => {
 	return (
 		<>
 			<Composition
-				id="Main"
+				id="MainEN"
 				component={Main}
+				defaultProps={{ locale: "en" as Locale }}
 				durationInFrames={TOTAL_DURATION}
-				fps={FPS}
-				width={WIDTH}
-				height={HEIGHT}
+				{...video}
+			/>
+			<Composition
+				id="MainPT"
+				component={Main}
+				defaultProps={{ locale: "pt-BR" as Locale }}
+				durationInFrames={TOTAL_DURATION}
+				{...video}
 			/>
 			<Folder name="Scenes">
 				<Composition
 					id="Intro"
-					component={IntroScene}
+					component={preview(IntroScene)}
 					durationInFrames={SCENE_DURATIONS.intro}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 				<Composition
 					id="TerminalOpen"
-					component={TerminalOpenScene}
+					component={preview(TerminalOpenScene)}
 					durationInFrames={SCENE_DURATIONS.terminalOpen}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 				<Composition
 					id="MainMenu"
-					component={MainMenuScene}
+					component={preview(MainMenuScene)}
 					durationInFrames={SCENE_DURATIONS.mainMenu}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 				<Composition
 					id="ModelSelect"
-					component={ModelSelectScene}
+					component={preview(ModelSelectScene)}
 					durationInFrames={SCENE_DURATIONS.modelSelect}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 				<Composition
 					id="Flags"
-					component={FlagsScene}
+					component={preview(FlagsScene)}
 					durationInFrames={SCENE_DURATIONS.flags}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 				<Composition
 					id="Launch"
-					component={LaunchScene}
+					component={preview(LaunchScene)}
 					durationInFrames={SCENE_DURATIONS.launch}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 				<Composition
 					id="Outro"
-					component={OutroScene}
+					component={preview(OutroScene)}
 					durationInFrames={SCENE_DURATIONS.outro}
-					fps={FPS}
-					width={WIDTH}
-					height={HEIGHT}
+					{...video}
 				/>
 			</Folder>
 		</>

@@ -1,58 +1,37 @@
-import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import { interpolate, useCurrentFrame } from "remotion";
+import { typed, typedEnd } from "../animations";
+import { Flash } from "../components/Flash";
 import { TerminalCursor } from "../components/TerminalCursor";
 import { TerminalWindow } from "../components/TerminalWindow";
 import { TextOverlay } from "../components/TextOverlay";
 import { COLORS } from "../constants";
+import { LITERAL } from "../copy";
+import { useCopy } from "../LocaleContext";
 
-const COMMAND = "mclaude";
-const CHAR_FRAMES = 3;
-const TYPE_START = 30;
-const ENTER_FRAME = TYPE_START + COMMAND.length * CHAR_FRAMES + 15;
+const CHAR_FRAMES = 2;
+const TYPE_START = 8;
+const ENTER_FRAME = typedEnd(LITERAL.command, TYPE_START, CHAR_FRAMES) + 6; // 28
+const BOOT_FRAME = ENTER_FRAME + 6;
 
 export const TerminalOpenScene: React.FC = () => {
 	const frame = useCurrentFrame();
-	const { fps } = useVideoConfig();
+	const copy = useCopy();
 
-	// Terminal scale in
-	const terminalScale = spring({
-		frame,
-		fps,
-		config: { damping: 15, stiffness: 80 },
-	});
-
-	// Typewriter
-	const typedChars = Math.min(
-		COMMAND.length,
-		Math.max(0, Math.floor((frame - TYPE_START) / CHAR_FRAMES)),
-	);
-	const typedText = COMMAND.slice(0, typedChars);
-	const doneTyping = typedChars >= COMMAND.length;
-
-	// Enter flash
+	const typedText = typed(LITERAL.command, frame, TYPE_START, CHAR_FRAMES);
 	const showEnter = frame >= ENTER_FRAME;
-	const enterFlash = showEnter
-		? interpolate(frame - ENTER_FRAME, [0, 4, 8], [0, 0.3, 0], {
-				extrapolateRight: "clamp",
-			})
-		: 0;
+	const showBoot = frame >= BOOT_FRAME;
 
-	// After enter: show TUI loading
-	const showLoading = frame >= ENTER_FRAME + 10;
-	const loadingDots = showLoading
-		? ".".repeat((Math.floor((frame - ENTER_FRAME - 10) / 8) % 3) + 1)
-		: "";
+	const loadingDots = showEnter ? ".".repeat((Math.floor((frame - ENTER_FRAME) / 4) % 3) + 1) : "";
+
+	const line = (delay: number) =>
+		interpolate(frame - BOOT_FRAME - delay, [0, 8], [0, 1], {
+			extrapolateLeft: "clamp",
+			extrapolateRight: "clamp",
+		});
 
 	return (
-		<div
-			style={{
-				width: "100%",
-				height: "100%",
-				transform: `scale(${terminalScale})`,
-				position: "absolute",
-			}}
-		>
-			<TerminalWindow>
-				{/* Shell prompt + typing */}
+		<div style={{ width: "100%", height: "100%", position: "absolute" }}>
+			<TerminalWindow entry>
 				<div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
 					<div style={{ display: "flex", alignItems: "center" }}>
 						<span style={{ color: COLORS.green, fontWeight: 700 }}>~/projects</span>
@@ -61,26 +40,23 @@ export const TerminalOpenScene: React.FC = () => {
 						{!showEnter && frame >= TYPE_START && <TerminalCursor />}
 					</div>
 
-					{showLoading && !showEnter ? null : null}
-
 					{showEnter && (
 						<div style={{ marginTop: 16 }}>
-							{!showLoading ? (
-								<span style={{ color: COLORS.gray }}>Loading{loadingDots}</span>
+							{!showBoot ? (
+								<span style={{ color: COLORS.gray }}>
+									{copy.terminalOpen.loading}
+									{loadingDots}
+								</span>
 							) : (
 								<>
-									<div style={{ color: COLORS.cyan, marginBottom: 8 }}>Starting mclaude...</div>
-									<div style={{ color: COLORS.green }}>✔ Configuration loaded</div>
-									<div
-										style={{
-											color: COLORS.green,
-											opacity: interpolate(frame - ENTER_FRAME - 20, [0, 10], [0, 1], {
-												extrapolateLeft: "clamp",
-												extrapolateRight: "clamp",
-											}),
-										}}
-									>
-										✔ 3 providers found
+									<div style={{ color: COLORS.cyan, marginBottom: 8, opacity: line(0) }}>
+										{copy.terminalOpen.starting}
+									</div>
+									<div style={{ color: COLORS.green, opacity: line(4) }}>
+										✔ {copy.terminalOpen.configLoaded}
+									</div>
+									<div style={{ color: COLORS.green, opacity: line(12) }}>
+										✔ {copy.terminalOpen.providersConfigured}
 									</div>
 								</>
 							)}
@@ -89,19 +65,9 @@ export const TerminalOpenScene: React.FC = () => {
 				</div>
 			</TerminalWindow>
 
-			{/* White flash overlay for enter */}
-			{enterFlash > 0 && (
-				<div
-					style={{
-						position: "absolute",
-						inset: 0,
-						backgroundColor: `rgba(255, 255, 255, ${enterFlash})`,
-						pointerEvents: "none",
-					}}
-				/>
-			)}
+			<Flash startFrame={ENTER_FRAME} rgb="255, 255, 255" peak={0.28} />
 
-			<TextOverlay text="Launch mclaude from any terminal" startFrame={15} durationFrames={120} />
+			<TextOverlay text={copy.terminalOpen.caption} startFrame={3} durationFrames={40} />
 		</div>
 	);
 };

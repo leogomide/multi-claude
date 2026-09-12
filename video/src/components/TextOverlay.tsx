@@ -1,4 +1,5 @@
-import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { enter } from "../animations";
 import { COLORS } from "../constants";
 import { sans } from "../fonts";
 
@@ -10,30 +11,19 @@ export const TextOverlay: React.FC<{
 	const frame = useCurrentFrame();
 	const { fps } = useVideoConfig();
 
-	const fadeIn = spring({
-		frame: frame - startFrame,
-		fps,
-		config: { damping: 200 },
-	});
-
-	const endFrame = startFrame + durationFrames;
-	const fadeOut = spring({
-		frame: frame - endFrame,
-		fps,
-		config: { damping: 200 },
-	});
-
+	const fadeIn = enter({ frame, fps, delay: startFrame });
+	const fadeOut = enter({ frame, fps, delay: startFrame + durationFrames });
 	const opacity = fadeIn - fadeOut;
 
-	if (opacity <= 0) return null;
+	if (opacity <= 0.001) return null;
 
-	const translateY = interpolate(fadeIn, [0, 1], [20, 0]);
+	const translateY = interpolate(fadeIn, [0, 1], [24, 0]);
 
 	return (
 		<div
 			style={{
 				position: "absolute",
-				bottom: 20,
+				bottom: 30,
 				left: 0,
 				right: 0,
 				display: "flex",
@@ -44,16 +34,37 @@ export const TextOverlay: React.FC<{
 		>
 			<div
 				style={{
-					backgroundColor: "rgba(0, 0, 0, 0.75)",
-					padding: "14px 40px",
-					borderRadius: 14,
-					fontFamily: sans,
-					fontSize: 30,
-					color: COLORS.white,
-					fontWeight: 600,
+					display: "flex",
+					alignItems: "center",
+					gap: 18,
+					backgroundColor: "rgba(13, 17, 23, 0.72)",
+					backdropFilter: "blur(14px)",
+					border: `1px solid ${COLORS.dimGray}`,
+					padding: "14px 34px 14px 26px",
+					borderRadius: 999,
+					boxShadow: "0 10px 34px rgba(0, 0, 0, 0.45)",
 				}}
 			>
-				{text}
+				<div
+					style={{
+						width: 4,
+						height: 26,
+						borderRadius: 2,
+						backgroundColor: COLORS.cyan,
+						flexShrink: 0,
+					}}
+				/>
+				<span
+					style={{
+						fontFamily: sans,
+						fontSize: 30,
+						color: COLORS.white,
+						fontWeight: 600,
+						whiteSpace: "nowrap",
+					}}
+				>
+					{text}
+				</span>
 			</div>
 		</div>
 	);

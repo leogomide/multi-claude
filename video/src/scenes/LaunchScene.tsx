@@ -1,72 +1,80 @@
-import { AbsoluteFill, Img, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { enter } from "../animations";
+import { SceneBackground } from "../components/SceneBackground";
 import { TerminalCursor } from "../components/TerminalCursor";
 import { TextOverlay } from "../components/TextOverlay";
-import { COLORS, TERMINAL } from "../constants";
+import { CLAUDE_CODE_VERSION, COLORS, TERMINAL } from "../constants";
+import { LITERAL } from "../copy";
+import { useCopy } from "../LocaleContext";
 import { mono } from "../fonts";
 
-// Timing
-const HEADER_START = 8;
-const PROMPT_START = 40;
-const STATUSLINE_START = 55;
+const HEADER_START = 4;
+const PROMPT_START = 26;
+const STATUSLINE_START = 40;
 
-// Better contrast colors for the status line
+// GitHub-dark tones: the statusline needs more contrast than the Dracula
+// palette gives at this size.
 const SL = {
-	label: "#8b949e", // brighter gray for labels
-	value: "#e6edf3", // near-white for values
-	accent: "#58a6ff", // bright blue for model/branch
-	cost: "#3fb950", // bright green for costs
-	separator: "#565e68", // visible separator lines
-	warn: "#d29922", // amber for bypass warning
+	label: "#8b949e",
+	value: "#e6edf3",
+	accent: "#58a6ff",
+	cost: "#3fb950",
+	separator: "#565e68",
+	warn: "#d29922",
 };
+
+// Context bar as statusline-script.mjs draws it: '━' filled, '╌' empty.
+const BAR_WIDTH = 56;
+const CTX_PCT = 1;
+const bar = "━".repeat(Math.floor((CTX_PCT * BAR_WIDTH) / 100)).padEnd(BAR_WIDTH, "╌");
 
 export const LaunchScene: React.FC = () => {
 	const frame = useCurrentFrame();
 	const { fps } = useVideoConfig();
+	const copy = useCopy();
 
-	const terminalFade = spring({
-		frame,
-		fps,
-		config: { damping: 200 },
-	});
+	const headerOpacity = enter({ frame, fps, delay: HEADER_START });
+	const promptOpacity = enter({ frame, fps, delay: PROMPT_START });
+	const statusOpacity = enter({ frame, fps, delay: STATUSLINE_START });
 
-	const headerOpacity = spring({ frame: frame - HEADER_START, fps, config: { damping: 200 } });
-	const promptOpacity = spring({ frame: frame - PROMPT_START, fps, config: { damping: 200 } });
-	const statusOpacity = spring({ frame: frame - STATUSLINE_START, fps, config: { damping: 200 } });
+	const sep = <span style={{ color: SL.separator, margin: "0 14px" }}>│</span>;
 
 	return (
-		<div style={{ width: "100%", height: "100%", position: "absolute", opacity: terminalFade }}>
+		<div style={{ width: "100%", height: "100%", position: "absolute" }}>
 			<AbsoluteFill
 				style={{
-					background: `radial-gradient(ellipse at 50% 30%, #1e2040 0%, ${COLORS.background} 70%)`,
 					display: "flex",
 					justifyContent: "center",
 					alignItems: "center",
 					fontFamily: mono,
 				}}
 			>
+				<SceneBackground />
 				<div
 					style={{
 						width: TERMINAL.width,
 						height: TERMINAL.height,
 						backgroundColor: COLORS.terminalBg,
 						borderRadius: TERMINAL.borderRadius,
-						boxShadow: "0 25px 80px rgba(0, 0, 0, 0.6)",
+						boxShadow: `0 30px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px ${COLORS.dimGray}, 0 0 90px rgba(139, 233, 253, 0.08)`,
 						display: "flex",
 						flexDirection: "column",
 						overflow: "hidden",
-						border: `1px solid ${COLORS.dimGray}`,
+						position: "relative",
+						zIndex: 1,
 					}}
 				>
 					{/* Title bar */}
 					<div
 						style={{
 							height: TERMINAL.titleBarHeight,
-							backgroundColor: COLORS.titleBar,
+							background: `linear-gradient(180deg, #30323f 0%, ${COLORS.titleBar} 100%)`,
 							display: "flex",
 							alignItems: "center",
 							paddingLeft: 20,
 							gap: 8,
 							flexShrink: 0,
+							borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
 						}}
 					>
 						<div
@@ -87,7 +95,7 @@ export const LaunchScene: React.FC = () => {
 								marginRight: 60,
 							}}
 						>
-							claude — ~/projects/my-app
+							claude — {LITERAL.cwd}
 						</div>
 					</div>
 
@@ -102,7 +110,7 @@ export const LaunchScene: React.FC = () => {
 							color: COLORS.white,
 						}}
 					>
-						{/* ── Claude Code Header ── */}
+						{/* ── Claude Code header ── */}
 						<div
 							style={{
 								opacity: headerOpacity,
@@ -112,40 +120,28 @@ export const LaunchScene: React.FC = () => {
 								marginBottom: 28,
 							}}
 						>
-							{/* Icon */}
 							<Img
 								src={staticFile("claude-code-icon.png")}
-								style={{
-									width: 80,
-									height: 80,
-									borderRadius: 10,
-									flexShrink: 0,
-									marginTop: 2,
-								}}
+								style={{ width: 80, height: 80, borderRadius: 10, flexShrink: 0, marginTop: 2 }}
 							/>
-							{/* Text block */}
 							<div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
 								<div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
-									<span style={{ fontWeight: 700, fontSize: 38, color: "#ffffff" }}>
-										Claude Code
-									</span>
-									<span style={{ color: SL.label, fontSize: 26 }}>v2.1.72</span>
+									<span style={{ fontWeight: 700, fontSize: 38, color: "#ffffff" }}>Claude Code</span>
+									<span style={{ color: SL.label, fontSize: 26 }}>v{CLAUDE_CODE_VERSION}</span>
 								</div>
 								<div style={{ fontSize: 32 }}>
-									<span style={{ color: "#ffffff", fontWeight: 700 }}>GLM-5</span>
-									<span style={{ color: SL.label }}> with high effort · </span>
-									<span style={{ color: "#79c0ff", fontWeight: 700 }}>Z.AI</span>
+									<span style={{ color: "#ffffff", fontWeight: 700 }}>{LITERAL.model}</span>
+									<span style={{ color: SL.label }}>{copy.launch.withEffort}</span>
+									<span style={{ color: "#79c0ff", fontWeight: 700 }}>{LITERAL.provider}</span>
 								</div>
-								<div style={{ color: "#b1bac4", fontSize: 28 }}>~/projects/my-app</div>
+								<div style={{ color: "#b1bac4", fontSize: 28 }}>{LITERAL.cwd}</div>
 							</div>
 						</div>
 
-						{/* Spacer */}
 						<div style={{ flex: 1 }} />
 
-						{/* ── Prompt with separator lines above and below ── */}
+						{/* ── Prompt ── */}
 						<div style={{ opacity: promptOpacity, flexShrink: 0 }}>
-							{/* Line above prompt */}
 							<div
 								style={{
 									color: SL.separator,
@@ -158,19 +154,12 @@ export const LaunchScene: React.FC = () => {
 							>
 								{"─".repeat(120)}
 							</div>
-							{/* Prompt */}
 							<div
-								style={{
-									display: "flex",
-									alignItems: "center",
-									fontSize: 34,
-									marginBottom: 12,
-								}}
+								style={{ display: "flex", alignItems: "center", fontSize: 34, marginBottom: 12 }}
 							>
 								<span style={{ color: "#ffffff", fontWeight: 700, marginRight: 12 }}>›</span>
 								<TerminalCursor color="#ffffff" />
 							</div>
-							{/* Line below prompt */}
 							<div
 								style={{
 									color: SL.separator,
@@ -185,56 +174,47 @@ export const LaunchScene: React.FC = () => {
 							</div>
 						</div>
 
-						{/* ── Status Line (mclaude statusline) ── */}
-						<div
-							style={{
-								opacity: statusOpacity,
-								flexShrink: 0,
-								paddingBottom: 32,
-							}}
-						>
-							{/* Line 1: Model + branch */}
+						{/* ── mclaude statusline (default template) ── */}
+						<div style={{ opacity: statusOpacity, flexShrink: 0, paddingBottom: 32 }}>
 							<div style={{ fontSize: 28, marginBottom: 6 }}>
-								<span style={{ color: "#ffffff", fontWeight: 700 }}>GLM-5</span>
+								<span style={{ color: "#ffffff", fontWeight: 700 }}>{LITERAL.model}</span>
 								{"  "}
 								<span style={{ color: "#79c0ff", fontWeight: 700 }}>(master)</span>
 							</div>
 
-							{/* Line 2: Tokens */}
 							<div style={{ fontSize: 24, color: SL.label, marginBottom: 5 }}>
 								<span>
-									Input:<span style={{ color: SL.value }}>0</span>
+									Input:<span style={{ color: SL.value }}>14.2k</span>
 								</span>
-								<span style={{ color: SL.separator, margin: "0 14px" }}>│</span>
+								{sep}
 								<span>
-									Output:<span style={{ color: SL.value }}>0</span>
+									Output:<span style={{ color: SL.value }}>642</span>
 								</span>
-								<span style={{ color: SL.separator, margin: "0 14px" }}>│</span>
+								{sep}
 								<span>
-									Cache:<span style={{ color: SL.value }}>0</span>
+									Cache:<span style={{ color: SL.value }}>11.9k</span>
 								</span>
 							</div>
 
-							{/* Line 3: Session + Cost */}
 							<div style={{ fontSize: 24, color: SL.label, marginBottom: 5 }}>
 								<span>
-									Sessao:<span style={{ color: SL.value }}>0m 3s</span>
+									{copy.statusline.session}:<span style={{ color: SL.value }}>0m 18s</span>
 								</span>
-								<span style={{ color: SL.separator, margin: "0 12px" }}>│</span>
+								{sep}
 								<span>
-									API:<span style={{ color: SL.value }}>0m 0s</span>
+									{copy.statusline.api}:<span style={{ color: SL.value }}>0m 5s</span>
 								</span>
-								<span style={{ color: SL.separator, margin: "0 16px" }}>│</span>
+								{sep}
 								<span>
-									Custo:<span style={{ color: SL.cost }}>$0.00</span>
+									{copy.statusline.cost}:<span style={{ color: SL.cost }}>$0.00</span>
 								</span>
-								<span style={{ color: SL.separator, margin: "0 12px" }}>│</span>
+								{sep}
 								<span>
 									<span style={{ color: SL.cost }}>$0.00</span>/min
 								</span>
 							</div>
 
-							{/* Line 4: Context bar */}
+							{/* Context bar — 1M window, barely touched */}
 							<div
 								style={{
 									fontSize: 24,
@@ -244,18 +224,28 @@ export const LaunchScene: React.FC = () => {
 									alignItems: "center",
 								}}
 							>
-								<span style={{ color: SL.separator }}>{"─".repeat(35)}</span>
-								<span style={{ color: SL.separator, margin: "0 12px" }}>│</span>
-								<span>
-									<span style={{ color: SL.value }}>0</span>/0%
+								<span
+									style={{
+										color: SL.value,
+										letterSpacing: -1,
+										flex: 1,
+										minWidth: 0,
+										overflow: "hidden",
+										whiteSpace: "nowrap",
+									}}
+								>
+									{bar}
 								</span>
-								<span style={{ color: SL.separator, margin: "0 16px" }}>│</span>
-								<span>
-									<span style={{ color: SL.value }}>0</span>/0% rest.
+								{sep}
+								<span style={{ flexShrink: 0 }}>
+									<span style={{ color: SL.value }}>14.2k</span>/{CTX_PCT}%
+								</span>
+								{sep}
+								<span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+									<span style={{ color: SL.value }}>1.0M</span>/99% {copy.statusline.left}
 								</span>
 							</div>
 
-							{/* Line 5: Bypass permissions */}
 							<div style={{ fontSize: 24, marginTop: 6 }}>
 								<span style={{ color: SL.warn, fontWeight: 700 }}>››</span>{" "}
 								<span style={{ color: SL.warn, fontWeight: 600 }}>bypass permissions on</span>{" "}
@@ -266,11 +256,7 @@ export const LaunchScene: React.FC = () => {
 				</div>
 			</AbsoluteFill>
 
-			<TextOverlay
-				text="Claude Code is running with Z.AI"
-				startFrame={PROMPT_START + 5}
-				durationFrames={40}
-			/>
+			<TextOverlay text={copy.launch.caption} startFrame={PROMPT_START + 2} durationFrames={40} />
 		</div>
 	);
 };
