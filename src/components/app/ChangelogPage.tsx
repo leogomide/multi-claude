@@ -41,7 +41,7 @@ export function ChangelogPage({ onBack }: ChangelogPageProps) {
 	}, [highlightedVer]);
 
 	// header(~3) + title(1) + blank(1) + footer(~1) = ~6 lines overhead
-	const maxVisible = Math.max(3, rows - 6);
+	const maxVisible = Math.max(3, rows - 7);
 
 	useInput((_input, key) => {
 		if (key.escape) {

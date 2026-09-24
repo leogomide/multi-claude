@@ -249,8 +249,8 @@ export function StartClaudeFlow({
 		);
 	}, [modelItems, query]);
 
-	// header(5) + footer(3) + status(1) + title(1) + scroll indicators(2) + search(1 if searchable)
-	const fixedOverhead = 12 + (searchable ? 1 : 0);
+	// header(5) + footer(4) + status(1) + title(1) + scroll indicators(2) + search(1 if searchable)
+	const fixedOverhead = 13 + (searchable ? 1 : 0);
 	const visibleLimit = Math.max(3, rows - fixedOverhead);
 	const scrollOffset = useMemo(() => {
 		if (filteredItems.length <= visibleLimit) return 0;

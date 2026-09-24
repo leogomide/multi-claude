@@ -113,7 +113,7 @@ export function GroupedSelect({ groups, onSelect, onHighlight, onEscape }: Group
 
 	// Calculate visible window
 	// header(~5) + footer(~3) + status message(~1) + scroll indicators(~2) = ~11
-	const maxVisibleRows = Math.max(5, rows - 11);
+	const maxVisibleRows = Math.max(5, rows - 12);
 	const needsScrolling = flatEntries.length > maxVisibleRows;
 
 	const visibleEntries = useMemo(() => {

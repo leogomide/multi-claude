@@ -306,6 +306,11 @@ export const en: TranslationDictionary = {
 		flagInfo: "Flag Info",
 		changelogDesc: "View release history and recent changes",
 	},
+	sponsorBanner: {
+		tagline1: "Flat-rate inference for coding agents",
+		tagline2: "262k context, no token counting",
+		tagline3: "Run Claude Code without watching the meter",
+	},
 	terminal: {
 		tooSmall: "Terminal too small ({{current}}). Minimum: {{min}}",
 	},

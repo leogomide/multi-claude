@@ -296,6 +296,11 @@ export interface TranslationDictionary {
 		flagInfo: string;
 		changelogDesc: string;
 	};
+	sponsorBanner: {
+		tagline1: string;
+		tagline2: string;
+		tagline3: string;
+	};
 	terminal: {
 		tooSmall: string;
 	};

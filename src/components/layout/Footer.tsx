@@ -1,6 +1,7 @@
 import { Box, Text } from "ink";
 import React from "react";
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
+import { SponsorBanner } from "./SponsorBanner.tsx";
 
 export interface FooterShortcut {
 	key: string;
@@ -19,6 +20,7 @@ export function Footer({ items }: FooterProps) {
 	return (
 		<Box flexDirection="column" paddingX={1}>
 			<Text color="gray">{"─".repeat(Math.max(0, columns - 2))}</Text>
+			<SponsorBanner />
 			<Box gap={gap}>
 				{visibleItems.length > 0 ? (
 					visibleItems.map((item) => (

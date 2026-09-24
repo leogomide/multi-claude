@@ -3,14 +3,15 @@ import type { ConfiguredProvider, EnvConfigurator, ProviderTemplate } from "./sc
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import type { ApiModelMeta } from "./services/api-models.ts";
 
+export const FLATT_SPONSOR_URL =
+	"https://flatt.com.br/?utm_source=mclaude&utm_medium=cli&utm_campaign=multi-claude";
+
 export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 	{
 		// https://flatt.com.br
 		id: "flatt",
 		description: "Flatt",
-		sponsor: {
-			url: "https://flatt.com.br/?utm_source=mclaude&utm_medium=cli&utm_campaign=multi-claude",
-		},
+		sponsor: { url: FLATT_SPONSOR_URL },
 		baseUrl: "https://infer.flatt.com.br",
 		// Model list, context window and output cap come from /v1/models.
 		defaultModels: [],

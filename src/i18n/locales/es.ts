@@ -315,6 +315,11 @@ export const es: TranslationDictionary = {
 		flagInfo: "Info de Flag",
 		changelogDesc: "Ver historial de versiones y cambios recientes",
 	},
+	sponsorBanner: {
+		tagline1: "Inferencia a precio fijo para agentes de código",
+		tagline2: "262 mil de contexto, sin conteo de tokens",
+		tagline3: "Usa Claude Code sin preocuparte por la factura",
+	},
 	terminal: {
 		tooSmall: "Terminal muy pequeño ({{current}}). Mínimo: {{min}}",
 	},

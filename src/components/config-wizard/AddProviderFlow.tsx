@@ -229,7 +229,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 				</Text>
 				<CyanSelectInput
 					items={templateItems}
-					limit={Math.max(3, rows - 9)}
+					limit={Math.max(3, rows - 10)}
 					onHighlight={(item) => {
 						setHighlightedTemplateId(item.value);
 					}}

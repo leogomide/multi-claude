@@ -311,6 +311,11 @@ export const ptBR: TranslationDictionary = {
 		flagInfo: "Info da Flag",
 		changelogDesc: "Ver histórico de versões e alterações recentes",
 	},
+	sponsorBanner: {
+		tagline1: "Inferência a preço fixo para agentes de código",
+		tagline2: "262 mil de contexto, sem contagem de token",
+		tagline3: "Rode o Claude Code sem se preocupar com a fatura",
+	},
 	terminal: {
 		tooSmall: "Terminal muito pequeno ({{current}}). Mínimo: {{min}}",
 	},

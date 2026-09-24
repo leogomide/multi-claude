@@ -497,7 +497,7 @@ export function StatusLinePage({ onDone, onCancel }: StatusLinePageProps) {
 				initialIndex={initialIndex}
 				onSelect={handleSelect}
 				onHighlight={(item) => setHighlightedId(item.value as StatusLineTemplateId)}
-				limit={Math.max(3, rows - 9)}
+				limit={Math.max(3, rows - 10)}
 			/>
 		</AppShell>
 	);
