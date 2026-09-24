@@ -1,6 +1,10 @@
 ## Changelog
 
-### v2.1.0 (current)
+### v2.2.0 (current)
+
+- **feat:** a Flatt sponsor line now sits above the shortcuts on every screen, with a clickable link to flatt.com.br
+
+### v2.1.0
 
 - **feat:** Flatt is now a built-in provider — pick it first in the list, paste your key and the model list, context window and output cap load from the API
 

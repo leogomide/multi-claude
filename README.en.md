@@ -6,7 +6,7 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/leogomide/multi-claude/releases)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue)](https://github.com/leogomide/multi-claude/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![NPM](https://img.shields.io/badge/npm-%40leogomide%2Fmulti--claude-red)](https://www.npmjs.com/package/@leogomide/multi-claude)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-339933)](https://nodejs.org)
