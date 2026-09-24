@@ -39,6 +39,7 @@ export interface TranslationDictionary {
 	};
 	templates: {
 		custom: string;
+		sponsor: string;
 	};
 	addFlow: {
 		selectTemplate: string;
@@ -264,6 +265,9 @@ export interface TranslationDictionary {
 		sourceDefault: string;
 		sourceUser: string;
 		modelsViaApi: string;
+		sponsor: string;
+		flattCta: string;
+		sponsorLink: string;
 		noProviders: string;
 		addProviderDesc: string;
 		manageProvidersDesc: string;

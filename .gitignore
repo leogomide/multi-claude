@@ -15,6 +15,7 @@ logs
 _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .playwright-mcp
+.impeccable
 
 # dotenv environment variable files
 .env

@@ -40,7 +40,7 @@ Type `mclaude`, pick a provider and a model from a terminal menu, and Claude Cod
   <p>
     Your agent runs all day, all month — the bill doesn't move.<br>
     No token counting, 262k context on every plan, and an Anthropic-compatible API<br>
-    you can plug into <b>mclaude</b> as a <a href="#custom-provider">Custom provider</a> in one minute.
+    built into <b>mclaude</b> as a native provider: first on the list, just paste your key.
   </p>
   <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
     <img src="https://img.shields.io/badge/Get%20started%20with%20Flatt-4b3fe6?style=for-the-badge" alt="Get started with Flatt"/>
@@ -90,6 +90,7 @@ Any extra argument is forwarded to Claude Code — for example, `mclaude -p "exp
 
 | Provider | Type | Get access |
 |----------|------|------------|
+| ★ Flatt | Subscription plan (flat rate) | [flatt.com.br](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude) |
 | Anthropic | Claude account (OAuth) | [claude.ai](https://claude.ai) |
 | Alibaba Cloud | Subscription plan | [Model Studio](https://bailian.console.alibabacloud.com/) |
 | BytePlus ModelArk | Subscription plan | [BytePlus](https://www.byteplus.com/en/activity/codingplan) |
@@ -111,11 +112,11 @@ Any extra argument is forwarded to Claude Code — for example, `mclaude -p "exp
 | 9Router | Local | [GitHub](https://github.com/decolua/9router) |
 | Custom provider | Any Anthropic-compatible API | — |
 
-Local providers need no API key. OpenRouter, NanoGPT, LiteLLM and the local providers load their model list automatically.
+Local providers need no API key. Flatt, OpenRouter, NanoGPT, LiteLLM and the local providers load their model list automatically.
 
 ### Custom provider
 
-Using a gateway that is not on the list? Pick **Custom provider**: enter a name, the base URL and the token, and you are done. The model list is fetched from the endpoint itself. It works with corporate proxies, self-hosted gateways and services like [Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude) — just paste the base URL and the key from your dashboard.
+Using a gateway that is not on the list? Pick **Custom provider**: enter a name, the base URL and the token, and you are done. The model list is fetched from the endpoint itself. It works with corporate proxies, self-hosted gateways and any service that speaks the Anthropic API.
 
 ## Multiple Anthropic accounts
 
@@ -159,7 +160,7 @@ API keys are encrypted with **AES-256-GCM** before they touch the disk. For an e
   <img src="assets/sponsors/flatt.png" alt="Flatt" width="40" align="left"/>
 </a>
 
-**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — LLM inference at a flat monthly price, built for coding agents that run all day. Works with mclaude as a [Custom provider](#custom-provider).
+**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — LLM inference at a flat monthly price, built for coding agents that run all day. Built into mclaude as a native provider, first on the list.
 
 <br clear="left"/>
 

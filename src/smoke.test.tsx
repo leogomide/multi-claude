@@ -161,6 +161,30 @@ describe("Smoke Test — TUI Flows", () => {
 		expect(lastFrame()!).toContain("Add provider");
 	}, 10000);
 
+	test("2b. Add provider lists Flatt first, flagged as sponsor with a CTA", async () => {
+		const { lastFrame, stdin } = render(
+			<I18nProvider>
+				<UnifiedApp onStartClaude={vi.fn()} onOAuthLogin={vi.fn()} onRunUpdate={vi.fn()} />
+			</I18nProvider>,
+		);
+
+		await delay(200);
+		await navigateAndSelect(stdin, 3);
+		await waitForFrame(lastFrame, "Add provider");
+		// The provider list loads async; keys sent before it settles are dropped.
+		await delay(200);
+		// Manage providers: My MiniMax(0), My OpenRouter(1), Add provider(2)
+		await navigateAndSelect(stdin, 2);
+		await waitForFrame(lastFrame, "Select a provider template");
+
+		const frame = lastFrame()!;
+		expect(frame).toContain("★ Flatt (sponsor)");
+		expect(frame).toContain("Sponsor");
+		expect(frame).toContain("flatt.com.br ↗");
+		// OSC 8 hyperlink, so terminals that support it make the text clickable
+		expect(frame).toContain("\x1b]8;;https://flatt.com.br/?utm_source=mclaude");
+	}, 10000);
+
 	test("3. Navigate to Settings", async () => {
 		const onStartClaude = vi.fn();
 		const { lastFrame, stdin } = render(

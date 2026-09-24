@@ -22,6 +22,8 @@ export interface ProviderTemplate {
 	promptBaseUrl?: boolean;
 	promptAuthVar?: boolean;
 	promptModel?: boolean;
+	/** Project sponsor: highlighted in the template list, with a CTA and a link in the sidebar. */
+	sponsor?: { url: string };
 }
 
 export const configuredProviderSchema = z.object({

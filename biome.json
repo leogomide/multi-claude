@@ -13,7 +13,8 @@
 			"!**/bun.lock",
 			"!pnpm-lock.yaml",
 			"!plans/done",
-			"!video"
+			"!video",
+			"!.impeccable"
 		]
 	},
 	"formatter": {

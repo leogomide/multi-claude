@@ -4,7 +4,8 @@ import type React from "react";
 import type { FC } from "react";
 
 type IndicatorProps = { readonly isSelected?: boolean };
-type ItemProps = { readonly isSelected?: boolean; readonly label: string };
+// ink-select-input spreads the whole item into the item component, so extra fields arrive here.
+type ItemProps = { readonly isSelected?: boolean; readonly label: string; readonly color?: string };
 
 const CyanIndicator: FC<IndicatorProps> = ({ isSelected }) => (
 	<Box marginRight={1}>
@@ -18,8 +19,9 @@ const CyanIndicator: FC<IndicatorProps> = ({ isSelected }) => (
 	</Box>
 );
 
-const CyanItem: FC<ItemProps> = ({ isSelected, label }) => (
-	<Text bold={isSelected} color={isSelected ? "cyan" : undefined}>
+// Same rule as GroupedSelect: the highlight wins, the item color shows otherwise.
+const CyanItem: FC<ItemProps> = ({ isSelected, label, color }) => (
+	<Text bold={isSelected} color={isSelected ? "cyan" : color}>
 		{label}
 	</Text>
 );

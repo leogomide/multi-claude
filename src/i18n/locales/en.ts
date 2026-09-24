@@ -42,6 +42,7 @@ export const en: TranslationDictionary = {
 	},
 	templates: {
 		custom: "Custom Provider",
+		sponsor: "sponsor",
 	},
 	addFlow: {
 		selectTemplate: "Select a provider template",
@@ -274,6 +275,9 @@ export const en: TranslationDictionary = {
 		sourceDefault: "default",
 		sourceUser: "user",
 		modelsViaApi: "via API",
+		sponsor: "Sponsor",
+		flattCta: "Flat-rate inference for coding agents — 262k context, no token counting.",
+		sponsorLink: "Get your key",
 		noProviders: "No providers configured yet",
 		addProviderDesc: "Add a new API provider",
 		manageProvidersDesc: "Add, edit and remove providers",

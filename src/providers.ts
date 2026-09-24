@@ -5,6 +5,21 @@ import type { ApiModelMeta } from "./services/api-models.ts";
 
 export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 	{
+		// https://flatt.com.br
+		id: "flatt",
+		description: "Flatt",
+		sponsor: {
+			url: "https://flatt.com.br/?utm_source=mclaude&utm_medium=cli&utm_campaign=multi-claude",
+		},
+		baseUrl: "https://infer.flatt.com.br",
+		// Model list, context window and output cap come from /v1/models.
+		defaultModels: [],
+		env: {
+			API_TIMEOUT_MS: "600000",
+			CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+		},
+	},
+	{
 		id: "anthropic",
 		description: "Anthropic (OAuth)",
 		baseUrl: "",

@@ -46,6 +46,7 @@ src/
 │   ├── api-models.ts   # Fetch de modelos de APIs externas
 │   ├── install-detect.ts # Deteccao do gerenciador que instalou o mclaude (auto-update)
 │   ├── dotenv-loader.ts # Leitura de .env
+│   ├── flatt.ts        # Integracao Flatt (patrocinador)
 │   ├── openrouter.ts   # Integracao OpenRouter
 │   ├── requesty.ts     # Integracao Requesty
 │   ├── ollama.ts       # Integracao Ollama

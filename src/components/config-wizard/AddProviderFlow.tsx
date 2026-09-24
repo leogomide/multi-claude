@@ -149,8 +149,12 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	}, [step]);
 
 	const templateItems = PROVIDER_TEMPLATES.map((tmpl) => ({
-		label: getTemplateLabel(tmpl, t),
+		// Decoration stays in the list only: the saved provider name is the plain label.
+		label: tmpl.sponsor
+			? `★ ${getTemplateLabel(tmpl, t)} (${t("templates.sponsor")})`
+			: getTemplateLabel(tmpl, t),
 		value: tmpl.id,
+		color: tmpl.sponsor ? "green" : undefined,
 	}));
 
 	const authVarItems = [
@@ -194,6 +198,18 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 					value: tmpl.promptModel ? t("sidebar.modelsUserDefined") : t("sidebar.modelsViaApi"),
 				});
 			}
+		}
+
+		if (tmpl.sponsor) {
+			items.push(
+				{ label: t("sidebar.sponsor"), value: t("sidebar.flattCta"), color: "yellow" },
+				{
+					label: t("sidebar.sponsorLink"),
+					value: `${new URL(tmpl.sponsor.url).host} ↗`,
+					color: "cyan",
+					href: tmpl.sponsor.url,
+				},
+			);
 		}
 
 		return <Sidebar title={t("sidebar.providerInfo")} items={items} />;

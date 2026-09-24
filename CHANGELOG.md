@@ -1,6 +1,10 @@
 ## Changelog
 
-### v2.0.0 (current)
+### v2.1.0 (current)
+
+- **feat:** Flatt is now a built-in provider — pick it first in the list, paste your key and the model list, context window and output cap load from the API
+
+### v2.0.0
 
 - **feat:** mclaude now runs on Node.js 22+ and installs with `npm i -g @leogomide/multi-claude` (pnpm and Bun also work) — Bun is no longer required
 - **feat:** the in-app update detects whether mclaude was installed with npm, pnpm, Bun, Yarn or Volta and updates with the same tool, and explains what to do when the global folder needs administrator rights

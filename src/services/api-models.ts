@@ -1,6 +1,7 @@
 import { getModelSpec, getProviderBaseUrl, getTemplate } from "../providers.ts";
 import type { ConfiguredProvider } from "../schema.ts";
 import { fetchCustomModels } from "./custom.ts";
+import { fetchFlattModels, validateFlattApiKey } from "./flatt.ts";
 import { fetchLiteLLMModels, validateLiteLLMApiKey } from "./litellm.ts";
 import { fetchLlamaCppModels } from "./llamacpp.ts";
 import { fetchLMStudioModels } from "./lmstudio.ts";
@@ -40,6 +41,7 @@ export type ApiFetchResult =
 export type ApiKeyValidation = { valid: true } | { valid: false; error: ApiModelError };
 
 const API_KEY_VALIDATION_PROVIDERS = new Set([
+	"flatt",
 	"openrouter",
 	"requesty",
 	"nanogpt",
@@ -49,6 +51,7 @@ const API_KEY_VALIDATION_PROVIDERS = new Set([
 	"zai",
 ]);
 const MODEL_FETCHING_PROVIDERS = new Set([
+	"flatt",
 	"custom",
 	"openrouter",
 	"requesty",
@@ -123,6 +126,11 @@ async function fetchRaw(
 	customBaseUrl?: string,
 ): Promise<ApiFetchResult> {
 	switch (templateId) {
+		case "flatt": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { ok: false, error: "unknown" };
+			return fetchFlattModels(baseUrl, apiKey);
+		}
 		case "openrouter": {
 			const result = await fetchOpenRouterModels(apiKey);
 			if (!result.ok) return result;
@@ -177,6 +185,11 @@ export async function validateApiKey(
 	customBaseUrl?: string,
 ): Promise<ApiKeyValidation> {
 	switch (templateId) {
+		case "flatt": {
+			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;
+			if (!baseUrl) return { valid: false, error: "unknown" };
+			return validateFlattApiKey(baseUrl, apiKey);
+		}
 		case "openrouter":
 			return validateOpenRouterApiKey(apiKey);
 		case "requesty":

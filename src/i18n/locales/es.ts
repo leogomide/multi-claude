@@ -43,6 +43,7 @@ export const es: TranslationDictionary = {
 	},
 	templates: {
 		custom: "Proveedor personalizado",
+		sponsor: "patrocinador",
 	},
 	addFlow: {
 		selectTemplate: "Seleccione una plantilla de proveedor",
@@ -282,6 +283,10 @@ export const es: TranslationDictionary = {
 		sourceDefault: "predeterminado",
 		sourceUser: "usuario",
 		modelsViaApi: "vía API",
+		sponsor: "Patrocinador",
+		flattCta:
+			"Inferencia a precio fijo para agentes de código — 262 mil de contexto, sin conteo de tokens.",
+		sponsorLink: "Crea tu clave",
 		noProviders: "No hay proveedores configurados",
 		addProviderDesc: "Agregar un nuevo proveedor de API",
 		manageProvidersDesc: "Agregar, editar y eliminar proveedores",
