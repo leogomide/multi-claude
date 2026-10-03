@@ -47,6 +47,7 @@ export interface TranslationDictionary {
 		apiKeyLabel: string;
 		apiKeyLabelOptional: string;
 		urlLabel: string;
+		modelsUrlLabel: string;
 		modelLabel: string;
 		modelLabelOptional: string;
 		authVarLabel: string;
@@ -62,6 +63,7 @@ export interface TranslationDictionary {
 		nameLabel: string;
 		apiKeyLabel: string;
 		urlLabel: string;
+		modelsUrlLabel: string;
 		authVarLabel: string;
 		noProviders: string;
 		success: string;
@@ -118,6 +120,10 @@ export interface TranslationDictionary {
 		nameUpdated: string;
 		apiKeyUpdated: string;
 		urlUpdated: string;
+		editModelsUrl: string;
+		modelsUrlUpdated: string;
+		modelsUrlTested: string;
+		testingModelsUrl: string;
 		authVarUpdated: string;
 	};
 	settings: {
@@ -260,6 +266,7 @@ export interface TranslationDictionary {
 		models: string;
 		baseUrl: string;
 		baseUrlUserDefined: string;
+		modelsUrl: string;
 		modelsUserDefined: string;
 		source: string;
 		sourceDefault: string;

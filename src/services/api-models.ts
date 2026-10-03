@@ -116,7 +116,12 @@ function applyModelSpecs(provider: ConfiguredProvider, result: ApiFetchResult): 
 export async function fetchApiModels(provider: ConfiguredProvider): Promise<ApiFetchResult> {
 	return applyModelSpecs(
 		provider,
-		await fetchRaw(provider.templateId, provider.apiKey, getProviderBaseUrl(provider)),
+		await fetchRaw(
+			provider.templateId,
+			provider.apiKey,
+			getProviderBaseUrl(provider),
+			provider.modelsUrl,
+		),
 	);
 }
 
@@ -124,6 +129,7 @@ async function fetchRaw(
 	templateId: string,
 	apiKey: string,
 	customBaseUrl?: string,
+	modelsUrl?: string,
 ): Promise<ApiFetchResult> {
 	switch (templateId) {
 		case "flatt": {
@@ -143,7 +149,7 @@ async function fetchRaw(
 		case "custom": {
 			// No template fallback: the custom template's baseUrl is "" by design.
 			if (!customBaseUrl) return { ok: false, error: "unknown" };
-			return fetchCustomModels(customBaseUrl, apiKey);
+			return fetchCustomModels(customBaseUrl, apiKey, modelsUrl);
 		}
 		case "litellm": {
 			const baseUrl = customBaseUrl || getTemplate(templateId)?.baseUrl;

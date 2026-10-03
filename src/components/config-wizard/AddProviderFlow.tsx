@@ -22,7 +22,7 @@ import {
 	parseContextWindow,
 	validateContextWindow,
 } from "../../utils/validate-context.ts";
-import { normalizeBaseUrl, validateBaseUrl } from "../../utils/validate-url.ts";
+import { defaultModelsUrl, normalizeBaseUrl, validateBaseUrl } from "../../utils/validate-url.ts";
 import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
 import { TextPrompt } from "../common/TextPrompt.tsx";
@@ -32,7 +32,7 @@ import { Sidebar } from "../layout/Sidebar.tsx";
 import type { FlowMessage } from "../types.ts";
 
 type Step = "template" | "details" | "validating-key" | "oauth-name" | "create-installation";
-type Field = "name" | "url" | "auth" | "key" | "model" | "context";
+type Field = "name" | "url" | "modelsUrl" | "auth" | "key" | "model" | "context";
 
 interface AddProviderFlowProps {
 	onDone: (message?: FlowMessage) => void;
@@ -51,6 +51,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 		PROVIDER_TEMPLATES[0]?.id ?? null,
 	);
 	const [baseUrl, setBaseUrl] = useState("");
+	const [modelsUrl, setModelsUrl] = useState("");
 	const [apiKey, setApiKey] = useState("");
 	const [authVar, setAuthVar] = useState<AuthVar>("ANTHROPIC_AUTH_TOKEN");
 	const [pendingModels, setPendingModels] = useState<string[]>([]);
@@ -71,6 +72,13 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const modelIsOptional = hasApiModelFetching(templateId);
 	const modelId = modelDraft.trim();
 
+	// Saved only when it differs from the default, so the default keeps following the base URL.
+	const modelsUrlOverride = () => {
+		if (!template?.promptModelsUrl || !baseUrl) return undefined;
+		const normalized = normalizeBaseUrl(modelsUrl);
+		return normalized && normalized !== defaultModelsUrl(baseUrl) ? normalized : undefined;
+	};
+
 	const persistProvider = async (
 		effectiveKey: string,
 		models: string[],
@@ -86,6 +94,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			apiKeyValid: true,
 			models,
 			baseUrl: baseUrl && baseUrl !== template?.baseUrl ? baseUrl : undefined,
+			modelsUrl: modelsUrlOverride(),
 			authVar: template?.promptAuthVar ? authVar : undefined,
 			modelSpecs,
 		};
@@ -105,7 +114,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			} else if (step === "create-installation") {
 				setStep("template");
 			} else if (step === "details" && activeField === "auth") {
-				setActiveField("url");
+				setActiveField(template?.promptModelsUrl ? "modelsUrl" : "url");
 			}
 		},
 		{
@@ -367,6 +376,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 
 	const backFromKey = () => {
 		if (template?.promptAuthVar) setActiveField("auth");
+		else if (template?.promptModelsUrl) setActiveField("modelsUrl");
 		else if (template?.promptBaseUrl) setActiveField("url");
 		else setActiveField("name");
 	};
@@ -433,12 +443,39 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 						focus={activeField === "url"}
 						validate={(val) => validateBaseUrl(val, t)}
 						onSubmit={(url) => {
-							setBaseUrl(normalizeBaseUrl(url));
-							if (template?.promptAuthVar) setActiveField("auth");
+							const nextBase = normalizeBaseUrl(url);
+							// Re-derive the default unless the user already typed an override.
+							if (!modelsUrl || (baseUrl && modelsUrl === defaultModelsUrl(baseUrl))) {
+								setModelsUrl(defaultModelsUrl(nextBase));
+							}
+							setBaseUrl(nextBase);
+							if (template?.promptModelsUrl) setActiveField("modelsUrl");
+							else if (template?.promptAuthVar) setActiveField("auth");
 							else setActiveField("key");
 						}}
 						onCancel={() => {
 							setActiveField("name");
+						}}
+					/>
+				</Box>
+			)}
+			{template?.promptModelsUrl && (
+				<Box marginTop={1}>
+					<TextPrompt
+						// Remount when the base URL changes so the prefilled default follows it.
+						key={baseUrl}
+						label={t("addFlow.modelsUrlLabel")}
+						initialValue={modelsUrl}
+						placeholder={baseUrl ? defaultModelsUrl(baseUrl) : undefined}
+						focus={activeField === "modelsUrl"}
+						validate={(val) => (val.trim() ? validateBaseUrl(val, t) : undefined)}
+						onSubmit={(val) => {
+							setModelsUrl(val.trim() ? normalizeBaseUrl(val) : defaultModelsUrl(baseUrl));
+							if (template?.promptAuthVar) setActiveField("auth");
+							else setActiveField("key");
+						}}
+						onCancel={() => {
+							setActiveField("url");
 						}}
 					/>
 				</Box>

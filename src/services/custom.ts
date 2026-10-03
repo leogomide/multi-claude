@@ -1,3 +1,4 @@
+import { defaultModelsUrl } from "../utils/validate-url.ts";
 import type { ApiFetchResult, ApiModelError, ApiModelMeta } from "./api-models.ts";
 
 interface CustomModelRaw {
@@ -81,15 +82,20 @@ async function requestModels(url: string, apiKey: string): Promise<Response | nu
 	}
 }
 
-export async function fetchCustomModels(baseUrl: string, apiKey: string): Promise<ApiFetchResult> {
-	const root = baseUrl.replace(/\/+$/, "");
+export async function fetchCustomModels(
+	baseUrl: string,
+	apiKey: string,
+	modelsUrl?: string,
+): Promise<ApiFetchResult> {
+	// A URL the user typed is taken literally: no guessing, no fallback.
+	const url = modelsUrl || defaultModelsUrl(baseUrl);
 
-	let response = await requestModels(`${root}/v1/models`, apiKey);
+	let response = await requestModels(url, apiKey);
 	if (response === null) return { ok: false, error: "network" };
 
-	// Base URLs that already end in /v1 expose the list at /models (OmniRoute, 9Router).
-	if (response.status === 404) {
-		const alt = await requestModels(`${root}/models`, apiKey);
+	// Some gateways serve the list at /models without a /v1 prefix.
+	if (response.status === 404 && !modelsUrl && url.endsWith("/v1/models")) {
+		const alt = await requestModels(`${url.slice(0, -"/v1/models".length)}/models`, apiKey);
 		if (alt !== null) response = alt;
 	}
 

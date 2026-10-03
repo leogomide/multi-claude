@@ -2,6 +2,7 @@ import { getInstallationPath, readOAuthCredentials } from "./config.ts";
 import type { ConfiguredProvider, EnvConfigurator, ProviderTemplate } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import type { ApiModelMeta } from "./services/api-models.ts";
+import { defaultModelsUrl } from "./utils/validate-url.ts";
 
 export const FLATT_SPONSOR_URL =
 	"https://flatt.com.br/?utm_source=mclaude&utm_medium=cli&utm_campaign=multi-claude";
@@ -322,6 +323,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		promptBaseUrl: true,
 		promptAuthVar: true,
 		promptModel: true,
+		promptModelsUrl: true,
 		env: {},
 	},
 ];
@@ -332,6 +334,13 @@ export function getTemplate(id: string): ProviderTemplate | undefined {
 
 export function getProviderBaseUrl(provider: ConfiguredProvider): string | undefined {
 	return provider.baseUrl || getTemplate(provider.templateId)?.baseUrl;
+}
+
+/** Effective model list URL: the user override, or one derived from the base URL. */
+export function getProviderModelsUrl(provider: ConfiguredProvider): string | undefined {
+	if (provider.modelsUrl) return provider.modelsUrl;
+	const base = getProviderBaseUrl(provider);
+	return base ? defaultModelsUrl(base) : undefined;
 }
 
 export function getTemplateLabel(tmpl: ProviderTemplate, t: (key: string) => string): string {

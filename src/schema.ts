@@ -22,6 +22,8 @@ export interface ProviderTemplate {
 	promptBaseUrl?: boolean;
 	promptAuthVar?: boolean;
 	promptModel?: boolean;
+	/** Asks for the model list URL (defaults to one derived from the base URL). */
+	promptModelsUrl?: boolean;
 	/** Project sponsor: highlighted in the template list, with a CTA and a link in the sidebar. */
 	sponsor?: { url: string };
 }
@@ -48,6 +50,8 @@ export const configuredProviderSchema = z.object({
 		)
 		.optional(),
 	baseUrl: z.string().optional(),
+	/** Model list URL override; absent means it is derived from the base URL. */
+	modelsUrl: z.string().optional(),
 	authVar: z.enum(AUTH_VARS).optional(),
 });
 

@@ -3,10 +3,16 @@ import { Box, Text, useInput } from "ink";
 import React, { useEffect, useState } from "react";
 import { loadConfig, removeAccountDir, saveConfig } from "../../config.ts";
 import { useTranslation } from "../../i18n/context.tsx";
-import { getProviderBaseUrl, getTemplate, getTemplateLabel } from "../../providers.ts";
+import {
+	getProviderBaseUrl,
+	getProviderModelsUrl,
+	getTemplate,
+	getTemplateLabel,
+} from "../../providers.ts";
 import type { AuthVar, ConfiguredProvider } from "../../schema.ts";
-import { hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
-import { normalizeBaseUrl, validateBaseUrl } from "../../utils/validate-url.ts";
+import type { ApiModelError } from "../../services/api-models.ts";
+import { fetchApiModels, hasApiKeyValidation, validateApiKey } from "../../services/api-models.ts";
+import { defaultModelsUrl, normalizeBaseUrl, validateBaseUrl } from "../../utils/validate-url.ts";
 import { ConfirmPrompt } from "../common/ConfirmPrompt.tsx";
 import CyanSelectInput from "../common/CyanSelectInput.tsx";
 import { StatusMessage } from "../common/StatusMessage.tsx";
@@ -20,6 +26,8 @@ type Step =
 	| "edit-name"
 	| "edit-key"
 	| "edit-url"
+	| "edit-models-url"
+	| "testing-models-url"
 	| "edit-auth"
 	| "validating-key"
 	| "confirm-remove";
@@ -56,6 +64,8 @@ export function EditProviderFlow({
 				step === "edit-name" ||
 				step === "edit-key" ||
 				step === "edit-url" ||
+				step === "edit-models-url" ||
+				step === "testing-models-url" ||
 				step === "edit-auth" ||
 				step === "confirm-remove"
 			) {
@@ -65,6 +75,41 @@ export function EditProviderFlow({
 			}
 		}
 	});
+
+	const providerLabelFor = (prov: ConfiguredProvider | null) => {
+		const template = getTemplate(prov?.templateId ?? "");
+		return template ? getTemplateLabel(template, t) : (prov?.templateId ?? "");
+	};
+
+	const fetchErrorMessage = (error: ApiModelError) =>
+		error === "auth"
+			? t("apiModels.keyInvalid")
+			: error === "network"
+				? t("apiModels.networkError", { provider: providerLabelFor(provider) })
+				: t("apiModels.fetchError", { provider: providerLabelFor(provider) });
+
+	// Runs against the URL already saved: a failure is reported, never rolled back.
+	useEffect(() => {
+		if (step !== "testing-models-url" || !provider) return;
+		let cancelled = false;
+
+		fetchApiModels(provider).then((result) => {
+			if (cancelled) return;
+			setMessage(
+				result.ok
+					? {
+							text: t("editProvider.modelsUrlTested", { count: result.models.length }),
+							variant: "success",
+						}
+					: { text: fetchErrorMessage(result.error), variant: "warning" },
+			);
+			setStep("menu");
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [step]);
 
 	useEffect(() => {
 		if (step !== "validating-key") return;
@@ -94,17 +139,7 @@ export function EditProviderFlow({
 					});
 				});
 			} else {
-				const template = getTemplate(provider?.templateId ?? "");
-				const providerLabel = template
-					? getTemplateLabel(template, t)
-					: (provider?.templateId ?? "");
-				const errorMsg =
-					result.error === "auth"
-						? t("apiModels.keyInvalid")
-						: result.error === "network"
-							? t("apiModels.networkError", { provider: providerLabel })
-							: t("apiModels.fetchError", { provider: providerLabel });
-				setValidationError(errorMsg);
+				setValidationError(fetchErrorMessage(result.error));
 				setStep("edit-key");
 			}
 		});
@@ -160,6 +195,9 @@ export function EditProviderFlow({
 					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
 					{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" },
 					{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" },
+					...(template?.promptModelsUrl
+						? [{ label: `📃 ${t("editProvider.editModelsUrl")}`, value: "edit-models-url" }]
+						: []),
 					...(template?.promptAuthVar
 						? [{ label: `🔐 ${t("editProvider.editAuthVar")}`, value: "edit-auth" }]
 						: []),
@@ -186,6 +224,8 @@ export function EditProviderFlow({
 								setStep("edit-name");
 							} else if (item.value === "edit-url") {
 								setStep("edit-url");
+							} else if (item.value === "edit-models-url") {
+								setStep("edit-models-url");
 							} else if (item.value === "edit-auth") {
 								setStep("edit-auth");
 							} else if (item.value === "edit-key") {
@@ -277,6 +317,50 @@ export function EditProviderFlow({
 						});
 					}}
 				/>
+			</AppShell>
+		);
+	}
+
+	if (step === "edit-models-url" && provider) {
+		const baseUrl = getProviderBaseUrl(provider) ?? "";
+		return (
+			<AppShell
+				footerItems={[
+					{ key: "⏎", label: t("footer.confirm") },
+					{ key: "esc", label: t("footer.back") },
+				]}
+			>
+				<TextPrompt
+					label={t("editFlow.modelsUrlLabel")}
+					initialValue={getProviderModelsUrl(provider) ?? ""}
+					placeholder={baseUrl ? defaultModelsUrl(baseUrl) : undefined}
+					validate={(val) => (val.trim() ? validateBaseUrl(val, t) : undefined)}
+					onSubmit={(val) => {
+						const typed = val.trim() ? normalizeBaseUrl(val) : "";
+						loadConfig().then((config) => {
+							const prov = config.providers.find((p) => p.id === providerId);
+							if (prov) {
+								const base = getProviderBaseUrl(prov);
+								const fallback = base ? defaultModelsUrl(base) : "";
+								// Empty or equal to the default: drop the override so it follows the base URL.
+								prov.modelsUrl = typed && typed !== fallback ? typed : undefined;
+							}
+							saveConfig(config).then(() => {
+								refreshProvider().then(() => {
+									setStep("testing-models-url");
+								});
+							});
+						});
+					}}
+				/>
+			</AppShell>
+		);
+	}
+
+	if (step === "testing-models-url") {
+		return (
+			<AppShell footerItems={[{ key: "esc", label: t("footer.back") }]}>
+				<Spinner label={t("editProvider.testingModelsUrl")} />
 			</AppShell>
 		);
 	}

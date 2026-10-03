@@ -6,6 +6,7 @@ import { useTranslation } from "../../i18n/context.tsx";
 import {
 	getEffectiveModels,
 	getProviderBaseUrl,
+	getProviderModelsUrl,
 	getTemplate,
 	getTemplateLabel,
 } from "../../providers.ts";
@@ -129,6 +130,14 @@ export function ManageProvidersPage({ onSelect, onEscape, lastMessage }: ManageP
 				items.push({
 					label: t("sidebar.baseUrl"),
 					value: effectiveUrl.replace(/^https?:\/\//, ""),
+				});
+			}
+			const modelsUrl = template?.promptModelsUrl ? getProviderModelsUrl(provider) : undefined;
+			if (modelsUrl) {
+				const shown = modelsUrl.replace(/^https?:\/\//, "");
+				items.push({
+					label: t("sidebar.modelsUrl"),
+					value: provider.modelsUrl ? shown : `${shown} ${t("modelsFlow.defaultTag")}`,
 				});
 			}
 			if (provider.apiKeyValid === false) {

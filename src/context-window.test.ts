@@ -4,13 +4,15 @@ import {
 	getEffectiveModels,
 	getEffectiveModelsWithSource,
 	getModelSpec,
+	getProviderModelsUrl,
 	resolveModelSpec,
 } from "./providers.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 import { configuredProviderSchema } from "./schema.ts";
-import { hasApiKeyValidation, hasApiModelFetching } from "./services/api-models.ts";
+import { fetchApiModels, hasApiKeyValidation, hasApiModelFetching } from "./services/api-models.ts";
 import { fetchCustomModels } from "./services/custom.ts";
 import { ignoresContextWindow, parseContextWindow } from "./utils/validate-context.ts";
+import { defaultModelsUrl } from "./utils/validate-url.ts";
 
 // ── Fixtures ─────────────────────────────────────────────────────────
 
@@ -417,20 +419,48 @@ describe("fetchCustomModels", () => {
 		expect(calls[0]?.url).toBe("http://gw.test/v1/models");
 	});
 
-	test("a 404 on /v1/models falls back to /models", async () => {
+	test("a base already ending in /v1 goes straight to /v1/models", async () => {
+		const calls = stubFetch(() => jsonResponse({ data: [{ id: "found" }] }));
+		const result = await fetchCustomModels("http://gw.test/v1", "k");
+		expect(calls.map((c) => c.url)).toEqual(["http://gw.test/v1/models"]);
+		expect(result.ok).toBe(true);
+	});
+
+	test("without an override a 404 on /v1/models falls back to /models", async () => {
 		const calls = stubFetch((url) =>
-			url === "http://gw.test/v1/v1/models"
+			url === "http://gw.test/v1/models"
 				? jsonResponse({ error: "not found" }, 404)
 				: jsonResponse({ data: [{ id: "found", context_length: 4096 }] }),
 		);
-		const result = await fetchCustomModels("http://gw.test/v1", "k");
-		expect(calls.map((c) => c.url)).toEqual([
-			"http://gw.test/v1/v1/models",
-			"http://gw.test/v1/models",
-		]);
+		const result = await fetchCustomModels("http://gw.test", "k");
+		expect(calls.map((c) => c.url)).toEqual(["http://gw.test/v1/models", "http://gw.test/models"]);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
 		expect(result.models[0]?.id).toBe("found");
+	});
+
+	test("an override URL is requested as typed", async () => {
+		const calls = stubFetch(() => jsonResponse({ data: [{ id: "x" }] }));
+		await fetchCustomModels("http://gw.test", "k", "http://other.test/api/models?all=1");
+		expect(calls.map((c) => c.url)).toEqual(["http://other.test/api/models?all=1"]);
+	});
+
+	test("an override URL never falls back on a 404", async () => {
+		const calls = stubFetch(() => jsonResponse({ error: "not found" }, 404));
+		const result = await fetchCustomModels("http://gw.test", "k", "http://gw.test/v1/models");
+		expect(calls).toHaveLength(1);
+		expect(result).toEqual({ ok: false, error: "unknown" });
+	});
+
+	test("fetchApiModels hands the provider override to the custom fetcher", async () => {
+		const calls = stubFetch(() => jsonResponse({ data: [] }));
+		await fetchApiModels({
+			...base,
+			templateId: "custom",
+			baseUrl: "http://gw.test",
+			modelsUrl: "http://gw.test/api/models",
+		});
+		expect(calls.map((c) => c.url)).toEqual(["http://gw.test/api/models"]);
 	});
 
 	test("an unreachable host is a network error", async () => {
@@ -467,5 +497,46 @@ describe("fetchCustomModels", () => {
 			ok: false,
 			error: "unknown",
 		});
+	});
+});
+
+// ── models URL ───────────────────────────────────────────────────────
+
+describe("models URL", () => {
+	test("the default appends /v1/models to a bare base", () => {
+		expect(defaultModelsUrl("http://gw.test")).toBe("http://gw.test/v1/models");
+		expect(defaultModelsUrl("http://gw.test/proxy")).toBe("http://gw.test/proxy/v1/models");
+	});
+
+	test("the default appends only /models to a base ending in /v1", () => {
+		expect(defaultModelsUrl("http://gw.test/v1")).toBe("http://gw.test/v1/models");
+		expect(defaultModelsUrl("http://gw.test/V1/")).toBe("http://gw.test/V1/models");
+	});
+
+	test("trailing slashes do not double up", () => {
+		expect(defaultModelsUrl("http://gw.test///")).toBe("http://gw.test/v1/models");
+	});
+
+	test("a provider without an override follows its base URL", () => {
+		const p: ConfiguredProvider = { ...base, templateId: "custom", baseUrl: "http://a.test" };
+		expect(getProviderModelsUrl(p)).toBe("http://a.test/v1/models");
+		expect(getProviderModelsUrl({ ...p, baseUrl: "http://b.test/v1" })).toBe(
+			"http://b.test/v1/models",
+		);
+	});
+
+	test("an override wins over the base URL", () => {
+		const p: ConfiguredProvider = {
+			...base,
+			templateId: "custom",
+			baseUrl: "http://a.test",
+			modelsUrl: "http://a.test/api/models",
+		};
+		expect(getProviderModelsUrl(p)).toBe("http://a.test/api/models");
+	});
+
+	test("old configs without modelsUrl still parse", () => {
+		const parsed = configuredProviderSchema.parse({ id: "x", name: "X", templateId: "custom" });
+		expect(parsed.modelsUrl).toBeUndefined();
 	});
 });
