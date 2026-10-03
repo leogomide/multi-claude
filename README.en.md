@@ -34,13 +34,13 @@ Type `mclaude`, pick a provider and a model from a terminal menu, and Claude Cod
   <sub>SPONSORED BY</sub>
   <br><br>
   <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
-    <img src="assets/sponsors/flatt.png" alt="Flatt" width="72"/>
+    <img src="assets/sponsors/assinatura-azul.svg" alt="Flatt" height="72"/>
   </a>
   <h3>Flatt — inference at a flat rate.</h3>
   <p>
     Your agent runs all day, all month — the bill doesn't move.<br>
-    No token counting, 262k context on every plan, and an Anthropic-compatible API<br>
-    built into <b>mclaude</b> as a native provider: first on the list, just paste your key.
+    An Anthropic-compatible API built into <b>mclaude</b> as a native provider:<br>
+    first on the list, just paste your key.
   </p>
   <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
     <img src="https://img.shields.io/badge/Get%20started%20with%20Flatt-4b3fe6?style=for-the-badge" alt="Get started with Flatt"/>
@@ -160,7 +160,7 @@ API keys are encrypted with **AES-256-GCM** before they touch the disk. For an e
   <img src="assets/sponsors/flatt.png" alt="Flatt" width="40" align="left"/>
 </a>
 
-**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — LLM inference at a flat monthly price, built for coding agents that run all day. Built into mclaude as a native provider, first on the list.
+**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — flat-rate LLM inference for coding agents that run all day. A native mclaude provider, first on the list.
 
 <br clear="left"/>
 

@@ -283,7 +283,7 @@ export const en: TranslationDictionary = {
 		sourceUser: "user",
 		modelsViaApi: "via API",
 		sponsor: "Sponsor",
-		flattCta: "Flat-rate inference for coding agents — 262k context, no token counting.",
+		flattCta: "Flat rate, all month long — no token meter.",
 		sponsorLink: "Get your key",
 		noProviders: "No providers configured yet",
 		addProviderDesc: "Add a new API provider",
@@ -314,9 +314,9 @@ export const en: TranslationDictionary = {
 		changelogDesc: "View release history and recent changes",
 	},
 	sponsorBanner: {
-		tagline1: "Flat-rate inference for coding agents",
-		tagline2: "262k context, no token counting",
-		tagline3: "Run Claude Code without watching the meter",
+		tagline1: "Flat rate for your agent, all month long",
+		tagline2: "No token meter. No surprises.",
+		tagline3: "Code all day, same bill every month",
 	},
 	terminal: {
 		tooSmall: "Terminal too small ({{current}}). Minimum: {{min}}",

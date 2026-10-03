@@ -34,13 +34,13 @@ Digite `mclaude`, escolha o provedor e o modelo num menu no terminal, e o Claude
   <sub>PATROCINADO POR</sub>
   <br><br>
   <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
-    <img src="assets/sponsors/flatt.png" alt="Flatt" width="72"/>
+    <img src="assets/sponsors/assinatura-azul.svg" alt="Flatt" height="72"/>
   </a>
   <h3>Flatt — inferência a preço fixo.</h3>
   <p>
     Seu agente roda o dia inteiro, o mês inteiro — e a conta não muda.<br>
-    Sem contagem de token, 262 mil de contexto em todos os planos e API compatível com a Anthropic,<br>
-    já integrada ao <b>mclaude</b> como provedor nativo: é o primeiro da lista, basta colar a chave.
+    API compatível com a Anthropic e integrada ao <b>mclaude</b> como provedor nativo:<br>
+    é o primeiro da lista, basta colar a chave.
   </p>
   <a href="https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude">
     <img src="https://img.shields.io/badge/Comece%20com%20a%20Flatt-4b3fe6?style=for-the-badge" alt="Comece com a Flatt"/>
@@ -160,7 +160,7 @@ As API keys são criptografadas com **AES-256-GCM** antes de irem para o disco. 
   <img src="assets/sponsors/flatt.png" alt="Flatt" width="40" align="left"/>
 </a>
 
-**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — inferência de modelos de linguagem por preço fixo mensal, feita para agentes de código que rodam o dia inteiro. Integrada ao mclaude como provedor nativo, o primeiro da lista.
+**[Flatt](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude)** — inferência a preço fixo mensal, feita para agentes de código que rodam o dia inteiro. Provedor nativo do mclaude, o primeiro da lista.
 
 <br clear="left"/>
 

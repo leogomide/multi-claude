@@ -287,8 +287,7 @@ export const ptBR: TranslationDictionary = {
 		sourceUser: "usuário",
 		modelsViaApi: "via API",
 		sponsor: "Patrocinador",
-		flattCta:
-			"Inferência a preço fixo para agentes de código — 262 mil de contexto, sem contagem de token.",
+		flattCta: "Preço fixo, o mês inteiro — sem contador de tokens.",
 		sponsorLink: "Crie sua chave",
 		noProviders: "Nenhum provedor configurado",
 		addProviderDesc: "Adicionar um novo provedor de API",
@@ -319,9 +318,9 @@ export const ptBR: TranslationDictionary = {
 		changelogDesc: "Ver histórico de versões e alterações recentes",
 	},
 	sponsorBanner: {
-		tagline1: "Inferência a preço fixo para agentes de código",
-		tagline2: "262 mil de contexto, sem contagem de token",
-		tagline3: "Rode o Claude Code sem se preocupar com a fatura",
+		tagline1: "Preço fixo para o seu agente, o mês inteiro",
+		tagline2: "Sem contador de tokens. Sem surpresas.",
+		tagline3: "Código o dia todo, fatura sempre igual",
 	},
 	terminal: {
 		tooSmall: "Terminal muito pequeno ({{current}}). Mínimo: {{min}}",
