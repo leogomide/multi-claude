@@ -1,6 +1,10 @@
 ## Changelog
 
-### v2.2.0 (current)
+### v2.3.0 (current)
+
+- **feat:** Custom Provider now lets you set the URL used to fetch the model list — it defaults to the base URL + `/v1/models` (or `/models` when the base already ends in `/v1`), can be changed when adding the provider and later in its settings, where saving tests the URL and shows how many models were found
+
+### v2.2.0
 
 - **feat:** a Flatt sponsor line now sits above the shortcuts on every screen, with a clickable link to flatt.com.br
 
