@@ -1,7 +1,7 @@
 <h1 align="center">multi-claude</h1>
 
 <p align="center">
-  <b>Português</b> · <a href="README.en.md">English</a>
+  <b>Português</b> · <a href="README.en.md">English</a> · <a href="README.es.md">Español</a>
 </p>
 
 <div align="center">

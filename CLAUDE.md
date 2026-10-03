@@ -153,9 +153,9 @@ pnpm check-types && pnpm test && pnpm build
 
 Atualizar o campo `version` no `package.json` e rodar `pnpm install` para atualizar o `pnpm-lock.yaml`.
 
-### 3. Atualizar README.md, README.en.md e CHANGELOG.md
+### 3. Atualizar README.md, README.en.md, README.es.md e CHANGELOG.md
 
-- **Badge de versão:** atualizar o número na badge `[![Version](https://img.shields.io/badge/version-X.Y.Z-blue)]` nos dois READMEs (`README.md` em PT-BR e `README.en.md` em inglês)
+- **Badge de versão:** atualizar o número na badge `[![Version](https://img.shields.io/badge/version-X.Y.Z-blue)]` nos três READMEs (`README.md` em PT-BR, `README.en.md` em inglês e `README.es.md` em espanhol)
 - **Changelog:** no `CHANGELOG.md`, adicionar nova seção `### vX.Y.Z (current)` com as entradas da versão e remover `(current)` da versão anterior
 - A tela Changelog da TUI le o `CHANGELOG.md` (`src/changelog.ts`): mantenha o titulo `## Changelog` e o formato `### vX.Y.Z` / `- **tipo:** ...`
 
@@ -169,7 +169,7 @@ Atualizar o campo `version` no `package.json` e rodar `pnpm install` para atuali
 
 ```bash
 # Commitar as alterações de versão
-git add package.json pnpm-lock.yaml README.md README.en.md CHANGELOG.md
+git add package.json pnpm-lock.yaml README.md README.en.md README.es.md CHANGELOG.md
 git commit -m "docs: bump version to vX.Y.Z"
 
 # Criar tag da versão
