@@ -391,14 +391,7 @@ while (true) {
 		process.exit(1);
 	}
 
-	const isOAuth = selection.type === "oauth";
 	const isDefault = selection.templateId === DEFAULT_LAUNCH_TEMPLATE_ID;
-
-	if (!selection.model && !isOAuth && !isDefault) {
-		log.info("no model selected, aborting");
-		console.error("No model selected. Add models to this provider in 'Manage models'.");
-		process.exit(1);
-	}
 
 	// Ensure stdin raw mode is off (precaution)
 	if (process.stdin.isTTY && process.stdin.setRawMode) {
@@ -417,6 +410,14 @@ while (true) {
 		baseUrl: selection.baseUrl,
 		authVar: selection.authVar,
 	};
+
+	// OAuth and setup-token providers let Claude Code pick the model natively
+	const { usesNativeModels } = await import("./src/providers.ts");
+	if (!selection.model && !isDefault && !usesNativeModels(provider)) {
+		log.info("no model selected, aborting");
+		console.error("No model selected. Add models to this provider in 'Manage models'.");
+		process.exit(1);
+	}
 
 	// Merge TUI-selected flags with original CLI args
 	const mergedArgs = mergeFlags(cliArgs, selection.selectedFlags ?? []);
@@ -451,7 +452,7 @@ while (true) {
 
 	const providerInfo = isDefault
 		? "Claude Code (default)"
-		: isOAuth
+		: usesNativeModels(provider)
 			? selection.providerName
 			: `${selection.providerName} (${selection.model})`;
 
