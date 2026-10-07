@@ -60,6 +60,11 @@ export const en: TranslationDictionary = {
 		defaultModels: "Default models",
 		contextLabel: "Context window in tokens (optional - Enter to skip)",
 		contextClaudeWarning: 'Claude Code ignores this value for model ids starting with "claude-".',
+		setupTokenLabel: "Token (from `claude setup-token`)",
+		setupTokenHint:
+			"Run `claude setup-token` and paste the token. Requires a Pro, Max, Team or Enterprise plan; valid for 1 year. Sent as CLAUDE_CODE_OAUTH_TOKEN.",
+		setupTokenFormatWarning:
+			'This does not look like a setup-token token (expected "sk-ant-oat..."). It will be saved anyway.',
 	},
 	editFlow: {
 		selectProvider: "Select a provider to edit",
@@ -70,6 +75,7 @@ export const en: TranslationDictionary = {
 		authVarLabel: "Authentication header (select new value)",
 		noProviders: "No providers configured.",
 		success: 'Provider "{{name}}" updated!',
+		setupTokenLabel: "Token (enter new value from `claude setup-token`)",
 	},
 	removeFlow: {
 		selectProvider: "Select a provider to remove",
@@ -282,6 +288,7 @@ export const en: TranslationDictionary = {
 		sourceDefault: "default",
 		sourceUser: "user",
 		modelsViaApi: "via API",
+		modelsNative: "native (/model)",
 		sponsor: "Sponsor",
 		flattCta: "Flat rate, all month long — no token meter.",
 		sponsorLink: "Get your key",

@@ -19,6 +19,7 @@ import { isEncryptedPayload } from "./crypto.ts";
 import { createLogger, formatError, initLogger } from "./debug.ts";
 import { i18n, initLocale } from "./i18n/index.ts";
 import { clearCachedKey, initKeystore, migrateKeyWrapping, resetKeyFile } from "./keystore.ts";
+import { usesNativeModels } from "./providers.ts";
 import { configSchema, DEFAULT_LAUNCH_TEMPLATE_ID } from "./schema.ts";
 
 export const SELECTION_FILE = join(CONFIG_DIR, "last-selection.json");
@@ -262,7 +263,7 @@ if (result) {
 	if (result.type === "start-claude") {
 		if (
 			!result.model &&
-			result.provider.type !== "oauth" &&
+			!usesNativeModels(result.provider) &&
 			result.provider.templateId !== DEFAULT_LAUNCH_TEMPLATE_ID
 		) {
 			log.error("model is null for API provider, aborting");

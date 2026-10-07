@@ -57,6 +57,9 @@ export interface TranslationDictionary {
 		defaultModels: string;
 		contextLabel: string;
 		contextClaudeWarning: string;
+		setupTokenLabel: string;
+		setupTokenHint: string;
+		setupTokenFormatWarning: string;
 	};
 	editFlow: {
 		selectProvider: string;
@@ -67,6 +70,7 @@ export interface TranslationDictionary {
 		authVarLabel: string;
 		noProviders: string;
 		success: string;
+		setupTokenLabel: string;
 	};
 	removeFlow: {
 		selectProvider: string;
@@ -272,6 +276,7 @@ export interface TranslationDictionary {
 		sourceDefault: string;
 		sourceUser: string;
 		modelsViaApi: string;
+		modelsNative: string;
 		sponsor: string;
 		flattCta: string;
 		sponsorLink: string;

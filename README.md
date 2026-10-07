@@ -51,7 +51,7 @@ Digite `mclaude`, escolha o provedor e o modelo num menu no terminal, e o Claude
 
 ## Por que usar
 
-- **20 provedores num só menu** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio e muitos outros, além de qualquer gateway compatível com a API da Anthropic.
+- **21 provedores num só menu** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio e muitos outros, além de qualquer gateway compatível com a API da Anthropic.
 - **Várias contas Anthropic** — alterne entre conta pessoal e de trabalho sem fazer logout.
 - **Instalações isoladas** — configurações, MCPs e histórico separados por contexto (trabalho, pessoal, cliente).
 - **Chaves protegidas** — suas API keys ficam criptografadas no disco, com senha mestra opcional.
@@ -92,6 +92,7 @@ Qualquer argumento extra é repassado ao Claude Code — por exemplo, `mclaude -
 |----------|------|-------------------|
 | ★ Flatt | Plano de assinatura (preço fixo) | [flatt.com.br](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude) |
 | Anthropic | Conta Claude (OAuth) | [claude.ai](https://claude.ai) |
+| Anthropic (setup-token) | Conta Claude (token de longa duração) | `claude setup-token` |
 | Alibaba Cloud | Plano de assinatura | [Model Studio](https://bailian.console.alibabacloud.com/) |
 | BytePlus ModelArk | Plano de assinatura | [BytePlus](https://www.byteplus.com/en/activity/codingplan) |
 | DeepSeek | API | [platform.deepseek.com](https://platform.deepseek.com) |
@@ -121,6 +122,8 @@ Tem um gateway que não está na lista? Use o **Provedor personalizado**: inform
 ## Várias contas Anthropic
 
 Adicione quantas contas Anthropic (OAuth) quiser — "Trabalho", "Pessoal" — e faça login uma vez em cada. Cada conta usa sua própria instalação, com configurações, histórico e MCPs totalmente separados.
+
+Sem navegador à mão, ou quer o mesmo login em várias máquinas? Rode `claude setup-token` (requer plano Pro, Max, Team ou Enterprise), cole o token no provedor **Anthropic (setup-token)** e pronto: o mclaude o envia como `CLAUDE_CODE_OAUTH_TOKEN`. O token vale por 1 ano, o modelo é escolhido pelo próprio Claude Code (`/model`) e funciona inclusive na instalação padrão. O modo `--bare` ignora esse token.
 
 ## Instalações isoladas
 

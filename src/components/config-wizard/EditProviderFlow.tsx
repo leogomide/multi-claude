@@ -54,6 +54,7 @@ export function EditProviderFlow({
 	const [provider, setProvider] = useState<ConfiguredProvider | null>(null);
 	const [message, setMessage] = useState<FlowMessage | null>(null);
 	const [pendingApiKey, setPendingApiKey] = useState("");
+	const [keyDraft, setKeyDraft] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	useInput((_input, key) => {
@@ -194,14 +195,18 @@ export function EditProviderFlow({
 			: [
 					{ label: `✏️ ${t("editProvider.editName")}`, value: "edit-name" },
 					{ label: `🔑 ${t("editProvider.editApiKey")}`, value: "edit-key" },
-					{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" },
+					...(template?.nativeModels
+						? []
+						: [{ label: `🌐 ${t("editProvider.editUrl")}`, value: "edit-url" }]),
 					...(template?.promptModelsUrl
 						? [{ label: `📃 ${t("editProvider.editModelsUrl")}`, value: "edit-models-url" }]
 						: []),
 					...(template?.promptAuthVar
 						? [{ label: `🔐 ${t("editProvider.editAuthVar")}`, value: "edit-auth" }]
 						: []),
-					{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" },
+					...(template?.nativeModels
+						? []
+						: [{ label: `📋 ${t("editProvider.manageModels")}`, value: "manage-models" }]),
 					{ label: `🗑️ ${t("editProvider.removeProvider")}`, value: "remove" },
 					{ label: `↩ ${t("editProvider.back")}`, value: "back" },
 				];
@@ -229,6 +234,7 @@ export function EditProviderFlow({
 							} else if (item.value === "edit-auth") {
 								setStep("edit-auth");
 							} else if (item.value === "edit-key") {
+								setKeyDraft("");
 								setStep("edit-key");
 							} else if (item.value === "manage-models") {
 								onManageModels();
@@ -407,6 +413,7 @@ export function EditProviderFlow({
 	}
 
 	if (step === "edit-key") {
+		const keyTemplate = getTemplate(provider?.templateId ?? "");
 		return (
 			<AppShell
 				footerItems={[
@@ -416,11 +423,14 @@ export function EditProviderFlow({
 			>
 				<TextPrompt
 					label={
-						getTemplate(provider?.templateId ?? "")?.defaultApiKey
+						keyTemplate?.defaultApiKey
 							? t("addFlow.apiKeyLabelOptional")
-							: t("editFlow.apiKeyLabel")
+							: keyTemplate?.nativeModels
+								? t("editFlow.setupTokenLabel")
+								: t("editFlow.apiKeyLabel")
 					}
 					mask="*"
+					onChange={setKeyDraft}
 					validate={(val) => {
 						const tmpl = getTemplate(provider?.templateId ?? "");
 						if (!val.trim() && !tmpl?.defaultApiKey) return t("validation.apiKeyRequired");
@@ -455,6 +465,15 @@ export function EditProviderFlow({
 						<StatusMessage variant="error">{validationError}</StatusMessage>
 					</Box>
 				)}
+				{keyTemplate?.apiKeyPrefix &&
+					keyDraft.trim() &&
+					!keyDraft.trim().startsWith(keyTemplate.apiKeyPrefix) && (
+						<Box marginTop={1}>
+							<StatusMessage variant="warning">
+								{t("addFlow.setupTokenFormatWarning")}
+							</StatusMessage>
+						</Box>
+					)}
 			</AppShell>
 		);
 	}

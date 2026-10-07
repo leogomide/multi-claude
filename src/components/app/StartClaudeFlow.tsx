@@ -13,7 +13,12 @@ import {
 import { useTerminalSize } from "../../hooks/useTerminalSize.ts";
 import { useTranslation } from "../../i18n/context.tsx";
 import type { ModelWithSource } from "../../providers.ts";
-import { getEffectiveModelsWithSource, getTemplate, getTemplateLabel } from "../../providers.ts";
+import {
+	getEffectiveModelsWithSource,
+	getTemplate,
+	getTemplateLabel,
+	usesNativeModels,
+} from "../../providers.ts";
 import type { ConfiguredProvider, Installation } from "../../schema.ts";
 import { DEFAULT_INSTALLATION_ID, DEFAULT_LAUNCH_TEMPLATE_ID } from "../../schema.ts";
 import type { ApiModelError } from "../../services/api-models.ts";
@@ -176,6 +181,18 @@ export function StartClaudeFlow({
 					// No installations \u2014 go to flags with default
 					goToFlagsStep(provider, "", DEFAULT_INSTALLATION_ID);
 				} else {
+					setStep("select-installation");
+				}
+				return;
+			}
+
+			if (usesNativeModels(provider)) {
+				// setup-token: Claude Code picks the model; Default installation is allowed
+				setSelectedModel("");
+				if ((config.installations ?? []).length === 0) {
+					goToFlagsStep(provider, "", DEFAULT_INSTALLATION_ID);
+				} else {
+					setInstallationActiveIndex(0);
 					setStep("select-installation");
 				}
 				return;
@@ -415,9 +432,9 @@ export function StartClaudeFlow({
 
 		if (key.escape) {
 			if (step === "select-installation") {
-				// Go back: for OAuth/default cancel, for API go back to model selection
+				// Go back: for native-model/default cancel, for API go back to model selection
 				if (
-					selectedProvider?.type === "oauth" ||
+					(selectedProvider && usesNativeModels(selectedProvider)) ||
 					selectedProvider?.templateId === DEFAULT_LAUNCH_TEMPLATE_ID
 				) {
 					onCancel();
@@ -664,11 +681,11 @@ export function StartClaudeFlow({
 					onHighlight={setHighlightedFlag}
 					onEscape={() => {
 						// Go back to installation selection if there are installations to choose from,
-						// otherwise go back to model selection (or cancel for OAuth/default)
+						// otherwise go back to model selection (or cancel for native-model/default)
 						if (installationListItems.length > 1) {
 							setStep("select-installation");
 						} else if (
-							selectedProvider.type === "oauth" ||
+							usesNativeModels(selectedProvider) ||
 							selectedProvider.templateId === DEFAULT_LAUNCH_TEMPLATE_ID
 						) {
 							onCancel();

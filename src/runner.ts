@@ -5,7 +5,7 @@ import { createLogger } from "./debug.ts";
 
 const log = createLogger("runner");
 
-import { buildClaudeEnv } from "./providers.ts";
+import { buildClaudeEnv, usesNativeModels } from "./providers.ts";
 import type { ConfiguredProvider } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import { loadDotenvFromCwd } from "./services/dotenv-loader.ts";
@@ -118,7 +118,7 @@ export async function runClaude(
 
 	// Build args
 	const args: string[] = [];
-	if (provider.type !== "oauth") {
+	if (!usesNativeModels(provider)) {
 		args.push("--model", model);
 	}
 
@@ -165,6 +165,13 @@ export async function runClaude(
 		for (const [key, value] of Object.entries(selectedEnvVars)) {
 			env[key] = value;
 		}
+	}
+
+	if (env["CLAUDE_CODE_OAUTH_TOKEN"] && args.includes("--bare")) {
+		log.warn("--bare with CLAUDE_CODE_OAUTH_TOKEN: bare mode ignores the token");
+		console.error(
+			"Warning: --bare ignores CLAUDE_CODE_OAUTH_TOKEN, so this provider's authentication will fail.",
+		);
 	}
 
 	log.info("spawning claude, args=" + JSON.stringify(args));

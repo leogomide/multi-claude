@@ -51,7 +51,7 @@ Escribe `mclaude`, elige el proveedor y el modelo en un menú de terminal, y Cla
 
 ## Por qué usar
 
-- **20 proveedores en un solo menú** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio y muchos más, además de cualquier gateway compatible con la API de Anthropic.
+- **21 proveedores en un solo menú** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio y muchos más, además de cualquier gateway compatible con la API de Anthropic.
 - **Varias cuentas de Anthropic** — alterna entre tu cuenta personal y la del trabajo sin cerrar sesión.
 - **Instalaciones aisladas** — configuración, MCP e historial separados por contexto (trabajo, personal, cliente).
 - **Claves protegidas** — tus API keys permanecen cifradas en el disco, con contraseña maestra opcional.
@@ -92,6 +92,7 @@ Cualquier argumento adicional se pasa a Claude Code — por ejemplo, `mclaude -p
 |-----------|------|----------------------|
 | ★ Flatt | Plan de suscripción (precio fijo) | [flatt.com.br](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude) |
 | Anthropic | Cuenta de Claude (OAuth) | [claude.ai](https://claude.ai) |
+| Anthropic (setup-token) | Cuenta de Claude (token de larga duración) | `claude setup-token` |
 | Alibaba Cloud | Plan de suscripción | [Model Studio](https://bailian.console.alibabacloud.com/) |
 | BytePlus ModelArk | Plan de suscripción | [BytePlus](https://www.byteplus.com/en/activity/codingplan) |
 | DeepSeek | API | [platform.deepseek.com](https://platform.deepseek.com) |
@@ -121,6 +122,8 @@ Los proveedores locales no necesitan API key. En Flatt, OpenRouter, NanoGPT, Lit
 ## Varias cuentas de Anthropic
 
 Añade tantas cuentas de Anthropic (OAuth) como quieras — "Trabajo", "Personal" — e inicia sesión una vez en cada una. Cada cuenta usa su propia instalación, con configuración, historial y MCP completamente separados.
+
+¿Sin navegador a mano, o quieres el mismo login en varias máquinas? Ejecuta `claude setup-token` (requiere plan Pro, Max, Team o Enterprise), pega el token en el proveedor **Anthropic (setup-token)** y listo: mclaude lo envía como `CLAUDE_CODE_OAUTH_TOKEN`. El token dura 1 año, Claude Code elige el modelo por sí mismo (`/model`) y funciona también con la instalación predeterminada. El modo `--bare` ignora este token.
 
 ## Instalaciones aisladas
 

@@ -62,6 +62,11 @@ export const ptBR: TranslationDictionary = {
 		contextLabel: "Janela de contexto em tokens (opcional - Enter para pular)",
 		contextClaudeWarning:
 			'O Claude Code ignora este valor para ids de modelo que começam com "claude-".',
+		setupTokenLabel: "Token (gerado pelo `claude setup-token`)",
+		setupTokenHint:
+			"Rode `claude setup-token` e cole o token. Requer plano Pro, Max, Team ou Enterprise; válido por 1 ano. Enviado como CLAUDE_CODE_OAUTH_TOKEN.",
+		setupTokenFormatWarning:
+			'Isso não parece um token do setup-token (esperado "sk-ant-oat..."). Ele será salvo mesmo assim.',
 	},
 	editFlow: {
 		selectProvider: "Selecione um provedor para editar",
@@ -72,6 +77,7 @@ export const ptBR: TranslationDictionary = {
 		authVarLabel: "Cabeçalho de autenticação (selecione novo valor)",
 		noProviders: "Nenhum provedor configurado.",
 		success: 'Provedor "{{name}}" atualizado!',
+		setupTokenLabel: "Token (insira novo valor do `claude setup-token`)",
 	},
 	removeFlow: {
 		selectProvider: "Selecione um provedor para remover",
@@ -286,6 +292,7 @@ export const ptBR: TranslationDictionary = {
 		sourceDefault: "padrão",
 		sourceUser: "usuário",
 		modelsViaApi: "via API",
+		modelsNative: "nativo (/model)",
 		sponsor: "Patrocinador",
 		flattCta: "Preço fixo, o mês inteiro — sem contador de tokens.",
 		sponsorLink: "Crie sua chave",

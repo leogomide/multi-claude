@@ -26,6 +26,13 @@ export interface ProviderTemplate {
 	promptModelsUrl?: boolean;
 	/** Project sponsor: highlighted in the template list, with a CTA and a link in the sidebar. */
 	sponsor?: { url: string };
+	/**
+	 * The key is a Claude subscription token (`claude setup-token`), sent as CLAUDE_CODE_OAUTH_TOKEN.
+	 * Claude Code picks the model natively: no model selection, no model env vars, no --model.
+	 */
+	nativeModels?: boolean;
+	/** Expected key prefix; a mismatch only shows a warning. */
+	apiKeyPrefix?: string;
 }
 
 export const configuredProviderSchema = z.object({

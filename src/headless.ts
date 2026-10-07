@@ -22,7 +22,7 @@ import {
 	verifyMasterPassword,
 } from "./credential-store.ts";
 import { initKeystore, migrateKeyWrapping } from "./keystore.ts";
-import { getEffectiveModels, resolveModelSpec } from "./providers.ts";
+import { getEffectiveModels, resolveModelSpec, usesNativeModels } from "./providers.ts";
 import type { ConfiguredProvider, Installation } from "./schema.ts";
 import { DEFAULT_INSTALLATION_ID } from "./schema.ts";
 import { fetchApiModels, hasApiModelFetching } from "./services/api-models.ts";
@@ -221,7 +221,7 @@ function resolveModel(
 	modelInput: string | undefined,
 	provider: ConfiguredProvider,
 ): Result<string> {
-	if (provider.type === "oauth") {
+	if (usesNativeModels(provider)) {
 		return { ok: true, value: "" };
 	}
 
@@ -393,7 +393,7 @@ export async function runHeadless(args: HeadlessArgs): Promise<number> {
 		contextWindowTokens,
 	);
 
-	const providerInfo = provider.type === "oauth" ? provider.name : `${provider.name} (${model})`;
+	const providerInfo = usesNativeModels(provider) ? provider.name : `${provider.name} (${model})`;
 
 	if (exitCode !== 0) {
 		console.log(`\n[mclaude] ${providerInfo} — exited with code ${exitCode}`);

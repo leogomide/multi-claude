@@ -51,7 +51,7 @@ Type `mclaude`, pick a provider and a model from a terminal menu, and Claude Cod
 
 ## Why multi-claude
 
-- **20 providers in one menu** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio and more, plus any Anthropic-compatible gateway.
+- **21 providers in one menu** — DeepSeek, OpenRouter, Z.AI, MiniMax, Kimi, Ollama, LM Studio and more, plus any Anthropic-compatible gateway.
 - **Multiple Anthropic accounts** — switch between personal and work accounts without logging out.
 - **Isolated installations** — separate settings, MCP servers and history per context (work, personal, client).
 - **Protected keys** — your API keys are encrypted on disk, with an optional master password.
@@ -92,6 +92,7 @@ Any extra argument is forwarded to Claude Code — for example, `mclaude -p "exp
 |----------|------|------------|
 | ★ Flatt | Subscription plan (flat rate) | [flatt.com.br](https://flatt.com.br/?utm_source=github&utm_medium=sponsor&utm_campaign=multi-claude) |
 | Anthropic | Claude account (OAuth) | [claude.ai](https://claude.ai) |
+| Anthropic (setup-token) | Claude account (long-lived token) | `claude setup-token` |
 | Alibaba Cloud | Subscription plan | [Model Studio](https://bailian.console.alibabacloud.com/) |
 | BytePlus ModelArk | Subscription plan | [BytePlus](https://www.byteplus.com/en/activity/codingplan) |
 | DeepSeek | API | [platform.deepseek.com](https://platform.deepseek.com) |
@@ -121,6 +122,8 @@ Using a gateway that is not on the list? Pick **Custom provider**: enter a name,
 ## Multiple Anthropic accounts
 
 Add as many Anthropic (OAuth) accounts as you like — "Work", "Personal" — and log in once to each. Every account uses its own installation, with fully separate settings, history and MCP servers.
+
+No browser at hand, or want the same login on several machines? Run `claude setup-token` (requires a Pro, Max, Team or Enterprise plan), paste the token into the **Anthropic (setup-token)** provider and you are done: mclaude sends it as `CLAUDE_CODE_OAUTH_TOKEN`. The token lasts 1 year, Claude Code picks the model itself (`/model`) and it works with the default installation too. `--bare` mode ignores this token.
 
 ## Isolated installations
 

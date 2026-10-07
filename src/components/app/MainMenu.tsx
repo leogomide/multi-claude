@@ -177,8 +177,9 @@ export function MainMenu({ onSelect, onEscape, lastMessage }: MainMenuProps) {
 			}
 
 			const modelCount = getEffectiveModels(provider).length;
-			const modelsValue =
-				hasApiModelFetching(provider.templateId) && modelCount === 0
+			const modelsValue = template?.nativeModels
+				? t("sidebar.modelsNative")
+				: hasApiModelFetching(provider.templateId) && modelCount === 0
 					? t("sidebar.modelsViaApi")
 					: String(modelCount);
 			const items: SidebarItem[] = [

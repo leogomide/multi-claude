@@ -57,6 +57,7 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 	const [pendingModels, setPendingModels] = useState<string[]>([]);
 	const [pendingSpecs, setPendingSpecs] = useState<ConfiguredProvider["modelSpecs"]>(undefined);
 	const [modelDraft, setModelDraft] = useState("");
+	const [keyDraft, setKeyDraft] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [existingNames, setExistingNames] = useState<string[]>([]);
 
@@ -185,6 +186,11 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 
 		if (isOAuthTemplate(tmpl.id)) {
 			items.push({ label: "", value: t("anthropic.noApiKeyNeeded") });
+		} else if (tmpl.nativeModels) {
+			items.push(
+				{ label: t("sidebar.models"), value: t("sidebar.modelsNative") },
+				{ label: "", value: t("addFlow.setupTokenHint") },
+			);
 		} else {
 			items.push(
 				{
@@ -526,13 +532,14 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 			) : (
 				<Box marginTop={1} flexDirection="column">
 					<TextPrompt
-						label={t("addFlow.apiKeyLabel")}
+						label={template?.nativeModels ? t("addFlow.setupTokenLabel") : t("addFlow.apiKeyLabel")}
 						mask="*"
 						focus={activeField === "key"}
 						validate={(val) => {
 							if (!val.trim()) return t("validation.apiKeyRequired");
 							return undefined;
 						}}
+						onChange={setKeyDraft}
 						onSubmit={(key) => {
 							proceedAfterKey(key, hasApiKeyValidation(templateId));
 						}}
@@ -543,6 +550,16 @@ export function AddProviderFlow({ onDone, onOAuthLogin, onCancel }: AddProviderF
 							<StatusMessage variant="error">{validationError}</StatusMessage>
 						</Box>
 					)}
+					{template?.apiKeyPrefix &&
+						activeField === "key" &&
+						keyDraft.trim() &&
+						!keyDraft.trim().startsWith(template.apiKeyPrefix) && (
+							<Box marginTop={1}>
+								<StatusMessage variant="warning">
+									{t("addFlow.setupTokenFormatWarning")}
+								</StatusMessage>
+							</Box>
+						)}
 				</Box>
 			)}
 			{template?.promptModel && (

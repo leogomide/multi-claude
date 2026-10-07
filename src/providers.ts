@@ -32,6 +32,16 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		},
 	},
 	{
+		// https://code.claude.com/docs/en/authentication (claude setup-token)
+		id: "anthropic-token",
+		description: "Anthropic (setup-token)",
+		baseUrl: "",
+		defaultModels: [],
+		env: {},
+		nativeModels: true,
+		apiKeyPrefix: "sk-ant-oat",
+	},
+	{
 		// https://www.alibabacloud.com/help/en/model-studio/coding-plan
 		id: "alibaba-coding",
 		description: "Alibaba Cloud (Coding Plan)",
@@ -391,6 +401,30 @@ function cleanupAndApplyTemplateEnv(env: Record<string, string>, template: Provi
 	}
 }
 
+/**
+ * Strip every inherited var that would outrank or override subscription auth
+ * (ANTHROPIC_AUTH_TOKEN/API_KEY win over CLAUDE_CODE_OAUTH_TOKEN) or pin a model.
+ */
+function clearProviderAuthAndModelVars(env: Record<string, string>): void {
+	delete env["ANTHROPIC_API_KEY"];
+	delete env["ANTHROPIC_AUTH_TOKEN"];
+	delete env["ANTHROPIC_BASE_URL"];
+	delete env["OPENROUTER_API_KEY"];
+	delete env["CLAUDE_CONFIG_DIR"];
+	delete env["ANTHROPIC_MODEL"];
+	delete env["ANTHROPIC_SMALL_FAST_MODEL"];
+	delete env["ANTHROPIC_DEFAULT_SONNET_MODEL"];
+	delete env["ANTHROPIC_DEFAULT_OPUS_MODEL"];
+	delete env["ANTHROPIC_DEFAULT_HAIKU_MODEL"];
+	delete env["API_TIMEOUT_MS"];
+	cleanupClaudeCodeVars(env);
+}
+
+/** True when Claude Code picks the model itself (no model selection, env vars or --model). */
+export function usesNativeModels(provider: ConfiguredProvider): boolean {
+	return provider.type === "oauth" || getTemplate(provider.templateId)?.nativeModels === true;
+}
+
 function setModelEnvVars(env: Record<string, string>, model: string): void {
 	env["ANTHROPIC_MODEL"] = model;
 	env["CLAUDE_CODE_SUBAGENT_MODEL"] = model;
@@ -424,31 +458,23 @@ export function buildClaudeEnv(
 		}
 	}
 
-	if (provider.type === "oauth") {
-		// OAuth: use CLAUDE_CODE_OAUTH_TOKEN to authenticate without isolating the config dir.
-		// This shares ~/.claude/ (settings, plugins, memory, agents, history) with the default install.
-		const creds = readOAuthCredentials(provider.id);
+	if (provider.type === "oauth" || template.nativeModels) {
+		// Subscription auth via CLAUDE_CODE_OAUTH_TOKEN: the OAuth login token (credentials live in
+		// accounts/<id>) or a pasted `claude setup-token` token. Settings and history come from the
+		// chosen installation dir.
+		clearProviderAuthAndModelVars(env);
 
-		delete env["ANTHROPIC_API_KEY"];
-		delete env["ANTHROPIC_AUTH_TOKEN"];
-		delete env["ANTHROPIC_BASE_URL"];
-		delete env["OPENROUTER_API_KEY"];
-		delete env["CLAUDE_CONFIG_DIR"];
-		delete env["ANTHROPIC_MODEL"];
-		delete env["ANTHROPIC_SMALL_FAST_MODEL"];
-		delete env["ANTHROPIC_DEFAULT_SONNET_MODEL"];
-		delete env["ANTHROPIC_DEFAULT_OPUS_MODEL"];
-		delete env["ANTHROPIC_DEFAULT_HAIKU_MODEL"];
-		delete env["API_TIMEOUT_MS"];
-
-		cleanupClaudeCodeVars(env);
-
-		// Set OAuth token AFTER cleanup (cleanup removes CLAUDE_CODE_* vars)
-		if (creds) {
-			env["CLAUDE_CODE_OAUTH_TOKEN"] = creds.accessToken;
+		// Set the token AFTER cleanup (cleanup removes CLAUDE_CODE_* vars)
+		const token =
+			provider.type === "oauth"
+				? readOAuthCredentials(provider.id)?.accessToken
+				: provider.apiKey.trim();
+		if (token) {
+			env["CLAUDE_CODE_OAUTH_TOKEN"] = token;
 		}
 
-		// Set installation dir (Anthropic MUST use custom installation)
+		// OAuth accounts always pick a custom installation; setup-token may use Default (~/.claude/),
+		// since CLAUDE_CODE_OAUTH_TOKEN outranks the /login credentials stored there.
 		if (installationId && installationId !== DEFAULT_INSTALLATION_ID) {
 			env["CLAUDE_CONFIG_DIR"] = getInstallationPath(installationId);
 		}
@@ -502,7 +528,7 @@ export interface ModelWithSource {
 }
 
 export function getEffectiveModels(provider: ConfiguredProvider): string[] {
-	if (provider.type === "oauth") return [];
+	if (usesNativeModels(provider)) return [];
 	const template = getTemplate(provider.templateId);
 	if (!template) return provider.models;
 	const seen = new Set(provider.models);
@@ -533,7 +559,7 @@ export function resolveModelSpec(
 }
 
 export function getEffectiveModelsWithSource(provider: ConfiguredProvider): ModelWithSource[] {
-	if (provider.type === "oauth") return [];
+	if (usesNativeModels(provider)) return [];
 	const template = getTemplate(provider.templateId);
 	const defaultSet = new Set(template?.defaultModels ?? []);
 	const userSet = new Set(provider.models);
