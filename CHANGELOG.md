@@ -1,6 +1,11 @@
 ## Changelog
 
-### v2.3.0 (current)
+### v2.4.0 (current)
+
+- **feat:** new Anthropic (setup-token) provider — run `claude setup-token` (Pro, Max, Team or Enterprise plan), paste the token and mclaude sends it as `CLAUDE_CODE_OAUTH_TOKEN`; Claude Code picks the model itself (`/model`) and the default installation works too
+- **feat:** launching with `--bare` on a provider authenticated through `CLAUDE_CODE_OAUTH_TOKEN` now prints a warning, since bare mode ignores the token
+
+### v2.3.0
 
 - **feat:** Custom Provider now lets you set the URL used to fetch the model list — it defaults to the base URL + `/v1/models` (or `/models` when the base already ends in `/v1`), can be changed when adding the provider and later in its settings, where saving tests the URL and shows how many models were found
 
