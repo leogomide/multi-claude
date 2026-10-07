@@ -1,0 +1,16 @@
+# LF everywhere, regardless of core.autocrlf (Biome also writes LF)
+* text=auto eol=lf
+
+# Binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.wav binary
+*.mp3 binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
